@@ -1,0 +1,185 @@
+<!-- HTML code for navbar -->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+      <meta charset="UTF-8">
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+      <link rel="stylesheet" href="https://unpkg.com/swiper@7/swiper-bundle.min.css" />
+      <!-- font awesome cdn link  -->
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+      <!-- iconscout cdn link -->
+      <link rel="stylesheet" href="https://unicons.iconscout.com/release/v4.0.0/css/line.css">
+      <title>Document</title>
+      <link rel="stylesheet" href="{{url_for('static',filename='table.css')}}">
+  </head>
+  <body>
+    <header class="header">
+      <a href="https://mohua.gov.in/" target="_blank" class="logo"><img src="{{url_for('static',filename='images/gov_logo.png')}}" class="gov_logo"></a>
+      <nav class="navbar"> 
+          <h2 class="heading_1">MOHUA GOVERNMENT</h2>
+      </nav> 
+      <a href="http://pubbs.co.in/" target="_blank" class="logo"><img src="{{url_for('static',filename='images/Pubbs_transit_logo_transparent.png')}}" class="pubbs_logo"></a>
+    </header>
+      <nav class="topnav">
+        <a href="/">HOME</a>
+        <!-- <button id="prevBtn1">Previous</button>
+        <button id="nextBtn1">Next</button>
+        <button id="submitBtn1">Submit</button> -->
+        <a href="/upload_file">Upload</a>
+      </nav>
+    <section class="products" id="products">
+      <h1 class="heading"> Input in <span>Table</span> </h1>
+    <div class="container1">
+    <!-- <form method="POST" class="form1"> -->
+    <form action="{{url_for('table_filled')}}" method="POST" class="form1" enctype="multipart/form-data">
+      <!-- <input id="periods" name="periods" value="{{periods}}" hidden>
+      <input id="stops_list" name="stops_list" value="{{','.join(stops_list)}}" hidden> -->
+      {% if not db_data %}
+        <table id="table" style="display:block; table-layout: fixed;margin-top: 0%;margin-bottom: 1%;" class="table1">
+          <thead class="jk">
+            <tr>
+              <th>Periods</th>
+              {%for n in stops_list%}
+              <th>{{n}}</th>
+              {%endfor%}
+            </tr>
+          </thead>
+            {% for i in range(periods) %}
+            <tr>
+              <td>{{i+1}}</td>
+              {%for n in stops_list%}
+              <td><input type="number" name="{{n}}{{'_'}}{{i+1}}" value="0"/></td>
+              {% endfor %}
+            </tr>
+            {% endfor %}
+        </table>
+      {% endif %}
+      {% if db_data %}
+        <table id="table" style="display:block; table-layout: fixed;margin-top: 0%;margin-bottom: 1%;" class="table1">
+          <thead class="jk">
+            <tr>
+              <th>Periods</th>
+              {%for n in stops_list%}
+              <th>{{n}}</th>
+              {%endfor%}
+            </tr>
+          </thead>
+            {% for i in range(periods) %}
+            <tr>
+              <td>{{i+1}}</td>
+              {%for n in stops_list%}
+              <td><input type="number" name="{{n}}{{'_'}}{{i+1}}" value="{{db_data[i][stops_list.index(n)]}}"/></td>
+              {% endfor %}
+            </tr>
+            {% endfor %}
+        </table>
+      {% endif %}
+          <label for="db_table"><b>Select the data you're entering:</b></label>
+          <select id="db_table" name="db_table">
+            <option>T_Passenger_Arrival_UP</option>
+            <option>T_Passenger_Arrival_DN</option>
+            <option>T_Fare_UP</option>
+            <option>T_Fare_DN</option>
+            <option>T_Alighting_Rate_UP</option>
+            <option>T_Alighting_Rate_DN</option>
+            <option>T_TraveTimeUP_ANN</option>
+            <option>T_TravelTimeDN_ANN</option>
+          </select>
+          <button type="submit" value="Submit">Save</button>
+          <button type="submit" formaction="{{url_for('retrieve_data')}}" value="Retrieve">Retrieve</button>
+          <!-- <button type="submit" formaction="{{url_for('upload_csv_data')}}" value="Upload">Upload CSV</button> -->
+          <input type="file" id="csvfile" name="csvfile" style="width: 20%;">
+          <button type="submit" formaction="{{url_for('upload_csv_data')}}" value="Upload" style="width: 10%;">Upload CSV</button>
+          <button type="submit" formaction="{{url_for('download_csv_data')}}" value="Download" style="width: 10%;">Download CSV</button>
+    </form>
+    </div>
+    </section>
+
+    <section class="contact" id="contact">
+      <h1 class="heading"> <span>contact</span> us </h1>
+      <div class="row">
+          <div class="mapouter"><div class="gmap_canvas"><iframe width="770" height="510" id="gmap_canvas" src="https://maps.google.com/maps?q=IIT kharagpur&t=&z=13&ie=UTF8&iwloc=&output=embed" frameborder="0" scrolling="no" marginheight="0" marginwidth="0"></iframe><a href="https://2yu.co">2yu</a><br><style>.mapouter{position:relative;text-align:right;height:510px;width:770px;}</style><a href="https://embedgooglemap.2yu.co">html embed google map</a><style>.gmap_canvas {overflow:hidden;background:none!important;height:510px;width:770px;}</style></div></div>
+          <form action="">
+              <h3 data-aos="zoom-in">tell us something!</h3>
+              <input data-aos="zoom-in" type="text" placeholder="your name" class="box">
+              <input data-aos="zoom-in" type="email" placeholder="your email" class="box">
+              <input data-aos="zoom-in" type="number" placeholder="your number" class="box">
+              <textarea data-aos="zoom-in" placeholder="your message" class="box" cols="30" rows="10"></textarea>
+              <input data-aos="zoom-in" type="submit" value="send message" class="btn">
+          </form>
+      </div>
+    </section>
+    
+    <!-- contact section ends -->
+    
+    <!-- footer section starts  -->
+    
+    <section class="footer" id="footer">
+    
+        <div class="box-container">
+    
+            <div class="box" data-aos="fade-right">
+                <h3>our branches</h3>
+                <a href="#"> <i class="fas fa-map-marker-alt"></i> india </a>
+                <a href="#"> <i class="fas fa-map-marker-alt"></i> USA </a>
+                <a href="#"> <i class="fas fa-map-marker-alt"></i> russia </a>
+                <a href="#"> <i class="fas fa-map-marker-alt"></i> france </a>
+                <a href="#"> <i class="fas fa-map-marker-alt"></i> japan </a>
+            </div>
+    
+            <div class="box" data-aos="fade-down">
+                <h3>quick links</h3>
+                <a href="#"> <i class="fas fa-arrow-right"></i> home </a>
+                <a href="#"> <i class="fas fa-arrow-right"></i> products </a>
+                <a href="#"> <i class="fas fa-arrow-right"></i> about </a>
+                <a href="#"> <i class="fas fa-arrow-right"></i> arrivals </a>
+                <a href="#"> <i class="fas fa-arrow-right"></i> contact </a>
+                <a href="#"> <i class="fas fa-arrow-right"></i> blogs </a>
+            </div>
+    
+            <div class="box" data-aos="fade-up">
+                <h3>contact us</h3>
+                <a href="#"> <i class="fas fa-phone"></i> +91-3222-283202 </a>
+                <a href="#"> <i class="fas fa-phone"></i> +91-9433944708 </a>
+                <a href="#"> <i class="fas fa-envelope"></i> ar.research2019debapratim@gmail.com </a>
+                <a href="#"> <i class="fas fa-map-marker-alt"></i> Dept of Architecture and Regional Planning IIT Kharagpur,West Bengal,India. </a>
+            </div>
+    
+            <div class="box" data-aos="fade-left">
+                <h3>Socials</h3>
+                <a href="#"> <i class="fab fa-facebook-f"></i> facebook </a>
+                <a href="#"> <i class="fab fa-twitter"></i> twitter </a>
+                <a href="#"> <i class="fab fa-instagram"></i> instagram </a>
+                <a href="#"> <i class="fab fa-linkedin"></i> linkedin </a>
+                <a href="#"> <i class="fab fa-pinterest"></i> pinterest </a>
+            </div>
+    
+        </div>
+    
+        <div class="credit"> &#169; &nbsp;  Indian Institute of Technology, Kharagpur 2019 </div>
+    
+    </section>
+    
+      <script src="{{url_for('static',filename='table.js')}}"></script>  
+      <script src="https://unpkg.com/swiper@7/swiper-bundle.min.js"></script>
+
+    <!-- custom js file links  -->
+    <!-- <script src="{{url_for('static',filename='script.js')}}"></script> -->
+
+    <script async
+        src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&libraries=geometry,places&callback=initMap">
+    </script>
+
+
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>  
+    <script>
+      AOS.init({
+          delay:400,
+          duration:800
+      });
+    </script>
+      
+</body>
+</html>

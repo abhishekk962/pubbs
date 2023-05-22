@@ -1,0 +1,35 @@
+alighting_rate_DN.csv
+alighting_rate_UP.csv
+app copy.py
+app.py
+distanceDN.csv
+distanceUP.csv
+dwn.csv
+freq_range.py
+freqOptimisation_GA.py
+ga_freq.py
+Initial_frequency.py
+overallcost.py
+parameters.yml
+Passenger_arrival_DN.csv
+Passenger_arrival_UP.csv
+route_info.csv
+stop OLS coefficient.csv
+test.py
+tmeperiodDN.csv
+.idea/.gitignore
+.idea/.name
+.idea/misc.xml
+.idea/modules.xml
+.idea/pubbs.iml
+.idea/inspectionProfiles/profiles_settings.xml
+.idea/workspace.xml
+__pycache__/app.cpython-311.pyc
+__pycache__/ga_freq.cpython-311.pyc
+__pycache__/output.cpython-311.pyc
+__pycache__/overallcost.cpython-311.pyc
+csv_files/distanceDN.csv
+csv_files/tmeperiodDN.csv
+csv_files/tmeperiodUP.csv
+templates/index.zip
+static/style.zip

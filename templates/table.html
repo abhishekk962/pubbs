@@ -1,0 +1,1122 @@
+<!-- HTML code for navbar -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+
+    <link rel="stylesheet" href="https://unpkg.com/swiper@7/swiper-bundle.min.css" />
+
+    <!-- font awesome cdn link  -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
+    <!-- iconscout cdn link -->
+    <link rel="stylesheet" href="https://unicons.iconscout.com/release/v4.0.0/css/line.css">
+    <title>Document</title>
+
+    <link rel="stylesheet" href="{{url_for('static',filename='table.css')}}">
+    
+</head>
+<body>
+
+<header class="header">
+
+    <a href="https://mohua.gov.in/" target="_blank" class="logo"><img src="{{url_for('static',filename='images/gov_logo.png')}}" class="gov_logo"></a>
+
+    <nav class="navbar"> 
+        
+        <h2 class="heading_1">MOHUA GOVERNMENT</h2>
+        <!-- <h3 class="heading_1">Government of India</h3> -->
+    </nav> 
+
+
+    <div class="icons">
+        <!-- <div id="menu-btn" class="fas fa-bars"></div>  -->
+            
+        
+       <!-- <a href="#" class="fas fa-user"></a> -->
+    </div>
+
+    <a href="http://pubbs.co.in/" target="_blank" class="logo"><img src="{{url_for('static',filename='images/Pubbs_transit_logo_transparent.png')}}" class="pubbs_logo"></a>
+
+</header>
+  
+  
+    <nav class="topnav">
+        <a href="/">HOME</a>
+        <button id="prevBtn1">Previous</button>
+        <button id="nextBtn1">Next</button>
+        <button id="submitBtn1">Submit</button>
+        <a href="/upload_file">Upload</a>
+    </nav>
+      
+  
+          <div class="parent">
+                <div class="parent_l">
+          <form action="{{url_for('passenger_arrival_UP')}}" method="POST">
+         
+            <table class="table1" id="table1">
+
+                
+                <thead class="jk">
+                  <h1 style="color:antiquewhite">Passenger Arrival </h1>
+                <tr>
+                    <!-- <th></th> -->
+                    <th>Passenger</th>
+                    <th>Garia</th>
+                    <th>Patuli P.S.</th>
+                    <th>Peerless</th>
+                    <th>Ajaynagar</th>
+                    <th>Kalikapur</th>
+                    <th>Ruby hospital</th>
+                    <th>VIP Bazaar</th>
+                    <th>Science City</th>
+                    <th>Metroplitan</th>
+                    <th>Beliaghata XING</th>
+                    <th>HUDCO</th>
+                    <th>Khanna Cinema</th>
+                    <th>Shyambazar</th>
+                    <th>Bagbazar</th>
+                </tr>
+                </thead>
+                <tbody>
+            
+                <!-- Table Body -->
+                <tr>
+                    <!-- <th>Row 1</th> -->
+                    <td><input type="text" name="Passenger1"></td>
+                    <td><input type="text" name="Garia1"></td>
+                    <td><input type="text" name="Patuli PS1"></td>
+                    <td><input type="text" name="Peerless1"></td>
+                    <td><input type="text" name="Ajaynagar1"></td>
+                    <td><input type="text" name="Kalikapur1"></td>
+                    <td><input type="text" name="Ruby hospital1"></td>
+                    <td><input type="text" name="VIP Bazaar1"></td>
+                    <td><input type="text" name="Science City1"></td>
+                    <td><input type="text" name="Metroplitan1"></td>
+                    <td><input type="text" name="Beliaghata XING1"></td>
+                    <td><input type="text" name="HUDCO1"></td>
+                    <td><input type="text" name="Khanna Cinema1"></td>
+                    <td><input type="text" name="Shyambazar1"></td>
+                    <td><input type="text" name="Bagbazar1"></td>
+                </tr>
+                <tr>
+                    <!-- <th>Row 2</th> -->
+                    <td><input type="text" name="Passenger2"></td>
+                    <td><input type="text" name="Garia2"></td>
+                    <td><input type="text" name="Patuli PS2"></td>
+                    <td><input type="text" name="Peerless2"></td>
+                    <td><input type="text" name="Ajaynagar2"></td>
+                    <td><input type="text" name="Kalikapur2"></td>
+                    <td><input type="text" name="Ruby hospital2"></td>
+                    <td><input type="text" name="VIP Bazaar2"></td>
+                    <td><input type="text" name="Science City2"></td>
+                    <td><input type="text" name="Metroplitan2"></td>
+                    <td><input type="text" name="Beliaghata XING2"></td>
+                    <td><input type="text" name="HUDCO2"></td>
+                    <td><input type="text" name="Khanna Cinema2"></td>
+                    <td><input type="text" name="Shyambazar2"></td>
+                    <td><input type="text" name="Bagbazar2"></td>
+                </tr>
+
+                <tr>
+                    <!-- <th>Row 3</th> -->
+                    <td><input type="text" name="Passenger3"></td>
+                    <td><input type="text" name="Garia3"></td>
+                    <td><input type="text" name="Patuli PS3"></td>
+                    <td><input type="text" name="Peerless3"></td>
+                    <td><input type="text" name="Ajaynagar3"></td>
+                    <td><input type="text" name="Kalikapur3"></td>
+                    <td><input type="text" name="Ruby hospital3"></td>
+                    <td><input type="text" name="VIP Bazaar3"></td>
+                    <td><input type="text" name="Science City3"></td>
+                    <td><input type="text" name="Metroplitan3"></td>
+                    <td><input type="text" name="Beliaghata XING3"></td>
+                    <td><input type="text" name="HUDCO3"></td>
+                    <td><input type="text" name="Khanna Cinema3"></td>
+                    <td><input type="text" name="Shyambazar3"></td>
+                    <td><input type="text" name="Bagbazar3"></td>
+                </tr>
+                <tr>
+                    <!-- <th>Row 4</th> -->
+                    <td><input type="text" name="Passenger4"></td>
+                    <td><input type="text" name="Garia4"></td>
+                    <td><input type="text" name="Patuli PS4"></td>
+                    <td><input type="text" name="Peerless4"></td>
+                    <td><input type="text" name="Ajaynagar4"></td>
+                    <td><input type="text" name="Kalikapur4"></td>
+                    <td><input type="text" name="Ruby hospital4"></td>
+                    <td><input type="text" name="VIP Bazaar4"></td>
+                    <td><input type="text" name="Science City4"></td>
+                    <td><input type="text" name="Metroplitan4"></td>
+                    <td><input type="text" name="Beliaghata XING4"></td>
+                    <td><input type="text" name="HUDCO4"></td>
+                    <td><input type="text" name="Khanna Cinema4"></td>
+                    <td><input type="text" name="Shyambazar4"></td>
+                    <td><input type="text" name="Bagbazar4"></td>
+                </tr>
+                <tr>
+                    <!-- <th>Row 5</th> -->
+                    <td><input type="text" name="Passenger5"></td>
+                    <td><input type="text" name="Garia5"></td>
+                    <td><input type="text" name="Patuli PS5"></td>
+                    <td><input type="text" name="Peerless5"></td>
+                    <td><input type="text" name="Ajaynagar5"></td>
+                    <td><input type="text" name="Kalikapur5"></td>
+                    <td><input type="text" name="Ruby hospital5"></td>
+                    <td><input type="text" name="VIP Bazaar5"></td>
+                    <td><input type="text" name="Science City5"></td>
+                    <td><input type="text" name="Metroplitan5"></td>
+                    <td><input type="text" name="Beliaghata XING5"></td>
+                    <td><input type="text" name="HUDCO5"></td>
+                    <td><input type="text" name="Khanna Cinema5"></td>
+                    <td><input type="text" name="Shyambazar5"></td>
+                    <td><input type="text" name="Bagbazar5"></td>
+                </tr>
+
+                <tr>
+                    <!-- <th>Row 6</th> -->
+                    <td><input type="text" name="Passenger6"></td>
+                    <td><input type="text" name="Garia6"></td>
+                    <td><input type="text" name="Patuli PS6"></td>
+                    <td><input type="text" name="Peerless6"></td>
+                    <td><input type="text" name="Ajaynagar6"></td>
+                    <td><input type="text" name="Kalikapur6"></td>
+                    <td><input type="text" name="Ruby hospital6"></td>
+                    <td><input type="text" name="VIP Bazaar6"></td>
+                    <td><input type="text" name="Science City6"></td>
+                    <td><input type="text" name="Metroplitan6"></td>
+                    <td><input type="text" name="Beliaghata XING6"></td>
+                    <td><input type="text" name="HUDCO6"></td>
+                    <td><input type="text" name="Khanna Cinema6"></td>
+                    <td><input type="text" name="Shyambazar6"></td>
+                    <td><input type="text" name="Bagbazar6"></td>
+                </tr>
+
+                <tr>
+                    <!-- <th>Row 7</th> -->
+                    <td><input type="text" name="Passenger7"></td>
+                    <td><input type="text" name="Garia7"></td>
+                    <td><input type="text" name="Patuli PS7"></td>
+                    <td><input type="text" name="Peerless7"></td>
+                    <td><input type="text" name="Ajaynagar7"></td>
+                    <td><input type="text" name="Kalikapur7"></td>
+                    <td><input type="text" name="Ruby hospital7"></td>
+                    <td><input type="text" name="VIP Bazaar7"></td>
+                    <td><input type="text" name="Science City7"></td>
+                    <td><input type="text" name="Metroplitan7"></td>
+                    <td><input type="text" name="Beliaghata XING7"></td>
+                    <td><input type="text" name="HUDCO7"></td>
+                    <td><input type="text" name="Khanna Cinema7"></td>
+                    <td><input type="text" name="Shyambazar7"></td>
+                    <td><input type="text" name="Bagbazar7"></td>
+                </tr>
+                <tr>
+                    <!-- <th>Row 8</th> -->
+                    <td><input type="text" name="Passenger8"></td>
+                    <td><input type="text" name="Garia8"></td>
+                    <td><input type="text" name="Patuli PS8"></td>
+                    <td><input type="text" name="Peerless8"></td>
+                    <td><input type="text" name="Ajaynagar8"></td>
+                    <td><input type="text" name="Kalikapur8"></td>
+                    <td><input type="text" name="Ruby hospital8"></td>
+                    <td><input type="text" name="VIP Bazaar8"></td>
+                    <td><input type="text" name="Science City8"></td>
+                    <td><input type="text" name="Metroplitan8"></td>
+                    <td><input type="text" name="Beliaghata XING8"></td>
+                    <td><input type="text" name="HUDCO8"></td>
+                    <td><input type="text" name="Khanna Cinema8"></td>
+                    <td><input type="text" name="Shyambazar8"></td>
+                    <td><input type="text" name="Bagbazar8"></td>
+                </tr>
+
+                <tr>
+                    <!-- <th>Row 9</th> -->
+                    <td><input type="text" name="Passenger9"></td>
+                    <td><input type="text" name="Garia9"></td>
+                    <td><input type="text" name="Patuli PS9"></td>
+                    <td><input type="text" name="Peerless9"></td>
+                    <td><input type="text" name="Ajaynagar9"></td>
+                    <td><input type="text" name="Kalikapur9"></td>
+                    <td><input type="text" name="Ruby hospital9"></td>
+                    <td><input type="text" name="VIP Bazaar9"></td>
+                    <td><input type="text" name="Science City9"></td>
+                    <td><input type="text" name="Metroplitan9"></td>
+                    <td><input type="text" name="Beliaghata XING9"></td>
+                    <td><input type="text" name="HUDCO9"></td>
+                    <td><input type="text" name="Khanna Cinema9"></td>
+                    <td><input type="text" name="Shyambazar9"></td>
+                    <td><input type="text" name="Bagbazar9"></td>
+                </tr>
+
+                <tr>
+                    <!-- <th>Row 10</th> -->
+                    <td><input type="text" name="Passenger10"></td>
+                    <td><input type="text" name="Garia10"></td>
+                    <td><input type="text" name="Patuli PS10"></td>
+                    <td><input type="text" name="Peerless10"></td>
+                    <td><input type="text" name="Ajaynagar10"></td>
+                    <td><input type="text" name="Kalikapur10"></td>
+                    <td><input type="text" name="Ruby hospital10"></td>
+                    <td><input type="text" name="VIP Bazaar10"></td>
+                    <td><input type="text" name="Science City10"></td>
+                    <td><input type="text" name="Metroplitan10"></td>
+                    <td><input type="text" name="Beliaghata XING10"></td>
+                    <td><input type="text" name="HUDCO10"></td>
+                    <td><input type="text" name="Khanna Cinema10"></td>
+                    <td><input type="text" name="Shyambazar10"></td>
+                    <td><input type="text" name="Bagbazar10"></td>
+                </tr>
+
+                <tr>
+                    <!-- <th>Row 11</th> -->
+                    <td><input type="text" name="Passenger11"></td>
+                    <td><input type="text" name="Garia11"></td>
+                    <td><input type="text" name="Patuli PS11"></td>
+                    <td><input type="text" name="Peerless11"></td>
+                    <td><input type="text" name="Ajaynagar11"></td>
+                    <td><input type="text" name="Kalikapur11"></td>
+                    <td><input type="text" name="Ruby hospital11"></td>
+                    <td><input type="text" name="VIP Bazaar11"></td>
+                    <td><input type="text" name="Science City11"></td>
+                    <td><input type="text" name="Metroplitan11"></td>
+                    <td><input type="text" name="Beliaghata XING11"></td>
+                    <td><input type="text" name="HUDCO11"></td>
+                    <td><input type="text" name="Khanna Cinema11"></td>
+                    <td><input type="text" name="Shyambazar11"></td>
+                    <td><input type="text" name="Bagbazar11"></td>
+                </tr>
+
+                <tr>
+                    <!-- <th>Row 12</th> -->
+                    <td><input type="text" name="Passenger12"></td>
+                    <td><input type="text" name="Garia12"></td>
+                    <td><input type="text" name="Patuli PS12"></td>
+                    <td><input type="text" name="Peerless12"></td>
+                    <td><input type="text" name="Ajaynagar12"></td>
+                    <td><input type="text" name="Kalikapur12"></td>
+                    <td><input type="text" name="Ruby hospital12"></td>
+                    <td><input type="text" name="VIP Bazaar12"></td>
+                    <td><input type="text" name="Science City12"></td>
+                    <td><input type="text" name="Metroplitan12"></td>
+                    <td><input type="text" name="Beliaghata XING12"></td>
+                    <td><input type="text" name="HUDCO12"></td>
+                    <td><input type="text" name="Khanna Cinema12"></td>
+                    <td><input type="text" name="Shyambazar12"></td>
+                    <td><input type="text" name="Bagbazar12"></td>
+                </tr>
+
+                <tr>
+                    <!-- <th>Row 13</th> -->
+                    <td><input type="text" name="Passenger13"></td>
+                    <td><input type="text" name="Garia13"></td>
+                    <td><input type="text" name="Patuli PS13"></td>
+                    <td><input type="text" name="Peerless13"></td>
+                    <td><input type="text" name="Ajaynagar13"></td>
+                    <td><input type="text" name="Kalikapur13"></td>
+                    <td><input type="text" name="Ruby hospital13"></td>
+                    <td><input type="text" name="VIP Bazaar13"></td>
+                    <td><input type="text" name="Science City13"></td>
+                    <td><input type="text" name="Metroplitan13"></td>
+                    <td><input type="text" name="Beliaghata XING13"></td>
+                    <td><input type="text" name="HUDCO13"></td>
+                    <td><input type="text" name="Khanna Cinema13"></td>
+                    <td><input type="text" name="Shyambazar13"></td>
+                    <td><input type="text" name="Bagbazar13"></td>
+                </tr>
+
+                <tr>
+                    <!-- <th>Row 14</th> -->
+                    <td><input type="text" name="Passenger14"></td>
+                    <td><input type="text" name="Garia14"></td>
+                    <td><input type="text" name="Patuli PS14"></td>
+                    <td><input type="text" name="Peerless14"></td>
+                    <td><input type="text" name="Ajaynagar14"></td>
+                    <td><input type="text" name="Kalikapur14"></td>
+                    <td><input type="text" name="Ruby hospital14"></td>
+                    <td><input type="text" name="VIP Bazaar14"></td>
+                    <td><input type="text" name="Science City14"></td>
+                    <td><input type="text" name="Metroplitan14"></td>
+                    <td><input type="text" name="Beliaghata XING14"></td>
+                    <td><input type="text" name="HUDCO14"></td>
+                    <td><input type="text" name="Khanna Cinema14"></td>
+                    <td><input type="text" name="Shyambazar14"></td>
+                    <td><input type="text" name="Bagbazar14"></td>
+                </tr>
+
+                <tr>
+                    <!-- <th>Row 15</th> -->
+                    <td><input type="text" name="Passenger15"></td>
+                    <td><input type="text" name="Garia15"></td>
+                    <td><input type="text" name="Patuli PS15"></td>
+                    <td><input type="text" name="Peerless15"></td>
+                    <td><input type="text" name="Ajaynagar15"></td>
+                    <td><input type="text" name="Kalikapur15"></td>
+                    <td><input type="text" name="Ruby hospital15"></td>
+                    <td><input type="text" name="VIP Bazaar15"></td>
+                    <td><input type="text" name="Science City15"></td>
+                    <td><input type="text" name="Metroplitan15"></td>
+                    <td><input type="text" name="Beliaghata XING15"></td>
+                    <td><input type="text" name="HUDCO15"></td>
+                    <td><input type="text" name="Khanna Cinema15"></td>
+                    <td><input type="text" name="Shyambazar15"></td>
+                    <td><input type="text" name="Bagbazar15"></td>
+                </tr>
+
+                <tr>
+                  <!-- <th>Row 15</th> -->
+                  <td><input type="text" name="Passenger16"></td>
+                  <td><input type="text" name="Garia16"></td>
+                  <td><input type="text" name="Patuli PS16"></td>
+                  <td><input type="text" name="Peerless16"></td>
+                  <td><input type="text" name="Ajaynagar16"></td>
+                  <td><input type="text" name="Kalikapur16"></td>
+                  <td><input type="text" name="Ruby hospital16"></td>
+                  <td><input type="text" name="VIP Bazaar16"></td>
+                  <td><input type="text" name="Science City16"></td>
+                  <td><input type="text" name="Metroplitan16"></td>
+                  <td><input type="text" name="Beliaghata XING16"></td>
+                  <td><input type="text" name="HUDCO16"></td>
+                  <td><input type="text" name="Khanna Cinema16"></td>
+                  <td><input type="text" name="Shyambazar16"></td>
+                  <td><input type="text" name="Bagbazar16"></td>
+              </tr>
+
+                </tbody>
+              </table>
+                <button type="submit"> Submit</button>
+
+              </form>
+
+            <!-- </table> -->
+        <!-- </div> -->
+       
+        <!-- </div> -->
+        <!-- <div class="passsenger_departure"> -->
+            <div class="parent_r">
+              <form action="{{url_for('passenger_arrival_DN')}}" method="POST">
+         
+                <table class="table2" id="table2">
+    
+         
+                <thead class="jk">
+                  
+                <!-- Table Header -->
+                <tr>
+                    <!-- <th></th> -->
+                    <th>Passenger arrival</th>
+                    <th>Bagbazar</th>
+                    <th>Shyambazar</th>
+                    <th>Khanna Cinema</th>
+                    <th>HUDCO</th>
+                    <th>Beliaghata XING</th>
+                    <th>Metroplitan</th>
+                    <th>Science City</th>
+                    <th>VIP Bazaar</th>
+                    <th>Ruby hospital</th>
+                    <th>Kalikapur</th>
+                    <th>Ajaynagar</th>
+                    <th>Peerless</th>
+                    <th>Patuli P.S.</th>
+                    <th>Garia</th>
+                </tr>
+                </thead>
+                <tbody>
+                
+            
+                <!-- Table Body -->
+                <tr>
+                    <!-- <th>Row 1</th> -->
+                    <td><input type="text" name="entry1"></td>
+                    <td><input type="text" name="entry1"></td>
+                    <td><input type="text" name="entry1"></td>
+                    <td><input type="text" name="entry1"></td>
+                    <td><input type="text" name="entry1"></td>
+                    <td><input type="text" name="entry1"></td>
+                    <td><input type="text" name="entry1"></td>
+                    <td><input type="text" name="entry1"></td>
+                    <td><input type="text" name="entry1"></td>
+                    <td><input type="text" name="entry1"></td>
+                    <td><input type="text" name="entry1"></td>
+                    <td><input type="text" name="entry1"></td>
+                    <td><input type="text" name="entry1"></td>
+                    <td><input type="text" name="entry1"></td>
+                    <td><input type="text" name="entry1"></td>
+                </tr>
+                <tr>
+                    <!-- <th>Row 2</th> -->
+                    <td><input type="text" name="entry2"></td>
+                    <td><input type="text" name="entry2"></td>
+                    <td><input type="text" name="entry2"></td>
+                    <td><input type="text" name="entry2"></td>
+                    <td><input type="text" name="entry2"></td>
+                    <td><input type="text" name="entry2"></td>
+                    <td><input type="text" name="entry2"></td>
+                    <td><input type="text" name="entry2"></td>
+                    <td><input type="text" name="entry2"></td>
+                    <td><input type="text" name="entry2"></td>
+                    <td><input type="text" name="entry2"></td>
+                    <td><input type="text" name="entry2"></td>
+                    <td><input type="text" name="entry2"></td>
+                    <td><input type="text" name="entry2"></td>
+                    <td><input type="text" name="entry2"></td>
+                </tr>
+
+                <tr>
+                    <!-- <th>Row 3</th> -->
+                    <td><input type="text" name="entry3"></td>
+                    <td><input type="text" name="entry3"></td>
+                    <td><input type="text" name="entry3"></td>
+                    <td><input type="text" name="entry3"></td>
+                    <td><input type="text" name="entry3"></td>
+                    <td><input type="text" name="entry3"></td>
+                    <td><input type="text" name="entry3"></td>
+                    <td><input type="text" name="entry3"></td>
+                    <td><input type="text" name="entry3"></td>
+                    <td><input type="text" name="entry3"></td>
+                    <td><input type="text" name="entry3"></td>
+                    <td><input type="text" name="entry3"></td>
+                    <td><input type="text" name="entry3"></td>
+                    <td><input type="text" name="entry3"></td>
+                    <td><input type="text" name="entry3"></td>
+                </tr>
+                <tr>
+                    <!-- <th>Row 4</th> -->
+                    <td><input type="text" name="entry4"></td>
+                    <td><input type="text" name="entry4"></td>
+                    <td><input type="text" name="entry4"></td>
+                    <td><input type="text" name="entry4"></td>
+                    <td><input type="text" name="entry4"></td>
+                    <td><input type="text" name="entry4"></td>
+                    <td><input type="text" name="entry4"></td>
+                    <td><input type="text" name="entry4"></td>
+                    <td><input type="text" name="entry4"></td>
+                    <td><input type="text" name="entry4"></td>
+                    <td><input type="text" name="entry4"></td>
+                    <td><input type="text" name="entry4"></td>
+                    <td><input type="text" name="entry4"></td>
+                    <td><input type="text" name="entry4"></td>
+                    <td><input type="text" name="entry4"></td>
+                </tr>
+                <tr>
+                    <!-- <th>Row 5</th> -->
+                    <td><input type="text" name="entry5"></td>
+                    <td><input type="text" name="entry5"></td>
+                    <td><input type="text" name="entry5"></td>
+                    <td><input type="text" name="entry5"></td>
+                    <td><input type="text" name="entry5"></td>
+                    <td><input type="text" name="entry5"></td>
+                    <td><input type="text" name="entry5"></td>
+                    <td><input type="text" name="entry5"></td>
+                    <td><input type="text" name="entry5"></td>
+                    <td><input type="text" name="entry5"></td>
+                    <td><input type="text" name="entry5"></td>
+                    <td><input type="text" name="entry5"></td>
+                    <td><input type="text" name="entry5"></td>
+                    <td><input type="text" name="entry5"></td>
+                    <td><input type="text" name="entry5"></td>
+                </tr>
+
+                <tr>
+                    <!-- <th>Row 6</th> -->
+                    <td><input type="text" name="entry6"></td>
+                    <td><input type="text" name="entry6"></td>
+                    <td><input type="text" name="entry6"></td>
+                    <td><input type="text" name="entry6"></td>
+                    <td><input type="text" name="entry6"></td>
+                    <td><input type="text" name="entry6"></td>
+                    <td><input type="text" name="entry6"></td>
+                    <td><input type="text" name="entry6"></td>
+                    <td><input type="text" name="entry6"></td>
+                    <td><input type="text" name="entry6"></td>
+                    <td><input type="text" name="entry6"></td>
+                    <td><input type="text" name="entry6"></td>
+                    <td><input type="text" name="entry6"></td>
+                    <td><input type="text" name="entry6"></td>
+                    <td><input type="text" name="entry6"></td>
+                </tr>
+
+                <tr>
+                    <!-- <th>Row 7</th> -->
+                    <td><input type="text" name="entry7"></td>
+                    <td><input type="text" name="entry7"></td>
+                    <td><input type="text" name="entry7"></td>
+                    <td><input type="text" name="entry7"></td>
+                    <td><input type="text" name="entry7"></td>
+                    <td><input type="text" name="entry7"></td>
+                    <td><input type="text" name="entry7"></td>
+                    <td><input type="text" name="entry7"></td>
+                    <td><input type="text" name="entry7"></td>
+                    <td><input type="text" name="entry7"></td>
+                    <td><input type="text" name="entry7"></td>
+                    <td><input type="text" name="entry7"></td>
+                    <td><input type="text" name="entry7"></td>
+                    <td><input type="text" name="entry7"></td>
+                    <td><input type="text" name="entry7"></td>
+                </tr>
+                <tr>
+                    <!-- <th>Row 8</th> -->
+                    <td><input type="text" name="entry8"></td>
+                    <td><input type="text" name="entry8"></td>
+                    <td><input type="text" name="entry8"></td>
+                    <td><input type="text" name="entry8" name="entry6"></td>
+                    <td><input type="text" name="entry8"></td>
+                    <td><input type="text" name="entry8"></td>
+                    <td><input type="text" name="entry8"></td>
+                    <td><input type="text" name="entry8"></td>
+                    <td><input type="text" name="entry8"></td>
+                    <td><input type="text" name="entry8"></td>
+                    <td><input type="text" name="entry8"></td>
+                    <td><input type="text" name="entry8"></td>
+                    <td><input type="text" name="entry8"></td>
+                    <td><input type="text" name="entry8"></td>
+                    <td><input type="text" name="entry8"></td>
+                </tr>
+
+                <tr>
+                    <!-- <th>Row 9</th> -->
+                    <td><input type="text" name="entry9"></td>
+                    <td><input type="text" name="entry9"></td>
+                    <td><input type="text" name="entry9"></td>
+                    <td><input type="text" name="entry9"></td>
+                    <td><input type="text" name="entry9"></td>
+                    <td><input type="text" name="entry9"></td>
+                    <td><input type="text" name="entry9"></td>
+                    <td><input type="text" name="entry9"></td>
+                    <td><input type="text" name="entry9"></td>
+                    <td><input type="text" name="entry9"></td>
+                    <td><input type="text" name="entry9"></td>
+                    <td><input type="text" name="entry9"></td>
+                    <td><input type="text" name="entry9"></td>
+                    <td><input type="text" name="entry9"></td>
+                    <td><input type="text" name="entry9"></td>
+                </tr>
+
+                <tr>
+                    <!-- <th>Row 10</th> -->
+                    <td><input type="text" name="entry10"></td>
+                    <td><input type="text" name="entry10"></td>
+                    <td><input type="text" name="entry10"></td>
+                    <td><input type="text" name="entry10"></td>
+                    <td><input type="text" name="entry10"></td>
+                    <td><input type="text" name="entry10"></td>
+                    <td><input type="text" name="entry10"></td>
+                    <td><input type="text" name="entry10"></td>
+                    <td><input type="text" name="entry10"></td>
+                    <td><input type="text" name="entry10"></td>
+                    <td><input type="text" name="entry10"></td>
+                    <td><input type="text" name="entry10"></td>
+                    <td><input type="text" name="entry10"></td>
+                    <td><input type="text" name="entry10"></td>
+                    <td><input type="text" name="entry10"></td>
+                </tr>
+
+                <tr>
+                    <!-- <th>Row 11</th> -->
+                    <td><input type="text" name="entry11"></td>
+                    <td><input type="text" name="entry11"></td>
+                    <td><input type="text" name="entry11"></td>
+                    <td><input type="text" name="entry11"></td>
+                    <td><input type="text" name="entry11"></td>
+                    <td><input type="text" name="entry11"></td>
+                    <td><input type="text" name="entry11"></td>
+                    <td><input type="text" name="entry11"></td>
+                    <td><input type="text" name="entry11"></td>
+                    <td><input type="text" name="entry11"></td>
+                    <td><input type="text" name="entry11"></td>
+                    <td><input type="text" name="entry11"></td>
+                    <td><input type="text" name="entry11"></td>
+                    <td><input type="text" name="entry11"></td>
+                    <td><input type="text" name="entry11"></td>
+                </tr>
+
+                <tr>
+                    <!-- <th>Row 12</th> -->
+                    <td><input type="text" name="entry12"></td>
+                    <td><input type="text" name="entry12"></td>
+                    <td><input type="text" name="entry12"></td>
+                    <td><input type="text" name="entry12"></td>
+                    <td><input type="text" name="entry12"></td>
+                    <td><input type="text" name="entry12"></td>
+                    <td><input type="text" name="entry12"></td>
+                    <td><input type="text" name="entry12"></td>
+                    <td><input type="text" name="entry12"></td>
+                    <td><input type="text" name="entry12"></td>
+                    <td><input type="text" name="entry12"></td>
+                    <td><input type="text" name="entry12"></td>
+                    <td><input type="text" name="entry12"></td>
+                    <td><input type="text" name="entry12"></td>
+                    <td><input type="text" name="entry12"></td>
+                </tr>
+
+                <tr>
+                    <!-- <th>Row 13</th> -->
+                    <td><input type="text" name="entry13"></td>
+                    <td><input type="text" name="entry13"></td>
+                    <td><input type="text" name="entry13"></td>
+                    <td><input type="text" name="entry13"></td>
+                    <td><input type="text" name="entry13"></td>
+                    <td><input type="text" name="entry13"></td>
+                    <td><input type="text" name="entry13"></td>
+                    <td><input type="text" name="entry13"></td>
+                    <td><input type="text" name="entry13"></td>
+                    <td><input type="text" name="entry13"></td>
+                    <td><input type="text" name="entry13"></td>
+                    <td><input type="text" name="entry13"></td>
+                    <td><input type="text" name="entry13"></td>
+                    <td><input type="text" name="entry13"></td>
+                    <td><input type="text" name="entry13"></td>
+                </tr>
+
+                <tr>
+                    <!-- <th>Row 14</th> -->
+                    <td><input type="text" name="entry14"></td>
+                    <td><input type="text" name="entry14"></td>
+                    <td><input type="text" name="entry14"></td>
+                    <td><input type="text" name="entry14"></td>
+                    <td><input type="text" name="entry14"></td>
+                    <td><input type="text" name="entry14"></td>
+                    <td><input type="text" name="entry14"></td>
+                    <td><input type="text" name="entry14"></td>
+                    <td><input type="text" name="entry14"></td>
+                    <td><input type="text" name="entry14"></td>
+                    <td><input type="text" name="entry14"></td>
+                    <td><input type="text" name="entry14"></td>
+                    <td><input type="text" name="entry14"></td>
+                    <td><input type="text" name="entry14"></td>
+                    <td><input type="text" name="entry14"></td>
+                </tr>
+
+                <tr>
+                    <!-- <th>Row 15</th> -->
+                    <td><input type="text" name="entry15"></td>
+                    <td><input type="text" name="entry15"></td>
+                    <td><input type="text" name="entry15"></td>
+                    <td><input type="text" name="entry15"></td>
+                    <td><input type="text" name="entry15"></td>
+                    <td><input type="text" name="entry15"></td>
+                    <td><input type="text" name="entry15"></td>
+                    <td><input type="text" name="entry15"></td>
+                    <td><input type="text" name="entry15"></td>
+                    <td><input type="text" name="entry15"></td>
+                    <td><input type="text" name="entry15"></td>
+                    <td><input type="text" name="entry15"></td>
+                    <td><input type="text" name="entry15"></td>
+                    <td><input type="text" name="entry15"></td>
+                    <td><input type="text" name="entry15"></td>
+                </tr>
+
+                </tbody>
+                </table>
+                <button type="submit"> Submit</button>
+
+              </form>
+        </div>
+                <!-- </div>
+    </div> -->
+      
+
+      <!-- jjkjkjkj -->
+      <form action="{{url_for('fare_UP')}}" method="POST">
+      <table id="table2" style="display:flex">
+        <thead class="table2_head">
+          <tr>
+            <th>Stops</th>
+            <th>Garia</th>
+            <th>Patuli P.S.</th>
+            <th>Peerless</th>
+            <th>Ajaynagar</th>
+            <th>Kalikapur</th>
+            <th>Ruby hospital</th>
+            <th>VIP Bazaar</th>
+            <th>Science City</th>
+            <th>Metroplitan</th>
+            <th>Beliaghata XING</th>
+            <th>HUDCO</th>
+            <th>Khanna Cinema</th>
+            <th>Shyambazar</th>
+            <th>Bagbazar</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for i in range(15) %}
+          <tr>
+            <td><input type="text" name="stops[]" /></td>
+            <td><input type="text" name="garia[]" /></td>
+            <td><input type="text" name="patuli[]" /></td>
+            <td><input type="text" name="peerless[]" /></td>
+            <td><input type="text" name="ajaynagar[]" /></td>
+            <td><input type="text" name="kalikapur[]" /></td>
+            <td><input type="text" name="ruby_hospital[]" /></td>
+            <td><input type="text" name="vip_bazaar[]" /></td>
+            <td><input type="text" name="science_city[]" /></td>
+            <td><input type="text" name="metropolitan[]" /></td>
+            <td><input type="text" name="beliaghata_xing[]" /></td>
+            <td><input type="text" name="hudco[]" /></td>
+            <td><input type="text" name="khanna_cinema[]" /></td>
+            <td><input type="text" name="shyambazar[]" /></td>
+            <td><input type="text" name="bagbazar[]" /></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+        
+      </table>
+      <button type="submit">Submit</button>
+    </form>
+      
+    <form action="{{url_for('fare_DN')}}" method="POST">
+      <table id="table3" style="display:flex">
+        <thead class="table2_head">
+          <tr>
+            <th>Stops</th>
+            <th>Bagbazar</th>
+            <th>Shyambazar</th>
+            <th>Khanna Cinema</th>
+            <th>HUDCO</th>
+            <th>Beliaghata XING</th>
+            <th>Metroplitan</th>
+            <th>Science City</th>
+            <th>VIP Bazaar</th>
+            <th>Ruby hospital</th>
+            <th>Kalikapur</th>
+            <th>Ajaynagar</th>
+            <th>Peerless</th>
+            <th>Patuli P.S.</th>
+            <th>Garia</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for i in range(15) %}
+          <tr>
+            <td><input type="text" name="stops[]" /></td>
+            <td><input type="text" name="bagbazar[]" /></td>
+            <td><input type="text" name="shyambazar[]" /></td>
+            <td><input type="text" name="khanna_cinema[]" /></td>
+            <td><input type="text" name="hudco[]" /></td>
+            <td><input type="text" name="beliaghata_xing[]" /></td>
+            <td><input type="text" name="metropolitan[]" /></td>
+            <td><input type="text" name="science_city[]" /></td>
+            <td><input type="text" name="vip_bazaar[]" /></td>
+            <td><input type="text" name="ruby_hospital[]" /></td>
+            <td><input type="text" name="kalikapur[]" /></td>
+            <td><input type="text" name="ajaynagar[]" /></td>
+            <td><input type="text" name="peerless[]" /></td>
+            <td><input type="text" name="patuli[]" /></td>
+            <td><input type="text" name="garia[]" /></td>
+
+          </tr>
+          {% endfor %}
+        </tbody>
+        
+      </table>
+      <button type="submit">Submit</button>
+    </form>
+    
+    <form action="{{url_for('alighting_rate_UP')}}" method="POST">
+      <table id="table2" style="display:flex">
+        <thead class="table2_head">
+          <tr>
+            <th>Alighting</th>
+            <th>Garia</th>
+            <th>Patuli P.S.</th>
+            <th>Peerless</th>
+            <th>Ajaynagar</th>
+            <th>Kalikapur</th>
+            <th>Ruby hospital</th>
+            <th>VIP Bazaar</th>
+            <th>Science City</th>
+            <th>Metroplitan</th>
+            <th>Beliaghata XING</th>
+            <th>HUDCO</th>
+            <th>Khanna Cinema</th>
+            <th>Shyambazar</th>
+            <th>Bagbazar</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for i in range(15) %}
+          <tr>
+            <td><input type="text" name="alighting[]" /></td>
+            <td><input type="text" name="garia[]" /></td>
+            <td><input type="text" name="patuli[]" /></td>
+            <td><input type="text" name="peerless[]" /></td>
+            <td><input type="text" name="ajaynagar[]" /></td>
+            <td><input type="text" name="kalikapur[]" /></td>
+            <td><input type="text" name="ruby_hospital[]" /></td>
+            <td><input type="text" name="vip_bazaar[]" /></td>
+            <td><input type="text" name="science_city[]" /></td>
+            <td><input type="text" name="metropolitan[]" /></td>
+            <td><input type="text" name="beliaghata_xing[]" /></td>
+            <td><input type="text" name="hudco[]" /></td>
+            <td><input type="text" name="khanna_cinema[]" /></td>
+            <td><input type="text" name="shyambazar[]" /></td>
+            <td><input type="text" name="bagbazar[]" /></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+        
+      </table>
+      <button type="submit">Submit</button>
+    </form>
+
+    <form action="{{url_for('alighting_rate_DN')}}" method="POST">
+      <table id="table3" style="display:flex">
+        <thead class="table2_head">
+          <tr>
+            <th>Alighting</th>
+            <th>Bagbazar</th>
+            <th>Shyambazar</th>
+            <th>Khanna Cinema</th>
+            <th>HUDCO</th>
+            <th>Beliaghata XING</th>
+            <th>Metroplitan</th>
+            <th>Science City</th>
+            <th>VIP Bazaar</th>
+            <th>Ruby hospital</th>
+            <th>Kalikapur</th>
+            <th>Ajaynagar</th>
+            <th>Peerless</th>
+            <th>Patuli P.S.</th>
+            <th>Garia</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for i in range(15) %}
+          <tr>
+            <td><input type="text" name="alighting[]" /></td>
+            <td><input type="text" name="bagbazar[]" /></td>
+            <td><input type="text" name="shyambazar[]" /></td>
+            <td><input type="text" name="khanna_cinema[]" /></td>
+            <td><input type="text" name="hudco[]" /></td>
+            <td><input type="text" name="beliaghata_xing[]" /></td>
+            <td><input type="text" name="metropolitan[]" /></td>
+            <td><input type="text" name="science_city[]" /></td>
+            <td><input type="text" name="vip_bazaar[]" /></td>
+            <td><input type="text" name="ruby_hospital[]" /></td>
+            <td><input type="text" name="kalikapur[]" /></td>
+            <td><input type="text" name="ajaynagar[]" /></td>
+            <td><input type="text" name="peerless[]" /></td>
+            <td><input type="text" name="patuli[]" /></td>
+            <td><input type="text" name="garia[]" /></td>
+
+          </tr>
+          {% endfor %}
+        </tbody>
+        
+      </table>
+      <button type="submit">Submit</button>
+    </form>
+
+    <form action="{{url_for('TraveTimeUP_ANN')}}" method="POST">
+      <table id="table2" style="display:flex">
+        <thead class="table2_head">
+          <tr>
+            <th>Travel Time</th>
+            <th>Garia</th>
+            <th>Patuli P.S.</th>
+            <th>Peerless</th>
+            <th>Ajaynagar</th>
+            <th>Kalikapur</th>
+            <th>Ruby hospital</th>
+            <th>VIP Bazaar</th>
+            <th>Science City</th>
+            <th>Metroplitan</th>
+            <th>Beliaghata XING</th>
+            <th>HUDCO</th>
+            <th>Khanna Cinema</th>
+            <th>Shyambazar</th>
+            <th>Bagbazar</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for i in range(15) %}
+          <tr>
+            <td><input type="text" name="travel_time[]" /></td>
+            <td><input type="text" name="garia[]" /></td>
+            <td><input type="text" name="patuli[]" /></td>
+            <td><input type="text" name="peerless[]" /></td>
+            <td><input type="text" name="ajaynagar[]" /></td>
+            <td><input type="text" name="kalikapur[]" /></td>
+            <td><input type="text" name="ruby_hospital[]" /></td>
+            <td><input type="text" name="vip_bazaar[]" /></td>
+            <td><input type="text" name="science_city[]" /></td>
+            <td><input type="text" name="metropolitan[]" /></td>
+            <td><input type="text" name="beliaghata_xing[]" /></td>
+            <td><input type="text" name="hudco[]" /></td>
+            <td><input type="text" name="khanna_cinema[]" /></td>
+            <td><input type="text" name="shyambazar[]" /></td>
+            <td><input type="text" name="bagbazar[]" /></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+        
+      </table>
+      <button type="submit">Submit</button>
+    </form>
+
+    <form action="{{url_for('TravelTimeDN_ann')}}" method="POST">
+      <table id="table3" style="display:flex">
+        <thead class="table2_head">
+          <tr>
+            <th>Travel Time</th>
+            <th>Bagbazar</th>
+            <th>Shyambazar</th>
+            <th>Khanna Cinema</th>
+            <th>HUDCO</th>
+            <th>Beliaghata XING</th>
+            <th>Metroplitan</th>
+            <th>Science City</th>
+            <th>VIP Bazaar</th>
+            <th>Ruby hospital</th>
+            <th>Kalikapur</th>
+            <th>Ajaynagar</th>
+            <th>Peerless</th>
+            <th>Patuli P.S.</th>
+            <th>Garia</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for i in range(15) %}
+          <tr>
+            <td><input type="text" name="travel_time[]" /></td>
+            <td><input type="text" name="bagbazar[]" /></td>
+            <td><input type="text" name="shyambazar[]" /></td>
+            <td><input type="text" name="khanna_cinema[]" /></td>
+            <td><input type="text" name="hudco[]" /></td>
+            <td><input type="text" name="beliaghata_xing[]" /></td>
+            <td><input type="text" name="metropolitan[]" /></td>
+            <td><input type="text" name="science_city[]" /></td>
+            <td><input type="text" name="vip_bazaar[]" /></td>
+            <td><input type="text" name="ruby_hospital[]" /></td>
+            <td><input type="text" name="kalikapur[]" /></td>
+            <td><input type="text" name="ajaynagar[]" /></td>
+            <td><input type="text" name="peerless[]" /></td>
+            <td><input type="text" name="patuli[]" /></td>
+            <td><input type="text" name="garia[]" /></td>
+
+          </tr>
+          {% endfor %}
+        </tbody>
+        
+      </table>
+      <button type="submit">Submit</button>
+    </form>
+
+      <!-- <table id="table3">
+         table contents
+        <thead class="table2_head">
+            <th>1</th>
+            <th>2</th>
+            <th>2</th>
+            <th>2</th>
+            <th>2</th>
+            <th>2</th>
+            <th>2</th>
+            <th>2</th>
+            <th>2</th>
+            <th>2</th>
+            <th>2</th>
+            <th>2</th>
+            <th>2</th>
+            <th>2</th>
+            <th>2</th>
+
+
+        </thead>
+        <tbody></tbody>
+        
+        
+      </table> -->
+      <section class="contact" id="contact">
+
+        <h1 class="heading"> <span>contact</span> us </h1>
+    
+        <div class="row">
+    
+            <div class="mapouter"><div class="gmap_canvas"><iframe width="770" height="510" id="gmap_canvas" src="https://maps.google.com/maps?q=IIT kharagpur&t=&z=13&ie=UTF8&iwloc=&output=embed" frameborder="0" scrolling="no" marginheight="0" marginwidth="0"></iframe><a href="https://2yu.co">2yu</a><br><style>.mapouter{position:relative;text-align:right;height:510px;width:770px;}</style><a href="https://embedgooglemap.2yu.co">html embed google map</a><style>.gmap_canvas {overflow:hidden;background:none!important;height:510px;width:770px;}</style></div></div>
+            <form action="">
+                <h3 data-aos="zoom-in">tell us something!</h3>
+                <input data-aos="zoom-in" type="text" placeholder="your name" class="box">
+                <input data-aos="zoom-in" type="email" placeholder="your email" class="box">
+                <input data-aos="zoom-in" type="number" placeholder="your number" class="box">
+                <textarea data-aos="zoom-in" placeholder="your message" class="box" cols="30" rows="10"></textarea>
+                <input data-aos="zoom-in" type="submit" value="send message" class="btn">
+            </form>
+    
+        </div>
+    
+    </section>
+    
+    <!-- contact section ends -->
+    
+    <!-- footer section starts  -->
+    
+    <section class="footer" id="footer">
+    
+        <div class="box-container">
+    
+            <div class="box" data-aos="fade-right">
+                <h3>our branches</h3>
+                <a href="#"> <i class="fas fa-map-marker-alt"></i> india </a>
+                <a href="#"> <i class="fas fa-map-marker-alt"></i> USA </a>
+                <a href="#"> <i class="fas fa-map-marker-alt"></i> russia </a>
+                <a href="#"> <i class="fas fa-map-marker-alt"></i> france </a>
+                <a href="#"> <i class="fas fa-map-marker-alt"></i> japan </a>
+            </div>
+    
+            <div class="box" data-aos="fade-down">
+                <h3>quick links</h3>
+                <a href="#"> <i class="fas fa-arrow-right"></i> home </a>
+                <a href="#"> <i class="fas fa-arrow-right"></i> products </a>
+                <a href="#"> <i class="fas fa-arrow-right"></i> about </a>
+                <a href="#"> <i class="fas fa-arrow-right"></i> arrivals </a>
+                <a href="#"> <i class="fas fa-arrow-right"></i> contact </a>
+                <a href="#"> <i class="fas fa-arrow-right"></i> blogs </a>
+            </div>
+    
+            <div class="box" data-aos="fade-up">
+                <h3>contact us</h3>
+                <a href="#"> <i class="fas fa-phone"></i> +91-3222-283202 </a>
+                <a href="#"> <i class="fas fa-phone"></i> +91-9433944708 </a>
+                <a href="#"> <i class="fas fa-envelope"></i> ar.research2019debapratim@gmail.com </a>
+                <a href="#"> <i class="fas fa-map-marker-alt"></i> Dept of Architecture and Regional Planning IIT Kharagpur,West Bengal,India. </a>
+            </div>
+    
+            <div class="box" data-aos="fade-left">
+                <h3>Socials</h3>
+                <a href="#"> <i class="fab fa-facebook-f"></i> facebook </a>
+                <a href="#"> <i class="fab fa-twitter"></i> twitter </a>
+                <a href="#"> <i class="fab fa-instagram"></i> instagram </a>
+                <a href="#"> <i class="fab fa-linkedin"></i> linkedin </a>
+                <a href="#"> <i class="fab fa-pinterest"></i> pinterest </a>
+            </div>
+    
+        </div>
+    
+        <div class="credit"> &#169; &nbsp;  Indian Institute of Technology, Kharagpur 2019 </div>
+    
+    </section>
+    
+      <script src="{{url_for('static',filename='table.js')}}"></script>  
+      <script src="https://unpkg.com/swiper@7/swiper-bundle.min.js"></script>
+
+    <!-- custom js file links  -->
+    <!-- <script src="{{url_for('static',filename='script.js')}}"></script> -->
+
+    <script async
+        src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&libraries=geometry,places&callback=initMap">
+    </script>
+
+
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>  
+    <script>
+      AOS.init({
+          delay:400,
+          duration:800
+      });
+    </script>
+      
+</body>
+</html>

@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pubbs Transit</title>
+
+    <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+
+    <link rel="stylesheet" href="https://unpkg.com/swiper@7/swiper-bundle.min.css" />
+
+    <!-- font awesome cdn link  -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
+    <!-- iconscout cdn link -->
+    <link rel="stylesheet" href="https://unicons.iconscout.com/release/v4.0.0/css/line.css">
+
+    <!-- custom css file link  -->
+    <link rel="stylesheet" href="{{url_for('static',filename='style.css')}}">
+
+</head>
+<body>
+    
+<!-- header section starts  -->
+
+<header class="header">
+
+    <a href="https://mohua.gov.in/" target="_blank" class="logo"><img src="{{url_for('static',filename='images/gov_logo.png')}}" class="gov_logo"></a>
+
+    <nav class="navbar"> 
+        
+        <h2 class="heading_1">MOHUA GOVERNMENT</h2>
+        <!-- <h3 class="heading_1">Government of India</h3> -->
+    </nav> 
+
+
+    <div class="icons">
+        <!-- <div id="menu-btn" class="fas fa-bars"></div>  -->
+            
+        
+       <!-- <a href="#" class="fas fa-user"></a> -->
+    </div>
+
+    <a href="http://pubbs.co.in/" target="_blank" class="logo"><img src="{{url_for('static',filename='images/Pubbs_transit_logo_transparent.png')}}" class="pubbs_logo"></a>
+
+</header>
+
+<!-- header section ends -->
+
+<!-- home section starts  -->
+
+<section class="home" id="home">
+  <div class="topnav">
+    <a href="/">Back</a>
+    <a href="/table">Next</a>
+    <a href="/upload_file">Upload</a>
+    <a href="/logout">Logout</a>
+  </div>
+</section>
+
+<!-- home section ends -->
+
+<!-- products section starts  -->
+
+<section class="products" id="products">
+
+    <h1 class="heading"> Bus Dispatch and <span>control system</span> </h1>
+
+    <div class="container1" > 
+      <!-- <form class="form1" id="myform" action="{{url_for('insert_data')}}" method="post"> -->
+      <form class="form1" id="myform" action="{{url_for('input_stops')}}" method="post">
+        <div class="form first">
+          <div class="details">
+            <span class="title">Bus Route and Time Period Information</span>
+            <div class="fields">
+              <div class="input-field">
+                <label for="Bus_route_name">Bus Route Name:</label>
+                <input type="text" id="Bus_route_name2" name="Bus_route_name" />
+              </div>
+  
+              <div class="input-field">
+                <label for="Terminal_1_origin">Terminal 1(origin): </label>
+                <input type="text" id="Terminal_1_origin" name="Terminal_1_origin" />
+              </div>
+  
+              <div class="input-field">
+                <label for="Terminal_2_destination">Terminal 2(destination): </label>
+                <input type="text" id="Terminal_2_destination" name="Terminal_2_destination" />
+              </div>
+  
+              <div class="input-field">
+                <label for="Bus_service_timings_From">From:</label>
+                <input type="time" id="Bus_service_timings_From" name="Bus_service_timings_From" />
+              </div>
+  
+              <div class="input-field">
+                <label for="Bus_service_timings_To">To:</label>
+                <input type="time" id="Bus_service_timings_To" name="Bus_service_timings_To" />
+              </div>
+  
+              <div class="input-field">
+                <label for="Number_of_service_periods">Number of service periods: </label>
+                <input type="number" id="Number_of_service_periods" name="Number_of_service_periods" required/>
+              </div>
+            </div>
+  
+            
+             <button id="myBtn" value="Submit" class="nextBtn" type="submit" style="width: 20%;">
+               <span class="btnText">Generate</span>
+              <i class="uil uil-navigator"></i>
+            </button>
+  
+  
+          </div>
+        
+        </div> 
+      </form>
+      <div style="display: flex; flex-direction: column;">
+        <table id="routeInfo" class="routeInfo">
+        <thead>
+          <tr>
+            {% for value in rows1 %}
+            {% endfor %}
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in rows1 %}
+            <tr>
+              {% for value in row %}
+                <td>{{ value }}</td>
+              {% endfor %}
+            </tr> 
+          {% endfor %}
+        </tbody>
+        <table>
+          <tr>
+            {% for value in rows2 %}
+            {% endfor %}
+          </tr>
+          {% for row in rows2 %}
+            <tr>
+              {% for value in row %}
+                <td>{{ value }}</td>
+              {% endfor %}
+            </tr>
+          {% endfor %}
+        </table>
+    </div>
+    <div>
+      <table id="timePeriodInfo" class="timePeriodInfo" >
+          <tr>
+            <th>Start</th>
+          </tr>
+            {% for row in time1 %}
+                <tr>
+                    <td>{{ row[0] }}</td>
+                </tr>
+            {% endfor %}
+      </table>
+      <table id="timePeriodInfo" class="timePeriodInfo" >
+        <tr>
+          <th>Start</th>
+        </tr>
+          {% for row in time2 %}
+              <tr>
+                  <td>{{ row[0] }}</td>
+              </tr>
+          {% endfor %}
+    </table>
+    </div>
+  </div>
+      <div class="container">
+        <form action="{{ url_for('submit') }}" class="form_data" id="form_data" method="post">
+            <div class="form first">
+              <div class="details">
+                <span class="title">Bus Service Details</span>
+                
+                <div class="fields">
+                  <div class="input-field">
+                    <label for="A">Terminal 1:</label>
+                    <input type="text" id="A" name="A" required>
+                  </div>
+    
+                  <div class="input-field">
+                    <label for="B">Terminal 2:</label>
+                    <input type="text" id="B" name="B" required>
+                  </div>
+    
+                  <div class="input-field">
+                    <label for="frequencydefault">Frequency Default:</label>
+                    <input type="number" id="frequencydefault" name="frequencydefault" required>
+                  </div>
+                  
+                  <div class="input-field">
+                    <label for="seatcap">Seating capacity:</label>
+                    <input type="number" id="seatcap" name="seatcap" required>
+                  </div>
+    
+                  <div class="input-field">
+                    <label for="min_c_lvl">Minimum crowding level:</label>
+                    <input type="number" step="0.01" id="min_c_lvl" name="min_c_lvl" required>
+                  </div>
+    
+                  <div class="input-field">
+                    <label for="max_c_lvl">Maximum crowding level:</label>
+                    <input type="number" step="0.01" id="max_c_lvl" name="max_c_lvl" required>
+                  </div>
+    
+                  <div class="input-field">
+                    <label for="max_weight">Max wait time of a passenger: </label>
+                    <input type="number" id="max_weight" name="max_weight" required>
+                  </div>
+    
+                  <div class="input-field">
+                    <label for="bus_left">Buses Left: </label>
+                    <input type="number" id="bus_left" name="bus_left" required>
+                  </div>
+    
+                  <div class="input-field">
+                    <label for="min_dwell">Minimum dwell time: </label>
+                    <input type="number" id="min_dwell" name="min_dwell" required>
+                  </div>
+    
+                  <div class="input-field">
+                    <label for="slack">Slack time for a trip: </label>
+                    <input type="number" id="slack" name="slack" required>
+                  </div>
+    
+                  <div class="input-field">
+                    <label for="lay_overtime">Lay over time for buses: </label>
+                    <input type="number" id="lay_overtime" name="lay_overtime" required>
+                  </div>
+    
+                  <div class="input-field">
+                    <label for="buscost">Cost of bus (inc loan interest): </label>
+                    <input type="number" id="buscost" name="buscost" required>
+                  </div>
+    
+                  <div class="input-field">
+                    <label for="buslifecycle">Bus Life Cycle: </label>
+                    <input type="number" id="buslifecycle" name="buslifecycle" required>
+                  </div>
+    
+                  <div class="input-field">
+                    <label for="crewperbus">No. of crew per bus: </label>
+                    <input type="number" id="crewperbus" name="crewperbus" required>
+                  </div>
+                    
+                  <div class="input-field">
+                    <label for="crewincome">Avg monthly wage of crew: </label>
+                    <input type="number" id="crewincome" name="crewincome" required>
+                  </div>
+                  
+                  <div class="input-field">
+                    <label for="cr_trip">no of round trips: </label>
+                    <input type="number" id="cr_trip" name="cr_trip" required>
+                  </div>
+    
+                  <div class="input-field">
+                    <label for="cr_day">Avg no of work days/month: </label>
+                    <input type="number" id="cr_day" name="cr_day" required>
+                  </div>
+    
+                  <div class="input-field">
+                    <label for="busmaintenance">Bus maintenance cost/km: </label>
+                    <input type="number" id="busmaintenance" name="busmaintenance" required>
+                  </div>
+                    
+                  <div class="input-field">
+                    <label for="fuelprice">Fuel cost: </label>
+                    <input type="number" id="fuelprice" name="fuelprice" required>
+                  </div>
+    
+                  <div class="input-field">
+                    <label for="kmperliter">Mileage running: </label>
+                    <input type="number" id="kmperliter" name="kmperliter" required>
+                  </div>
+                    
+                  <div class="input-field">
+                    <label for="kmperliter2">Mileage engine idle: </label>
+                    <input type="number" id="kmperliter2" name="kmperliter2" required>
+                  </div>
+    
+                  <div class="input-field">
+                    <label for="c_cantboard">Cost incurred </label>
+                    <input type="number" id="c_cantboard" name="c_cantboard" required>
+                  </div>
+                    
+                  <div class="input-field">
+                    <label for="c_waittime">Waiting at bus stop cost: </label>
+                    <input type="number" id="c_waittime" name="c_waittime" required>
+                  </div>
+    
+                  <div class="input-field">
+                    <label for="c_invehtime">Invehicle traveltime cost:</label>
+                    <input type="number" id="c_invehtime" name="c_invehtime" required>
+                  </div>
+    
+                  <div class="input-field">
+                    <label for="penalty">Penalty: </label>
+                    <input type="number" id="penalty" name="penalty" required>
+                  </div>
+    
+                  <div class="input-field">
+                    <label for="hrinperiod">Length of a period: </label>
+                    <input type="number" id="hrinperiod" name="hrinperiod" required>
+                  </div>
+    
+                  <div class="input-field">
+                    <label for="ser_period">service hours: </label>
+                    <input type="number" id="ser_period" name="ser_period" required>
+                  </div>
+    
+                </div>
+                <div class="buttons">
+                  <button class="backBtn">
+                    <i class="uil uil-navigator"></i>
+                    <span class="btnText">Back</span>
+                  </button>
+  
+                  <button class="nextBtn" id="nextBtn">
+                    <span class="btnText">Next</span>
+                    <i class="uil uil-navigator"></i>
+                  </button>
+                </div>
+                
+              </div>
+            </div>
+    
+            <div class="form second">
+              <div class="details">
+                <span class="title">Vehicle and crew scheduling</span>
+    
+                <div class="fields">
+                  <div class="input-field">
+                    <label for="dead_todepot_t1">Deadheading time t1 to depot: </label>
+                    <input type="number" id="dead_todepot_t1" name="dead_todepot_t1" required>
+                  </div>
+          
+                  <div class="input-field">
+                    <label for="dead_todepot_t2">Deadheading time t2 to depot: </label>
+                    <input type="number" id="dead_todepot_t2" name="dead_todepot_t2" required>
+                  </div>
+          
+                  <div class="input-field">
+                    <label for="layover_depot">Layover at depot in min: </label>
+                    <input type="number" id="layover_depot" name="layover_depot" required>
+                  </div>
+          
+                  <div class="input-field">
+                    <label for="start_ser">Start service: </label>
+                    <input type="number" id="start_ser" name="start_ser" required>
+                  </div>
+          
+                  <div class="input-field">
+                    <label for="end_ser">End service: </label>
+                    <input type="number" id="end_ser" name="end_ser" required>
+                  </div>
+          
+                  <div class="input-field">
+                    <label for="shift">Shift of buses in hrs: </label>
+                    <input type="number" id="shift" name="shift" required>
+                  </div>
+          
+                  <div class="input-field">
+                    <label for="max_ideal">Max ideal time of bus: </label>
+                    <input type="number" id="max_ideal" name="max_ideal" required>
+                  </div>
+                </div>
+              </div>
+    
+              <div class="details">
+                <span class="title">Genetic algorith parameters</span>
+    
+                <div class="fields">
+    
+                  <div class="input-field">
+                    <label for="sol_per_pop">No of sol set of freq in one popl. for GA: </label>
+                    <input type="number" id="sol_per_pop" name="sol_per_pop" required>
+                  </div>
+        
+                  <div class="input-field">
+                    <label for="num_generations">Number of generations for GA: </label>
+                    <input type="number" id="num_generations" name="num_generations" required>
+                  </div>
+                  
+                </div>
+              </div>
+    
+              <div class="details">
+                <span class="title">CONSTRAINTS FULL DAY SERVICES</span>
+    
+                <div class="fields">
+    
+                    <div class="input-field">
+                      <label for="max_oppp">Maximum operation cost/person: </label>
+                      <input type="number" id="max_oppp" name="max_oppp" required>
+                    </div>
+          
+                    <div class="input-field">
+                      <label for="min_ppvk">Min passenger per vehicle-km: </label>
+                      <input type="number" id="min_ppvk" name="min_ppvk" required>
+                    </div>
+          
+                    <div class="input-field">
+                      <label for="min_ppt">Minimum passenger per trip: </label>
+                      <input type="number" id="min_ppt" name="min_ppt" required>
+                    </div>
+          
+                    <div class="input-field">
+                      <label for="max_ocpp">Max operation cost per trip: </label>
+                      <input type="number" id="max_ocpp" name="max_ocpp" required>
+                    </div>
+          
+                    <div class="input-field">
+                      <label for="max_fleet">Maximum fleet size: </label>
+                      <input type="number" id="max_fleet" name="max_fleet" required>
+                    </div>
+          
+                    <div class="input-field">
+                      <label for="max_ppl">Max % of passenger lost: </label>
+                      <input type="number" id="max_ppl" name="max_ppl" required>
+                    </div>
+          
+                    <div class="input-field">
+                      <label for="min_crr"> Min cost recovery ratio: </label>
+                      <input type="number" id="min_crr" name="min_crr" required>
+                    </div>
+                </div>
+              </div>
+    
+              <div class="details">
+                <span class="title">CONSTRAINTS TRIP WISE</span>
+    
+                <div class="fields">
+    
+                  <div class="input-field">
+                    <label for="min_ppp">Minimum Passenger per trip: </label>
+                    <input type="number" id="min_ppp" name="min_ppp" required>
+                  </div>
+          
+                  <div class="input-field">
+                      <label for="max_pplpt">Max % of passenger lost/trip: </label>
+                      <input type="number" id="max_pplpt" name="max_pplpt" required>
+                  </div>
+          
+                  <div class="input-field">
+                      <label for="min_rvpt">Minimum revenue per trip: </label>
+                      <input type="number" id="min_rvpt" name="min_rvpt" required>
+                  </div>
+          
+                  <div class="input-field">
+                      <label for="max_opc">Maximum operation cost: </label>
+                      <input type="number" id="max_opc" name="max_opc" required>
+                  </div>
+                </div>
+              </div>
+    
+              <div class="buttons">
+                <button class="backBtn">
+                  <i class="uil uil-navigator"></i>
+                  <span class="btnText">Back</span>
+                </button>
+    
+                <button class="submit" type="submit" value="submit">
+                  <span class="btnText">Submit</span>
+                  <i class="uil uil-navigator"></i>
+                </button>
+              </div>
+              
+    
+            </div>
+          </form>
+    </div>
+    <div class="container">
+      <form action="{{url_for('stop_coef')}}" id="form_2" method="post">
+          <div class="form first">
+            <div class="details">
+              <span class="title">OLS Coefficients</span>
+              
+              <div class="fields">
+                <div class="input-field">
+                  <label for="A">Attributes:</label>
+                  <input type="text" id="Attributes" name="Attributes" required>
+                </div>
+
+                <div class="input-field">
+                  <label for="A">Const:</label>
+                  <input type="text" id="Const" name="Const" required>
+                </div>
+
+                <div class="input-field">
+                  <label for="A">No of Boarding:</label>
+                  <input type="text" id="No_of_Boarding" name="No_of_Boarding" required>
+                </div>
+
+                <div class="input-field">
+                  <label for="A">No of Alighting:</label>
+                  <input type="text" id="No_of_Alighting" name="No_of_Alighting" required>
+                </div>
+
+                <div class="input-field">
+                  <label for="A">Occupancy Level:</label>
+                  <input type="text" id="Occupancy_Level" name="Occupancy_Level" required>
+                </div>
+
+                <div class="input-field">
+                  <label for="A">Morning Peak:</label>
+                  <input type="text" id="Morning_Peak" name="Morning_Peak" required>
+                </div>
+
+                
+
+                <div class="input-field">
+                  <label for="A">Before Intersection:</label>
+                  <input type="text" id="Before_Intersection" name="Before_Intersection" required>
+                </div>
+
+                <div class="input-field">
+                  <label for="A">Far from Intersection:</label>
+                  <input type="text" id="Far_from_Intersection" name="Far_from_Intersection" required>
+                </div>
+
+                <div class="input-field">
+                  <label for="A">Commercial:</label>
+                  <input type="text" id="Commercial" name="Commercial" required>
+                </div>
+
+                <div class="input-field">
+                  <label for="A">Transport hub:</label>
+                  <input type="text" id="Transport_hub" name="Transport_hub" required>
+                </div>
+
+                <div class="input-field">
+                  <label for="A">Bus Bay:</label>
+                  <input type="text" id="Bus_Bay" name="Bus_Bay" required>
+                </div>
+                
+  
+  
+              </div>
+              <div class="buttons">
+                 <!-- <button class="backBtn" type="submit">
+                  <i class="uil uil-navigator"></i>
+                  <span class="btnText">Submit</span>
+                </button> -->
+
+                <button class="nextBtn" type="submit">
+                  <span class="btnText">Submit</span>
+                  <i class="uil uil-navigator"></i>
+                </button>
+              </div>
+              
+            </div>
+          </div>
+      </form>
+   </div>
+          
+
+</section>
+
+<!-- products section ends -->
+
+<!-- about section starts  -->
+
+<!-- <section class="about" id="about"> -->
+
+    <!-- <div class="content" data-aos="fade-right">
+        <h3>about us</h3>
+        <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Magni, adipisci neque! Veritatis laboriosam odio corporis, quo fugit architecto. Veritatis in dicta qui odit soluta sequi ipsam facere eum numquam! Obcaecati.</p>
+        <a href="#" class="btn">read more</a>
+    </div> -->
+
+<!-- </section> -->
+
+<!-- about section ends -->
+
+
+<!-- contact section starts  -->
+
+<section class="contact" id="contact">
+
+    <h1 class="heading"> <span>contact</span> us </h1>
+
+    <div class="row">
+
+        <div class="mapouter"><div class="gmap_canvas"><iframe width="770" height="510" id="gmap_canvas" src="https://maps.google.com/maps?q=IIT kharagpur&t=&z=13&ie=UTF8&iwloc=&output=embed" frameborder="0" scrolling="no" marginheight="0" marginwidth="0"></iframe><a href="https://2yu.co">2yu</a><br><style>.mapouter{position:relative;text-align:right;height:510px;width:770px;}</style><a href="https://embedgooglemap.2yu.co">html embed google map</a><style>.gmap_canvas {overflow:hidden;background:none!important;height:510px;width:770px;}</style></div></div>
+        <form action="">
+            <h3 data-aos="zoom-in">tell us something!</h3>
+            <input data-aos="zoom-in" type="text" placeholder="your name" class="box">
+            <input data-aos="zoom-in" type="email" placeholder="your email" class="box">
+            <input data-aos="zoom-in" type="number" placeholder="your number" class="box">
+            <textarea data-aos="zoom-in" placeholder="your message" class="box" cols="30" rows="10"></textarea>
+            <input data-aos="zoom-in" type="submit" value="send message" class="btn">
+        </form>
+
+    </div>
+
+</section>
+
+<!-- contact section ends -->
+
+<!-- footer section starts  -->
+
+<section class="footer" id="footer">
+
+    <div class="box-container">
+
+        <div class="box" data-aos="fade-right">
+            <h3>our branches</h3>
+            <a href="#"> <i class="fas fa-map-marker-alt"></i> india </a>
+            <a href="#"> <i class="fas fa-map-marker-alt"></i> USA </a>
+            <a href="#"> <i class="fas fa-map-marker-alt"></i> russia </a>
+            <a href="#"> <i class="fas fa-map-marker-alt"></i> france </a>
+            <a href="#"> <i class="fas fa-map-marker-alt"></i> japan </a>
+        </div>
+
+        <div class="box" data-aos="fade-down">
+            <h3>quick links</h3>
+            <a href="#"> <i class="fas fa-arrow-right"></i> home </a>
+            <a href="#"> <i class="fas fa-arrow-right"></i> products </a>
+            <a href="#"> <i class="fas fa-arrow-right"></i> about </a>
+            <a href="#"> <i class="fas fa-arrow-right"></i> arrivals </a>
+            <a href="#"> <i class="fas fa-arrow-right"></i> contact </a>
+            <a href="#"> <i class="fas fa-arrow-right"></i> blogs </a>
+        </div>
+
+        <div class="box" data-aos="fade-up">
+            <h3>contact us</h3>
+            <a href="#"> <i class="fas fa-phone"></i> +91-3222-283202 </a>
+            <a href="#"> <i class="fas fa-phone"></i> +91-9433944708 </a>
+            <a href="#"> <i class="fas fa-envelope"></i> ar.research2019debapratim@gmail.com </a>
+            <a href="#"> <i class="fas fa-map-marker-alt"></i> Dept of Architecture and Regional Planning IIT Kharagpur,West Bengal,India. </a>
+        </div>
+
+        <div class="box" data-aos="fade-left">
+            <h3>Socials</h3>
+            <a href="#"> <i class="fab fa-facebook-f"></i> facebook </a>
+            <a href="#"> <i class="fab fa-twitter"></i> twitter </a>
+            <a href="#"> <i class="fab fa-instagram"></i> instagram </a>
+            <a href="#"> <i class="fab fa-linkedin"></i> linkedin </a>
+            <a href="#"> <i class="fab fa-pinterest"></i> pinterest </a>
+        </div>
+
+    </div>
+
+    <div class="credit"> &#169; &nbsp;  Indian Institute of Technology, Kharagpur 2019 </div>
+
+</section>
+
+<!-- footer section ends -->
+
+<script src="https://unpkg.com/swiper@7/swiper-bundle.min.js"></script>
+
+<!-- custom js file links  -->
+<script src="{{url_for('static',filename='script.js')}}"></script>
+
+<!-- <script async
+    src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&libraries=geometry,places&callback=initMap">
+</script> -->
+
+
+<script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+<script>
+  AOS.init({
+      delay:400,
+      duration:800
+  });
+</script>
+
+</body>
+</html>

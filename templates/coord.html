@@ -1,0 +1,300 @@
+<!-- HTML code for navbar -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+
+    <link rel="stylesheet" href="https://unpkg.com/swiper@7/swiper-bundle.min.css" />
+
+    <!-- font awesome cdn link  -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
+    <!-- iconscout cdn link -->
+    <link rel="stylesheet" href="https://unicons.iconscout.com/release/v4.0.0/css/line.css">
+    <title>Interactive Map</title>
+
+    <link rel="stylesheet" href="{{url_for('static',filename='table.css')}}">
+    <!-- for map -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <style>
+      #map {
+        height: 500px;
+        width: 100%;
+        align-self: top;
+        align-items: center;
+        z-index: 0;
+        margin: 0 15px;
+        margin-top: 38px;
+        border-radius: 7px;
+      }
+    </style>
+</head>
+<body>
+
+  <header class="header">
+
+    <a href="https://mohua.gov.in/" target="_blank" class="logo"><img src="{{url_for('static',filename='images/gov_logo.png')}}" class="gov_logo"></a>
+
+    <nav class="navbar"> 
+        
+        <h2 class="heading_1">MOHUA GOVERNMENT</h2>
+        <!-- <h3 class="heading_1">Government of India</h3> -->
+    </nav> 
+
+
+    <div class="icons">
+        <!-- <div id="menu-btn" class="fas fa-bars"></div>  -->
+            
+        
+       <!-- <a href="#" class="fas fa-user"></a> -->
+    </div>
+
+    <a href="http://pubbs.co.in/" target="_blank" class="logo"><img src="{{url_for('static',filename='images/Pubbs_transit_logo_transparent.png')}}" class="pubbs_logo"></a>
+
+</header>
+  <section class="home" id="home" style="display: flexbox;">
+    <nav class="topnav">
+        <a href="/">HOME</a>
+      </nav>
+  </section>
+
+<section class="products" id="products">
+  <h1 class="heading"> Plot Bus Stop <span>Locations</span> </h1>  
+      <div> 
+        <div style="display:flex">
+          <div id="map" style="flex: 70%;"></div>
+          <div style="flex: 30%;" class="container1" style="height: fit-content;">
+            <form action="{{url_for('save_stops')}}" method="post" >
+              <table id="markerTable" style="margin-top: 0%; width: 100%;">
+                <thead>
+                  <tr>
+                    <th>Bus Stops</th>
+                    <th>Remove</th>
+                    <th>UP Dist</th>
+                    <th>DN Dist</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+              <input type="submit" value="Confirm Stops" style="margin: 20px; width: fit-content; background-color: #04AA6D; border-radius: 7px;">
+            </form>
+          </div>
+        </div>
+      </div> 
+
+      <!-- <table id="table3">
+         table contents
+        <thead class="table2_head">
+            <th>1</th>
+            <th>2</th>
+            <th>2</th>
+            <th>2</th>
+            <th>2</th>
+            <th>2</th>
+            <th>2</th>
+            <th>2</th>
+            <th>2</th>
+            <th>2</th>
+            <th>2</th>
+            <th>2</th>
+            <th>2</th>
+            <th>2</th>
+            <th>2</th>
+
+
+        </thead>
+        <tbody></tbody>
+        
+        
+      </table> -->
+</section>      
+      <section class="contact" id="contact">
+
+        <h1 class="heading"> <span>contact</span> us </h1>
+    
+        <div class="row">
+    
+            <div class="mapouter"><div class="gmap_canvas"><iframe width="770" height="510" id="gmap_canvas" src="https://maps.google.com/maps?q=IIT kharagpur&t=&z=13&ie=UTF8&iwloc=&output=embed" frameborder="0" scrolling="no" marginheight="0" marginwidth="0"></iframe><a href="https://2yu.co">2yu</a><br><style>.mapouter{position:relative;text-align:right;height:510px;width:770px;}</style><a href="https://embedgooglemap.2yu.co">html embed google map</a><style>.gmap_canvas {overflow:hidden;background:none!important;height:510px;width:770px;}</style></div></div>
+            <form action="">
+                <h3 data-aos="zoom-in">tell us something!</h3>
+                <input data-aos="zoom-in" type="text" placeholder="your name" class="box">
+                <input data-aos="zoom-in" type="email" placeholder="your email" class="box">
+                <input data-aos="zoom-in" type="number" placeholder="your number" class="box">
+                <textarea data-aos="zoom-in" placeholder="your message" class="box" cols="30" rows="10"></textarea>
+                <input data-aos="zoom-in" type="submit" value="send message" class="btn">
+            </form>
+    
+        </div>
+    
+      </section>
+    
+    <!-- contact section ends -->
+    
+    <!-- footer section starts  -->
+    
+    <section class="footer" id="footer">
+    
+        <div class="box-container">
+    
+            <div class="box" data-aos="fade-right">
+                <h3>our branches</h3>
+                <a href="#"> <i class="fas fa-map-marker-alt"></i> india </a>
+                <a href="#"> <i class="fas fa-map-marker-alt"></i> USA </a>
+                <a href="#"> <i class="fas fa-map-marker-alt"></i> russia </a>
+                <a href="#"> <i class="fas fa-map-marker-alt"></i> france </a>
+                <a href="#"> <i class="fas fa-map-marker-alt"></i> japan </a>
+            </div>
+    
+            <div class="box" data-aos="fade-down">
+                <h3>quick links</h3>
+                <a href="#"> <i class="fas fa-arrow-right"></i> home </a>
+                <a href="#"> <i class="fas fa-arrow-right"></i> products </a>
+                <a href="#"> <i class="fas fa-arrow-right"></i> about </a>
+                <a href="#"> <i class="fas fa-arrow-right"></i> arrivals </a>
+                <a href="#"> <i class="fas fa-arrow-right"></i> contact </a>
+                <a href="#"> <i class="fas fa-arrow-right"></i> blogs </a>
+            </div>
+    
+            <div class="box" data-aos="fade-up">
+                <h3>contact us</h3>
+                <a href="#"> <i class="fas fa-phone"></i> +91-3222-283202 </a>
+                <a href="#"> <i class="fas fa-phone"></i> +91-9433944708 </a>
+                <a href="#"> <i class="fas fa-envelope"></i> ar.research2019debapratim@gmail.com </a>
+                <a href="#"> <i class="fas fa-map-marker-alt"></i> Dept of Architecture and Regional Planning IIT Kharagpur,West Bengal,India. </a>
+            </div>
+    
+            <div class="box" data-aos="fade-left">
+                <h3>Socials</h3>
+                <a href="#"> <i class="fab fa-facebook-f"></i> facebook </a>
+                <a href="#"> <i class="fab fa-twitter"></i> twitter </a>
+                <a href="#"> <i class="fab fa-instagram"></i> instagram </a>
+                <a href="#"> <i class="fab fa-linkedin"></i> linkedin </a>
+                <a href="#"> <i class="fab fa-pinterest"></i> pinterest </a>
+            </div>
+    
+        </div>
+    
+        <div class="credit"> &#169; &nbsp;  Indian Institute of Technology, Kharagpur 2019 </div>
+    
+    </section>
+    
+      <script src="{{url_for('static',filename='table.js')}}"></script>  
+      <script src="https://unpkg.com/swiper@7/swiper-bundle.min.js"></script>
+
+    <!-- custom js file links  -->
+    <!-- <script src="{{url_for('static',filename='script.js')}}"></script> -->
+
+    <script async
+        src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&libraries=geometry,places&callback=initMap">
+    </script>
+
+
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>  
+    <script>
+      AOS.init({
+          delay:400,
+          duration:800
+      });
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/leaflet@1.7.1/dist/leaflet.js"></script>
+  <script>
+    var map = L.map('map').setView([51.505, -0.09], 13);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(map);
+
+    var markersLayer = L.layerGroup().addTo(map);
+    var linesLayer = L.layerGroup().addTo(map);
+
+    var markerCount = 0;
+
+    map.on('click', function(e) {
+      var markerName = 'Stop ' + (markerCount + 1);
+
+      var markerRow = document.createElement('tr');
+      markerRow.id = 'markerRow' + markerCount;
+
+      var markerNameCell = document.createElement('td');
+      markerNameCell.style.border = "None";
+      markerNameCell.style.background = "White";
+      var markerInputBox = document.createElement('input');
+      markerInputBox.id = markerName;
+      markerInputBox.name = markerName;
+      markerInputBox.value = markerName;
+      markerNameCell.appendChild(markerInputBox);
+      markerRow.appendChild(markerNameCell);
+
+      var actionsCell = document.createElement('td');
+      actionsCell.style.border = "None";
+      actionsCell.style.background = "White";
+      var deleteButton = document.createElement('button');
+      deleteButton.type = 'button';
+      deleteButton.style.width = "50%"
+      deleteButton.style.height = "50%"
+      deleteButton.textContent = 'X';
+      actionsCell.appendChild(deleteButton);
+      markerRow.appendChild(actionsCell);
+
+      var distUPCell = document.createElement('td');
+      distUPCell.style.border = "None";
+      distUPCell.style.background = "White";
+      var distUPInputBox = document.createElement('input');
+      var distUPname = markerName + '_UP'
+      distUPInputBox.id = distUPname;
+      distUPInputBox.name = distUPname;
+      distUPInputBox.value = 0;
+      distUPCell.appendChild(distUPInputBox);
+      markerRow.appendChild(distUPCell);
+      
+      var distDNCell = document.createElement('td');
+      distDNCell.style.border = "None";
+      distDNCell.style.background = "White";
+      var distDNInputBox = document.createElement('input');
+      var distDNname = markerName + '_DN'
+      distDNInputBox.id = distDNname;
+      distDNInputBox.name = distDNname;
+      distDNInputBox.value = 0;
+      distDNCell.appendChild(distDNInputBox);
+      markerRow.appendChild(distDNCell);
+
+      var marker = L.marker(e.latlng, { draggable: true }).addTo(markersLayer);
+      marker.bindPopup(markerName);
+
+      marker.on('dragend', function(event) {
+        updateLines();
+      });
+
+      markersLayer.addLayer(marker);
+      updateLines();
+
+      deleteButton.addEventListener('click', function() {
+        markersLayer.removeLayer(marker);
+        markerRow.remove();
+        updateLines();
+      });
+
+      markerCount++;
+
+      document.getElementById('markerTable').getElementsByTagName('tbody')[0].appendChild(markerRow);
+    });
+
+    function updateLines() {
+      linesLayer.clearLayers();
+
+      var markers = markersLayer.getLayers();
+
+      if (markers.length > 1) {
+        var latlngs = markers.map(function(marker) {
+          return marker.getLatLng();
+        });
+
+        var polyline = L.polyline(latlngs, { color: '#3388ff' }).addTo(linesLayer);
+      }
+    }
+  </script>
+</body>
+</html>

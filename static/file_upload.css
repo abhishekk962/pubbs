@@ -1,0 +1,161 @@
+/* @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;500;600;700&display=swap');
+*{
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Poppins", sans-serif;
+}
+body{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: #5256ad;
+}
+.drag-area{
+  border: 2px dashed #fff;
+  height: 500px;
+  width: 700px;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+}
+.drag-area.active{
+  border: 2px solid #fff;
+}
+.drag-area .icon{
+  font-size: 100px;
+  color: #fff;
+}
+.drag-area header{
+  font-size: 30px;
+  font-weight: 500;
+  color: #fff;
+}
+.drag-area span{
+  font-size: 25px;
+  font-weight: 500;
+  color: #fff;
+  margin: 10px 0 15px 0;
+}
+.drag-area button{
+  padding: 10px 25px;
+  font-size: 20px;
+  font-weight: 500;
+  border: none;
+  outline: none;
+  background: #fff;
+  color: #5256ad;
+  border-radius: 5px;
+  cursor: pointer;
+}
+.drag-area img{
+  height: 100%;
+  width: 100%;
+  object-fit: cover;
+  border-radius: 5px;
+} */
+
+
+* {
+	box-sizing: border-box;
+}
+
+body {
+	font-family: Arial, sans-serif;
+	background-color: #f2f2f2;
+}
+
+.containerx {
+	margin: 50px auto;
+	max-width: 600px;
+	padding: 20px;
+	background-color: #fff;
+	border-radius: 10px;
+	box-shadow: 0 0 10px rgba(0,0,0,0.2);
+}
+
+.dropzone {
+	border: 2px dashed #ccc;
+	padding: 50px;
+	text-align: center;
+	position: relative;
+	margin-top: 120px;
+}
+
+.inputfile {
+	display: none;
+}
+
+label {
+	display: inline-block;
+	cursor: pointer;
+	color: #666;
+	font-size: 20px;
+	margin-top: 20px;
+}
+
+label:hover {
+	color: #000;
+}
+
+.btn {
+	background-color: #008CBA;
+	border: none;
+	color: #fff;
+	padding: 10px 20px;
+	font-size: 16px;
+	border-radius: 5px;
+	margin-top: 20px;
+	cursor: pointer;
+}
+
+.btn:hover {
+	background-color: #006A9E;
+}
+
+.btn:active {
+	background-color: #004A6E;
+}
+
+.dropzone:before {
+	content: '';
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	font-size: 30px;
+	color: #ccc;
+}
+
+.dropzone:hover:before {
+	color: #666;
+}
+
+.dropzone.dragover {
+	border-color: #008CBA;
+}
+
+.dropzone.dragover:before {
+	content: '\f0c9';
+	font-family: FontAwesome;
+	color: #008CBA;
+}
+
+@media only screen and (max-width: 600px) {
+	.container {
+		margin: 20px auto;
+		padding: 10px;
+	}
+	
+	label {
+		font-size: 16px;
+	}
+	
+	.btn {
+		font-size: 14px;
+		padding: 8px 16px;
+	}
+}
