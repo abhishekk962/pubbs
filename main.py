@@ -202,11 +202,11 @@ def table_filled():
     # Upload to Database
     c = conn.cursor()
     db_table = request.form['db_table']
-    c.execute(f"DROP TABLE IF EXISTS {db_table};")
-    query = f"CREATE TABLE {db_table} ({','.join([f'`{n}` FLOAT' for n in session['stops_list']])});"
+    # c.execute(f"DROP TABLE IF EXISTS {db_table};")
+    query = f"CREATE TABLE IF NOT EXISTS {db_table} (User,Project,{','.join([f'`Stop {n+1}` FLOAT' for n in len(30)])});"
     c.execute(query)
     for p in range(session['periods']):
-        query = f"INSERT INTO {db_table} (`{'`, `'.join(session['stops_list'])}`) VALUES ({', '.join(['%s' for n in range(len(session['stops_list']))])})"
+        query = f"INSERT INTO {db_table} (User,Project,{','.join([f'`Stop {n+1}`' for n in range(len(session['stops_list']))])}) VALUES ({session['email']},test,{', '.join(['%s' for n in range(len(session['stops_list']))])})"
         row = []
         for s in session['stops_list']:
             row.append(float(data[f"{s}_{p+1}"]))
