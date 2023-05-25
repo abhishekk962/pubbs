@@ -9,12 +9,23 @@ import io
 from io import BytesIO
 import pymysql
 import yaml
-from flask import send_file     
-# import mysql.connector
+from flask import send_file  
+# from flask_session import Session
+
+
+
+
 
 app = Flask(__name__)
 
-app.secret_key = os.urandom(24)
+# SESSION_TYPE = 'memcached'
+# app.config.from_object(__name__)
+
+# app.config["SESSION_PERMANENT"] = True
+# app.config["SESSION_TYPE"] = "filesystem"
+# Session(app)
+
+app.secret_key = "os.urandom(24)"
 
 
 # Connect to phpMyAdmin Database
@@ -32,23 +43,6 @@ conn = pymysql.connect(host="103.21.58.10",
 @app.route('/login', methods =['GET', 'POST'])
 def login():
     message = ''
-    # if request.method == 'POST' and 'email' in request.form and 'password' in request.form:
-    #     email = request.form['email']
-    #     password = request.form['password']
-    #     c = conn.cursor()
-    #     c.execute('SELECT * FROM user WHERE email = % s AND password = % s', (email, password, ))
-    #     user = c.fetchone()
-    #     if user:
-    #         session['loggedin'] = True
-    #         # session['userid'] = user['userid']
-    #         session['email'] = user['email']
-    #         session['password'] = user['password']
-    #         session['loggedin'] = True
-    #         message = 'Logged in successfully !'
-    #         return redirect('/home')
-    #         # return render_template('index.html', message = message)
-    #     else:
-    #         message = 'Please enter correct email / password !'
     if 'email' in session:
         return render_template('index.html')
     else:
@@ -65,26 +59,6 @@ def logout():
 @app.route('/register', methods =['GET', 'POST'])
 def register():
     message = ''
-    # if request.method == 'POST':
-    #     name = request.form['name']
-    #     password = request.form['password']
-    #     email = request.form['email']
-    #     c = conn.cursor()
-    #     c.execute('SELECT * FROM user WHERE email = % s', (email, ))
-    #     account = c.fetchone()
-    #     if account:
-    #         message = 'Account already exists !'
-    #     elif not re.match(r'[^@]+@[^@]+\.[^@]+', email):
-    #         message = 'Invalid email address !'
-    #     elif not name or not password or not email:
-    #         message = 'Please fill out the form !'
-    #     else:
-    #         c.execute('INSERT INTO user (name, email, password) VALUES (% s, % s, % s)', (name, email, password, ))
-    #         conn.commit()
-    #         message = 'You have successfully registered !'
-
-    # elif request.method == 'POST':
-    #     message = 'Please fill out the form !'
     if 'email' in session:
         return render_template('index.html')
     else:
@@ -137,10 +111,6 @@ def registered():
             conn.commit()
             message = 'You have successfully registered ! Please Login'
             return render_template('register1.html', message = message)
-        
-    # elif request.method == 'POST':
-    #     message = 'Please fill out the form !'
-    # return render_template('register1.html', message = message)
 
 
 @app.route('/home', methods=['GET', 'POST'])
@@ -149,16 +119,6 @@ def home():
         return render_template('index.html')
     else:
         return redirect('/login')
-
-# old
-@app.route('/table')
-def table():
-    return render_template('table.html')
-
-# old
-@app.route('/upload_file')
-def file_upload():
-    return render_template('file_upload.html')
 
 # new
 @app.route('/input-stops', methods=['GET', 'POST'])
@@ -170,27 +130,35 @@ def input_stops():
 @app.route('/save-stops', methods=['GET', 'POST'])
 def save_stops():
     stops = request.form.to_dict()
-    session['stops_list'] = [stops[n] for n in stops if '_UP' not in n and '_DN' not in n]
+    session['stops_list'] = [stops[n] for n in stops if '_Name' in n]
     up_distances = [stops[n] for n in stops if '_UP' in n]
     dn_distances = [stops[n] for n in stops if '_DN' in n]
+    latitudes = [stops[n] for n in stops if '_lat' in n]
+    longitudes = [stops[n] for n in stops if '_lng' in n]
 
     # Upload to Database
     c = conn.cursor()
-    c.execute(f"DROP TABLE IF EXISTS T_DistanceUP;")
-    query = f"CREATE TABLE T_DistanceUP ({','.join([f'`{n}` FLOAT' for n in session['stops_list']])});"
+    query = f"CREATE TABLE IF NOT EXISTS T_STOPS_INFO (User TEXT,Project TEXT,Stop_Num INT,Stop_Name TEXT,Stop_Lat FLOAT,Stop_Long FLOAT, UP_Dist FLOAT, DN_Dist FLOAT);"
     c.execute(query)
-    query = f"INSERT INTO T_DistanceUP (`{'`, `'.join(session['stops_list'])}`) VALUES ({', '.join(['%s' for n in range(len(session['stops_list']))])})"
-    c.execute(query, tuple(up_distances))
-    conn.commit()
+    for n in range(len(session['stops_list'])):
+        query = f"INSERT INTO T_STOPS_INFO (User,Project,Stop_Num,Stop_Name,Stop_Lat,Stop_Long,UP_Dist,DN_Dist) VALUES ('{session['email']}','test','{n+1}','{session['stops_list'][n]}','{latitudes[n]}','{longitudes[n]}','{up_distances[n]}','{dn_distances[n]}');"
+        c.execute(query)
+        conn.commit()
+    # c.execute(f"DROP TABLE IF EXISTS T_DistanceUP;")
+    # query = f"CREATE TABLE T_DistanceUP ({','.join([f'`{n}` FLOAT' for n in session['stops_list']])});"
+    # c.execute(query)
+    # query = f"INSERT INTO T_DistanceUP (`{'`, `'.join(session['stops_list'])}`) VALUES ({', '.join(['%s' for n in range(len(session['stops_list']))])})"
+    # c.execute(query, tuple(up_distances))
+    # conn.commit()
 
-    c = conn.cursor()
-    c.execute(f"DROP TABLE IF EXISTS T_DistanceDN;")
-    query = f"CREATE TABLE T_DistanceDN ({','.join([f'`{n}` FLOAT' for n in session['stops_list']])});"
-    c.execute(query)
-    query = f"INSERT INTO T_DistanceDN (`{'`, `'.join(session['stops_list'])}`) VALUES ({', '.join(['%s' for n in range(len(session['stops_list']))])})"
-    c.execute(query, tuple(dn_distances))
-    conn.commit()
-
+    # c = conn.cursor()
+    # c.execute(f"DROP TABLE IF EXISTS T_DistanceDN;")
+    # query = f"CREATE TABLE T_DistanceDN ({','.join([f'`{n}` FLOAT' for n in session['stops_list']])});"
+    # c.execute(query)
+    # query = f"INSERT INTO T_DistanceDN (`{'`, `'.join(session['stops_list'])}`) VALUES ({', '.join(['%s' for n in range(len(session['stops_list']))])})"
+    # c.execute(query, tuple(dn_distances))
+    # conn.commit()
+    # return stops
     return render_template('newtable.html', stops_list=session['stops_list'], periods=session['periods'])
 
 # new
@@ -198,15 +166,16 @@ def save_stops():
 def table_filled():
     # Get filled data
     data = request.form.to_dict()
-
+    stops_list = session['stops_list']
     # Upload to Database
     c = conn.cursor()
     db_table = request.form['db_table']
     # c.execute(f"DROP TABLE IF EXISTS {db_table};")
-    query = f"CREATE TABLE IF NOT EXISTS {db_table} (User,Project,{','.join([f'`Stop {n+1}` FLOAT' for n in len(30)])});"
+    query = f"CREATE TABLE IF NOT EXISTS {db_table} (User TEXT,Project TEXT,Period INT,{','.join([f'`Stop {n+1}` FLOAT' for n in range(30)])});"
     c.execute(query)
     for p in range(session['periods']):
-        query = f"INSERT INTO {db_table} (User,Project,{','.join([f'`Stop {n+1}`' for n in range(len(session['stops_list']))])}) VALUES ({session['email']},test,{', '.join(['%s' for n in range(len(session['stops_list']))])})"
+        query = f"INSERT INTO {db_table} (User,Project,Period,{','.join([f'`Stop {n+1}`' for n in range(len(stops_list))])}) VALUES ('{session['email']}','test','{p+1}',{','.join(['%s' for n in range(len(stops_list))])})"
+        print(query)
         row = []
         for s in session['stops_list']:
             row.append(float(data[f"{s}_{p+1}"]))
@@ -226,7 +195,7 @@ def retrieve_data():
     # Retrieve from Database
     db_table = request.form['db_table']
     c = conn.cursor()
-    c.execute(f"SELECT * FROM {db_table}")
+    c.execute(f"SELECT {','.join([f'`Stop {n+1}`' for n in range(len(session['stops_list']))])} FROM {db_table} WHERE User = '{session['email']}' and Project='Test' ORDER BY Period")
     db_data= c.fetchall()
     if len(db_data) != session['periods']:
         return "The specified number of periods don't match the data from the database. Please check and try again."
@@ -270,6 +239,16 @@ def download_csv_data():
                  "attachment; filename=myplot.csv"})
     # return render_template('newtable.html', stops_list=stops_list, periods=periods, db_data=db_data)
     # return render_template('test.html',stops_list=stops_list)
+
+# old
+@app.route('/table')
+def table():
+    return render_template('table.html')
+
+# old
+@app.route('/upload_file')
+def file_upload():
+    return render_template('file_upload.html')
 
 # old
 @app.route('/insert-data', methods=['GET', 'POST'])

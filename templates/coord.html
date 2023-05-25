@@ -75,6 +75,8 @@
                     <th>Remove</th>
                     <th>UP Dist</th>
                     <th>DN Dist</th>
+                    <th>Latitude</th>
+                    <th>Longitude</th>
                   </tr>
                 </thead>
                 <tbody></tbody>
@@ -222,8 +224,9 @@
       markerNameCell.style.border = "None";
       markerNameCell.style.background = "White";
       var markerInputBox = document.createElement('input');
-      markerInputBox.id = markerName;
-      markerInputBox.name = markerName;
+      var markerNameName = markerName + '_Name';
+      markerInputBox.id = markerNameName;
+      markerInputBox.name = markerNameName;
       markerInputBox.value = markerName;
       markerNameCell.appendChild(markerInputBox);
       markerRow.appendChild(markerNameCell);
@@ -243,7 +246,7 @@
       distUPCell.style.border = "None";
       distUPCell.style.background = "White";
       var distUPInputBox = document.createElement('input');
-      var distUPname = markerName + '_UP'
+      var distUPname = markerName + '_UP';
       distUPInputBox.id = distUPname;
       distUPInputBox.name = distUPname;
       distUPInputBox.value = 0;
@@ -254,12 +257,36 @@
       distDNCell.style.border = "None";
       distDNCell.style.background = "White";
       var distDNInputBox = document.createElement('input');
-      var distDNname = markerName + '_DN'
+      var distDNname = markerName + '_DN';
       distDNInputBox.id = distDNname;
       distDNInputBox.name = distDNname;
       distDNInputBox.value = 0;
       distDNCell.appendChild(distDNInputBox);
       markerRow.appendChild(distDNCell);
+
+      var latCell = document.createElement('td');
+      latCell.style.border = "None";
+      latCell.style.background = "White";
+      var latInputBox = document.createElement('input');
+      var latname = markerName + '_lat'
+      latInputBox.id = latname;
+      latInputBox.name = latname;
+      latInputBox.value = e.latlng.lat;
+      latInputBox.readonly = true;
+      latCell.appendChild(latInputBox);
+      markerRow.appendChild(latCell);
+
+      var lngCell = document.createElement('td');
+      lngCell.style.border = "None";
+      lngCell.style.background = "White";
+      var lngInputBox = document.createElement('input');
+      var lngname = markerName + '_lng'
+      lngInputBox.id = lngname;
+      lngInputBox.name = lngname;
+      lngInputBox.value = e.latlng.lng;
+      lngInputBox.readonly = true;
+      lngCell.appendChild(lngInputBox);
+      markerRow.appendChild(lngCell);
 
       var marker = L.marker(e.latlng, { draggable: true }).addTo(markersLayer);
       marker.bindPopup(markerName);
