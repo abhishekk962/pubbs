@@ -141,10 +141,17 @@ def save_stops():
     c = conn.cursor()
     query = f"CREATE TABLE IF NOT EXISTS T_STOPS_INFO (User TEXT,Project TEXT,Stop_Num INT,Stop_Name TEXT,Stop_Lat FLOAT,Stop_Long FLOAT, UP_Dist FLOAT, DN_Dist FLOAT, Dummy BOOLEAN, Cong_Int BOOLEAN);"
     c.execute(query)
-    for n in range(len(session['stops_list'])):
-        query = f"INSERT INTO T_STOPS_INFO (User,Project,Stop_Num,Stop_Name,Stop_Lat,Stop_Long,UP_Dist,DN_Dist,Dummy,Cong_Int) VALUES ('{session['email']}','{session['project']}','{n+1}','{session['stops_list'][n]}','{latitudes[n]}','{longitudes[n]}','{up_distances[n]}','{dn_distances[n]}',{is_dummy[n]},{is_intersection[n]});"
-        c.execute(query)
+    conn.commit()
+
+    # c = conn.cursor()
+    # c.execute(f"DELETE FROM T_STOPS_INFO WHERE Project = '{session['project']}' and User = '{session['email']}';")
+    # conn.commit()
+
+    c = conn.cursor()
+    for n in range(len(stops_list)):
+        c.execute(f"INSERT INTO T_STOPS_INFO (User,Project,Stop_Num,Stop_Name,Stop_Lat,Stop_Long,UP_Dist,DN_Dist,Dummy,Cong_Int) VALUES ('{session['email']}','{session['project']}','{n+1}','{stops_list[n]}','{latitudes[n]}','{longitudes[n]}','{up_distances[n]}','{dn_distances[n]}',{is_dummy[n]},{is_intersection[n]});")
         conn.commit()
+    
     # c.execute(f"DROP TABLE IF EXISTS T_DistanceUP;")
     # query = f"CREATE TABLE T_DistanceUP ({','.join([f'`{n}` FLOAT' for n in session['stops_list']])});"
     # c.execute(query)
@@ -179,8 +186,9 @@ def table_filled():
     # c.execute(f"DROP TABLE IF EXISTS {db_table};")
     query = f"CREATE TABLE IF NOT EXISTS {db_table} (User TEXT,Project TEXT,Period INT,{','.join([f'`Stop {n+1}` FLOAT' for n in range(30)])});"
     c.execute(query)
+    c.execute(f"DELETE FROM {db_table} WHERE Project = '{session['project']}';")
     for p in range(session['periods']):
-        query = f"INSERT INTO {db_table} (User,Project,Period,{','.join([f'`Stop {n+1}`' for n in range(len(stops_list))])}) VALUES ('{session['email']}','{session['project']}','{p+1}',{','.join(['%s' for n in range(len(stops_list))])})"
+        query = f"INSERT INTO {db_table} (User,Project,Period,{','.join([f'`Stop {n+1}`' for n in range(len(stops_list))])}) VALUES ('{session['email']}','{session['project']}','{p+1}',{','.join(['%s' for n in range(len(stops_list))])});"
         print(query)
         row = []
         for s in stops_list:
