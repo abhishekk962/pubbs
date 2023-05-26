@@ -88,6 +88,7 @@
             <option>T_TravelTimeDN_ANN</option>
           </select>
           <button type="submit" value="Submit">Save</button>
+          <button type="submit" formaction="{{url_for('clear_table')}}" value="Clear">Clear</button>
           <button type="submit" formaction="{{url_for('retrieve_data')}}" value="Retrieve">Retrieve</button>
           <!-- <button type="submit" formaction="{{url_for('upload_csv_data')}}" value="Upload">Upload CSV</button> -->
           <button type="submit" formaction="{{url_for('download_csv_data')}}" value="Download" style="width: 10%;">Download CSV</button>

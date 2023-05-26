@@ -196,6 +196,15 @@ def table_filled():
     # return render_template('test.html',stops_list=stops_list)
 
 # new
+@app.route('/clear-table', methods=['GET', 'POST'])
+def clear_table():
+    c = conn.cursor()
+    c.execute(f"SELECT Stop_Name FROM T_STOPS_INFO WHERE User = '{session['email']}' and Project='{session['project']}' ORDER BY Stop_Num")
+    stops_list= c.fetchall()
+    stops_list = tuple(sum(stops_list, ()))
+    return render_template('newtable.html', stops_list=stops_list, periods=session['periods'])
+
+# new
 @app.route('/retrieve-data', methods=['GET', 'POST'])
 def retrieve_data():
     # Retrieve from Database
