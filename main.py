@@ -10,22 +10,14 @@ from io import BytesIO
 import pymysql
 import yaml
 from flask import send_file  
-# from flask_session import Session
-
-
-
-
-
+from flask_session import Session
+ 
 app = Flask(__name__)
-
-# SESSION_TYPE = 'memcached'
-# app.config.from_object(__name__)
-
-# app.config["SESSION_PERMANENT"] = True
+# app.config["SESSION_PERMANENT"] = False
 # app.config["SESSION_TYPE"] = "filesystem"
 # Session(app)
 
-app.secret_key = "os.urandom(24)"
+app.secret_key = os.urandom(24)
 
 
 # Connect to phpMyAdmin Database
@@ -38,6 +30,11 @@ conn = pymysql.connect(host="103.21.58.10",
 
 # Create a User Login and Register Page
 
+def query_db(query):
+    c = conn.cursor()
+    c.execute(query)
+    data = c.fetchall()
+    return data
 
 @app.route('/')
 @app.route('/login', methods =['GET', 'POST'])
@@ -124,24 +121,28 @@ def home():
 @app.route('/input-stops', methods=['GET', 'POST'])
 def input_stops():
     session['periods'] = int(request.form['Number_of_service_periods'])
+    session['project'] = request.form['Bus_route_name']
     return render_template('coord.html', periods=session['periods'])
 
 # new
 @app.route('/save-stops', methods=['GET', 'POST'])
 def save_stops():
     stops = request.form.to_dict()
-    session['stops_list'] = [stops[n] for n in stops if '_Name' in n]
+    stops_list = [stops[n] for n in stops if '_Name' in n]
+    session['stops_list'] = stops_list
     up_distances = [stops[n] for n in stops if '_UP' in n]
     dn_distances = [stops[n] for n in stops if '_DN' in n]
     latitudes = [stops[n] for n in stops if '_lat' in n]
     longitudes = [stops[n] for n in stops if '_lng' in n]
+    is_dummy = [True if f"{n}_Dummy" in stops else False for n in stops_list]
+    is_intersection = [True if f"{n}_Cong" in stops else False for n in stops_list]
 
     # Upload to Database
     c = conn.cursor()
-    query = f"CREATE TABLE IF NOT EXISTS T_STOPS_INFO (User TEXT,Project TEXT,Stop_Num INT,Stop_Name TEXT,Stop_Lat FLOAT,Stop_Long FLOAT, UP_Dist FLOAT, DN_Dist FLOAT);"
+    query = f"CREATE TABLE IF NOT EXISTS T_STOPS_INFO (User TEXT,Project TEXT,Stop_Num INT,Stop_Name TEXT,Stop_Lat FLOAT,Stop_Long FLOAT, UP_Dist FLOAT, DN_Dist FLOAT, Dummy BOOLEAN, Cong_Int BOOLEAN);"
     c.execute(query)
     for n in range(len(session['stops_list'])):
-        query = f"INSERT INTO T_STOPS_INFO (User,Project,Stop_Num,Stop_Name,Stop_Lat,Stop_Long,UP_Dist,DN_Dist) VALUES ('{session['email']}','test','{n+1}','{session['stops_list'][n]}','{latitudes[n]}','{longitudes[n]}','{up_distances[n]}','{dn_distances[n]}');"
+        query = f"INSERT INTO T_STOPS_INFO (User,Project,Stop_Num,Stop_Name,Stop_Lat,Stop_Long,UP_Dist,DN_Dist,Dummy,Cong_Int) VALUES ('{session['email']}','{session['project']}','{n+1}','{session['stops_list'][n]}','{latitudes[n]}','{longitudes[n]}','{up_distances[n]}','{dn_distances[n]}',{is_dummy[n]},{is_intersection[n]});"
         c.execute(query)
         conn.commit()
     # c.execute(f"DROP TABLE IF EXISTS T_DistanceUP;")
@@ -166,7 +167,12 @@ def save_stops():
 def table_filled():
     # Get filled data
     data = request.form.to_dict()
-    stops_list = session['stops_list']
+    c = conn.cursor()
+    c.execute(f"SELECT Stop_Name FROM T_STOPS_INFO WHERE User = '{session['email']}' and Project='{session['project']}' ORDER BY Stop_Num")
+    stops_list= c.fetchall()
+    stops_list = tuple(sum(stops_list, ()))
+    # print(stops_list)
+    # return stops_list
     # Upload to Database
     c = conn.cursor()
     db_table = request.form['db_table']
@@ -174,10 +180,10 @@ def table_filled():
     query = f"CREATE TABLE IF NOT EXISTS {db_table} (User TEXT,Project TEXT,Period INT,{','.join([f'`Stop {n+1}` FLOAT' for n in range(30)])});"
     c.execute(query)
     for p in range(session['periods']):
-        query = f"INSERT INTO {db_table} (User,Project,Period,{','.join([f'`Stop {n+1}`' for n in range(len(stops_list))])}) VALUES ('{session['email']}','test','{p+1}',{','.join(['%s' for n in range(len(stops_list))])})"
+        query = f"INSERT INTO {db_table} (User,Project,Period,{','.join([f'`Stop {n+1}`' for n in range(len(stops_list))])}) VALUES ('{session['email']}','{session['project']}','{p+1}',{','.join(['%s' for n in range(len(stops_list))])})"
         print(query)
         row = []
-        for s in session['stops_list']:
+        for s in stops_list:
             row.append(float(data[f"{s}_{p+1}"]))
             print(row, f"{s}_{p+1}")
         print(query)
@@ -186,7 +192,7 @@ def table_filled():
         row = []
 
     # return data
-    return render_template('newtable.html', stops_list=session['stops_list'], periods=session['periods'])
+    return render_template('newtable.html', stops_list=stops_list, periods=session['periods'])
     # return render_template('test.html',stops_list=stops_list)
 
 # new
@@ -195,26 +201,35 @@ def retrieve_data():
     # Retrieve from Database
     db_table = request.form['db_table']
     c = conn.cursor()
-    c.execute(f"SELECT {','.join([f'`Stop {n+1}`' for n in range(len(session['stops_list']))])} FROM {db_table} WHERE User = '{session['email']}' and Project='Test' ORDER BY Period")
+    c.execute(f"SELECT Stop_Name FROM T_STOPS_INFO WHERE User = '{session['email']}' and Project='{session['project']}' ORDER BY Stop_Num")
+    stops_list= c.fetchall()
+    stops_list = tuple(sum(stops_list, ()))
+    c.execute(f"SELECT {','.join([f'`Stop {n+1}`' for n in range(len(stops_list))])} FROM {db_table} WHERE User = '{session['email']}' and Project='{session['project']}' ORDER BY Period")
     db_data= c.fetchall()
     if len(db_data) != session['periods']:
         return "The specified number of periods don't match the data from the database. Please check and try again."
-    if len(db_data[0]) != len(session['stops_list']):
+    if len(db_data[0]) != len(stops_list):
         return "The specified number of stops don't match the data from the database. Please check and try again."
-    return render_template('newtable.html', stops_list=session['stops_list'], periods=session['periods'], db_data=db_data)
+    return render_template('newtable.html', stops_list=stops_list, periods=session['periods'], db_data=db_data)
     # return render_template('test.html',stops_list=stops_list)
 
 # new
 @app.route('/upload-csv-data', methods=['GET', 'POST'])
 def upload_csv_data():
+    # Get stops list
+    c = conn.cursor()
+    c.execute(f"SELECT Stop_Name FROM T_STOPS_INFO WHERE User = '{session['email']}' and Project='{session['project']}' ORDER BY Stop_Num")
+    stops_list= c.fetchall()
+    stops_list = tuple(sum(stops_list, ()))
+
     csvdata = request.files['csvfile'].read()
     csvdata = pd.read_csv(BytesIO(csvdata))
     csvdata = list(csvdata.itertuples(index=False, name=None))
     if len(csvdata) != session['periods']:
         return "The specified number of periods don't match the csv data uploaded. Please check and try again."
-    if len(csvdata[0]) != len(session['stops_list']):
+    if len(csvdata[0]) != len(stops_list):
         return "The specified number of stops don't match the csv data uploaded. Please check and try again."
-    return render_template('newtable.html', stops_list=session['stops_list'], periods=session['periods'], db_data=csvdata)
+    return render_template('newtable.html', stops_list=stops_list, periods=session['periods'], db_data=csvdata)
 
 # new
 @app.route('/download-csv-data', methods=['GET', 'POST'])
@@ -222,12 +237,18 @@ def download_csv_data():
     # Retrieve from Database
     data = request.form.to_dict()
 
+    # Get stops list
+    c = conn.cursor()
+    c.execute(f"SELECT Stop_Name FROM T_STOPS_INFO WHERE User = '{session['email']}' and Project='{session['project']}' ORDER BY Stop_Num")
+    stops_list= c.fetchall()
+    stops_list = tuple(sum(stops_list, ()))
+
     # Write csv
     csv = ""
-    csv += ','.join(session['stops_list']) + '\n'
+    csv += ','.join(stops_list) + '\n'
     for p in range(session['periods']):
         row = []
-        for s in session['stops_list']:
+        for s in stops_list:
             row.append(float(data[f"{s}_{p+1}"]))
         row = ','.join([str(n) for n in row])
         csv += row + '\n'

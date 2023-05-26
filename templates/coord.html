@@ -65,8 +65,8 @@
   <h1 class="heading"> Plot Bus Stop <span>Locations</span> </h1>  
       <div> 
         <div style="display:flex">
-          <div id="map" style="flex: 70%;"></div>
-          <div style="flex: 30%;" class="container1" style="height: fit-content;">
+          <div id="map" style="flex: 60%;"></div>
+          <div style="flex: 40%;" class="container1" style="height: fit-content;">
             <form action="{{url_for('save_stops')}}" method="post" >
               <table id="markerTable" style="margin-top: 0%; width: 100%;">
                 <thead>
@@ -75,6 +75,8 @@
                     <th>Remove</th>
                     <th>UP Dist</th>
                     <th>DN Dist</th>
+                    <th>Dummy</th>
+                    <th>Cong./Int.</th>
                     <th>Latitude</th>
                     <th>Longitude</th>
                   </tr>
@@ -263,6 +265,28 @@
       distDNInputBox.value = 0;
       distDNCell.appendChild(distDNInputBox);
       markerRow.appendChild(distDNCell);
+
+      var dummyCell = document.createElement('td');
+      dummyCell.style.border = "None";
+      dummyCell.style.background = "White";
+      var dummyInputBox = document.createElement('input');
+      var dummyname = markerName + '_Dummy';
+      dummyInputBox.id = dummyname;
+      dummyInputBox.name = dummyname;
+      dummyInputBox.type = "checkbox";
+      dummyCell.appendChild(dummyInputBox);
+      markerRow.appendChild(dummyCell);
+
+      var cong_int_Cell = document.createElement('td');
+      cong_int_Cell.style.border = "None";
+      cong_int_Cell.style.background = "White";
+      var cong_int_InputBox = document.createElement('input');
+      var cong_int_name = markerName + '_Cong';
+      cong_int_InputBox.id = cong_int_name;
+      cong_int_InputBox.name = cong_int_name;
+      cong_int_InputBox.type = "checkbox";
+      cong_int_Cell.appendChild(cong_int_InputBox);
+      markerRow.appendChild(cong_int_Cell);
 
       var latCell = document.createElement('td');
       latCell.style.border = "None";
