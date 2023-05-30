@@ -1,0 +1,61 @@
+body{
+    margin: 0px;
+    height: 100vh;
+}
+
+header{
+    background: grey;
+    display: flex;
+    height: 5%;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.header-brand{
+    padding-left: 10px;
+}
+
+.header-buttons{
+    padding-right: 10px;
+}
+
+nav{
+    display:flex;
+    height: 5%;
+    background-color: lightslategray;
+    align-items: center;
+}
+
+nav > form{
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+}
+.page-body{
+    display: flex;
+    height: 90%;
+}
+
+.sidebar{
+    background-color: beige;
+    align-items: center;
+    height: 100%;
+    width: 20%;
+}
+
+.content{
+    padding: 20px;
+}
+
+.mapdata{
+    display: flex;
+}
+
+.maptable{
+    width: 50%;
+    display: flex;
+}
+
+td > input{
+    width: 50px;
+}

@@ -1,0 +1,25 @@
+{% extends "dashboard.html" %}
+{% block content %}
+<form id="myform" action="{{url_for('input_stops')}}" method="post">
+  <div>
+    <label for="Bus_route_name">Bus Route Name:</label>
+    <input type="text" id="Bus_route_name" name="Bus_route_name" required/>
+
+    <label for="Terminal_1_origin">Terminal 1(origin): </label>
+    <input type="text" id="Terminal_1_origin" name="Terminal_1_origin" />
+
+    <label for="Terminal_2_destination">Terminal 2(destination): </label>
+    <input type="text" id="Terminal_2_destination" name="Terminal_2_destination" />
+
+    <label for="Bus_service_timings_From">From:</label>
+    <input type="time" id="Bus_service_timings_From" name="Bus_service_timings_From" />
+
+    <label for="Bus_service_timings_To">To:</label>
+    <input type="time" id="Bus_service_timings_To" name="Bus_service_timings_To" />
+
+    <label for="Number_of_service_periods">Number of service periods: </label>
+    <input type="number" id="Number_of_service_periods" name="Number_of_service_periods" min="2" max="30" required/>
+  </div>
+  <button id="myBtn" value="Submit" class="nextBtn" type="submit">Generate</button>
+</form>
+{% endblock %}

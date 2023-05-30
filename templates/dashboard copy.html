@@ -6,7 +6,8 @@
     <title>Test Layout</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-KK94CHFLLe+nY2dmCWGMq91rCGa5gtU4mk92HdvYe+M/SXH301p5ILy+dN9+nJOZ" crossorigin="anonymous">
     <link href='https://unpkg.com/boxicons@2.0.7/css/boxicons.min.css' rel='stylesheet'>
-
+    {% block head %}
+      {% endblock %}
     <style>
         /* Google Fonts Import Link */
     @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
@@ -291,8 +292,8 @@
     <nav class="navbar navbar-expand-lg bg-black p-1 shadow d-flex justify-content-between" style="height: 7vh;">
         <i class='bx bx-menu ms-4' style="font-size:xx-large;"></i>
         <form class="d-flex p-1" role="search">
-            <button class="btn text-bg-dark ms-2 me-2 focus-ring" type="submit">Stop Details</button>
-            <button class="btn text-bg-dark me-2 focus-ring" type="submit">Route Details</button>
+            <button class="btn text-bg-dark ms-2 me-2 focus-ring" type="submit" formaction="{{url_for('home')}}">Route Details</button>
+            <button class="btn text-bg-dark me-2 focus-ring" type="submit" formaction="{{url_for('input_stops')}}">Stop Details</button>
             <button class="btn text-bg-dark me-2 focus-ring" type="submit">Bus Fleet Details</button>
             <button class="btn text-bg-dark me-2 focus-ring" type="submit">Constraints</button>
             <button class="btn text-bg-dark me-2 focus-ring" type="submit">Cost Details</button>
@@ -375,7 +376,8 @@
       </div>
       </div>
       <div style="margin: 20px;">
-        TestTestTestTestTestTestTestTestTestTestTestTestTest
+        {% block content %}
+        {% endblock %}
       </div>
     </div>
     <script>
@@ -397,5 +399,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.7/dist/umd/popper.min.js" integrity="sha384-zYPOMqeu1DAVkHiLqWBUTcbYfZ8osu1Nd6Z89ify25QV9guujx43ITvfi12/QExE" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.min.js" integrity="sha384-Y4oOpwW3duJdCWv5ly8SCFYWqFDsfob/3GkgExXKV4idmbt98QcxXYs9UoXAB7BZ" crossorigin="anonymous"></script>
-</body>
+    {% block foot %}
+    {% endblock %}
+  </body>
 </html>

@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Test Layout</title>
+    <link rel="stylesheet" href="{{url_for('static',filename='main.css')}}">
+    {% block head %}
+    {% endblock %}
+  </head>
+  <body>
+    <header>
+      <div class="header-brand">
+        <b>MOHUA</b>
+        <b>PUBBS</b>
+      </div>
+      <div class="header-buttons">
+        <button type="button">Login</button>
+        <button type="button">Sign Up</button>
+      </div>
+    </header>
+    <nav>
+      <form>
+        <button type="submit" formaction="{{url_for('route_details')}}">Route Details</button>
+        <button type="submit" formaction="{{url_for('stop_details')}}">Stop Details</button>
+        <button type="submit" formaction="{{url_for('table_details')}}">Table Details</button>
+        <button type="submit">Bus Fleet Details</button>
+        <button type="submit">Constraints</button>
+        <button type="submit">Cost Details</button>
+      </form>
+    </nav>
+    <div class="page-body">
+      <div class="sidebar">
+        <ul>
+          <li>Frequency Optimisation
+            <ul>
+              <li>Stop Locations</li>
+              <li>Stop-wise Data</li>
+              <li>Fare</li>
+              <li>Distance</li>
+              <li>Passenger Arrival</li>
+              <li>Alighting Rate</li>
+              <li>Travel Time</li>
+              <li>O-D Data</li>
+              <li>OLS Co-efficients</li>
+              <li>Time Period</li>
+            </ul>
+          </li>
+          <li>Vehicle Scheduling
+            <ul>
+              <li>Vehicle Scheduling</li>
+              <li>Stop-wise Data</li>
+              <li>Distance</li>
+              <li>Alighting Rate</li>
+              <li>O-D Data</li>
+              <li>OLS Co-efficients</li>
+            </ul>
+          </li>
+    
+          <li>Holding Strategy
+            <ul>
+              <li>Holding Strategy</li>
+              <li>Departure Time</li>
+              <li>Stop Arrival Time</li>
+              <li>Travel Time</li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+      <div class="content">
+        {% block content %}
+        {% endblock %}
+      </div>
+    </div>
+    {% block foot %}
+    {% endblock %}
+  </body>
+</html>

@@ -1,0 +1,201 @@
+{% extends "dashboard.html" %}
+{% block head %}
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" />
+  <style>
+    #map {
+      height: 500px;
+      width: 500px;
+      align-self: top;
+      align-items: center;
+      z-index: 0;
+      margin: 0 15px;
+      margin-top: 38px;
+      border-radius: 7px;
+    }
+  </style>
+{% endblock %}
+{% block content %}
+  <div class="mapdata">
+    <div id="map"></div>
+    <div class="maptable">
+      <form action="{{url_for('save_stops')}}" method="post">
+        <table id="markerTable">
+          <thead>
+            <tr>
+              <th>Bus Stops</th>
+              <th>Remove</th>
+              <th>UP Dist</th>
+              <th>DN Dist</th>
+              <th>Dummy</th>
+              <th>Cong./Int.</th>
+              <th>Latitude</th>
+              <th>Longitude</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+        <input type="submit" value="Confirm Stops">
+      </form>
+    </div>
+  </div>
+{% endblock %}
+{% block foot %}
+  <script src="https://cdn.jsdelivr.net/npm/leaflet@1.7.1/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
+  <script>
+    var map = L.map('map').setView([51.505, -0.09], 13);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(map);
+
+    var markersLayer = L.layerGroup().addTo(map);
+    var linesLayer = L.layerGroup().addTo(map);
+
+    var markerCount = 0;
+
+    // Search box
+    var searchControl = L.Control.geocoder({
+      defaultMarkGeocode: false,
+      placeholder: 'Search location...',
+      errorMessage: 'No results found.',
+      showResultIcons: true,
+      collapsed: false,
+    }).on('markgeocode', function (e) {
+      map.setView(e.geocode.center, 13);
+      addMarker(e.geocode.center);
+    }).addTo(map);
+
+    map.on('click', function(e) {
+      var markerName = 'Stop ' + (markerCount + 1);
+
+      var markerRow = document.createElement('tr');
+      markerRow.id = 'markerRow' + markerCount;
+
+      var markerNameCell = document.createElement('td');
+      markerNameCell.style.border = "None";
+      markerNameCell.style.background = "White";
+      var markerInputBox = document.createElement('input');
+      var markerNameName = markerName + '_Name';
+      markerInputBox.id = markerNameName;
+      markerInputBox.name = markerNameName;
+      markerInputBox.value = markerName;
+      markerNameCell.appendChild(markerInputBox);
+      markerRow.appendChild(markerNameCell);
+
+      var actionsCell = document.createElement('td');
+      actionsCell.style.border = "None";
+      actionsCell.style.background = "White";
+      var deleteButton = document.createElement('button');
+      deleteButton.type = 'button';
+      deleteButton.style.width = "50%"
+      deleteButton.style.height = "50%"
+      deleteButton.textContent = 'X';
+      actionsCell.appendChild(deleteButton);
+      markerRow.appendChild(actionsCell);
+
+      var distUPCell = document.createElement('td');
+      distUPCell.style.border = "None";
+      distUPCell.style.background = "White";
+      var distUPInputBox = document.createElement('input');
+      var distUPname = markerName + '_UP';
+      distUPInputBox.id = distUPname;
+      distUPInputBox.name = distUPname;
+      distUPInputBox.value = 0;
+      distUPCell.appendChild(distUPInputBox);
+      markerRow.appendChild(distUPCell);
+      
+      var distDNCell = document.createElement('td');
+      distDNCell.style.border = "None";
+      distDNCell.style.background = "White";
+      var distDNInputBox = document.createElement('input');
+      var distDNname = markerName + '_DN';
+      distDNInputBox.id = distDNname;
+      distDNInputBox.name = distDNname;
+      distDNInputBox.value = 0;
+      distDNCell.appendChild(distDNInputBox);
+      markerRow.appendChild(distDNCell);
+
+      var dummyCell = document.createElement('td');
+      dummyCell.style.border = "None";
+      dummyCell.style.background = "White";
+      var dummyInputBox = document.createElement('input');
+      var dummyname = markerName + '_Dummy';
+      dummyInputBox.id = dummyname;
+      dummyInputBox.name = dummyname;
+      dummyInputBox.type = "checkbox";
+      dummyCell.appendChild(dummyInputBox);
+      markerRow.appendChild(dummyCell);
+
+      var cong_int_Cell = document.createElement('td');
+      cong_int_Cell.style.border = "None";
+      cong_int_Cell.style.background = "White";
+      var cong_int_InputBox = document.createElement('input');
+      var cong_int_name = markerName + '_Cong';
+      cong_int_InputBox.id = cong_int_name;
+      cong_int_InputBox.name = cong_int_name;
+      cong_int_InputBox.type = "checkbox";
+      cong_int_Cell.appendChild(cong_int_InputBox);
+      markerRow.appendChild(cong_int_Cell);
+
+      var latCell = document.createElement('td');
+      latCell.style.border = "None";
+      latCell.style.background = "White";
+      var latInputBox = document.createElement('input');
+      var latname = markerName + '_lat'
+      latInputBox.id = latname;
+      latInputBox.name = latname;
+      latInputBox.value = e.latlng.lat;
+      latInputBox.readonly = true;
+      latCell.appendChild(latInputBox);
+      markerRow.appendChild(latCell);
+
+      var lngCell = document.createElement('td');
+      lngCell.style.border = "None";
+      lngCell.style.background = "White";
+      var lngInputBox = document.createElement('input');
+      var lngname = markerName + '_lng'
+      lngInputBox.id = lngname;
+      lngInputBox.name = lngname;
+      lngInputBox.value = e.latlng.lng;
+      lngInputBox.readonly = true;
+      lngCell.appendChild(lngInputBox);
+      markerRow.appendChild(lngCell);
+
+      var marker = L.marker(e.latlng, { draggable: true }).addTo(markersLayer);
+      marker.bindPopup(markerName);
+
+      marker.on('dragend', function(event) {
+        updateLines();
+      });
+
+      markersLayer.addLayer(marker);
+      updateLines();
+
+      deleteButton.addEventListener('click', function() {
+        markersLayer.removeLayer(marker);
+        markerRow.remove();
+        updateLines();
+      });
+
+      markerCount++;
+
+      document.getElementById('markerTable').getElementsByTagName('tbody')[0].appendChild(markerRow);
+    });
+
+    function updateLines() {
+      linesLayer.clearLayers();
+
+      var markers = markersLayer.getLayers();
+
+      if (markers.length > 1) {
+        var latlngs = markers.map(function(marker) {
+          return marker.getLatLng();
+        });
+
+        var polyline = L.polyline(latlngs, { color: '#3388ff' }).addTo(linesLayer);
+      }
+    }
+  </script>
+{% endblock %}

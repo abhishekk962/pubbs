@@ -1,0 +1,68 @@
+{% extends "dashboard.html" %}
+{% block content %}
+{% if message == "" %}
+    <form action="{{url_for('table_filled')}}" method="POST" enctype="multipart/form-data">
+      <label for="db_table"><b>Select the data you're entering:</b></label>
+        <select id="db_table" name="db_table">
+          <option>T_Passenger_Arrival_UP</option>
+          <option>T_Passenger_Arrival_DN</option>
+          <option>T_Fare_UP</option>
+          <option>T_Fare_DN</option>
+          <option>T_Alighting_Rate_UP</option>
+          <option>T_Alighting_Rate_DN</option>
+          <option>T_TraveTimeUP_ANN</option>
+          <option>T_TravelTimeDN_ANN</option>
+        </select>
+      {% if not db_data %}
+        <table>
+          <thead>
+            <tr>
+              <th>Periods</th>
+              {%for n in stops_list%}
+              <th>{{n}}</th>
+              {%endfor%}
+            </tr>
+          </thead>
+            {% for i in range(periods) %}
+            <tr>
+              <td>{{i+1}}</td>
+              {%for n in stops_list%}
+              <td><input type="number" name="{{n}}{{'_'}}{{i+1}}" value="0"/></td>
+              {% endfor %}
+            </tr>
+            {% endfor %}
+        </table>
+      {% endif %}
+      {% if db_data %}
+        <table>
+          <thead>
+            <tr>
+              <th>Periods</th>
+              {%for n in stops_list%}
+              <th>{{n}}</th>
+              {%endfor%}
+            </tr>
+          </thead>
+            {% for i in range(periods) %}
+            <tr>
+              <td>{{i+1}}</td>
+              {%for n in stops_list%}
+              <td><input type="number" name="{{n}}{{'_'}}{{i+1}}" value="{{db_data[i][stops_list.index(n)]}}"/></td>
+              {% endfor %}
+            </tr>
+            {% endfor %}
+        </table>
+      {% endif %}
+          <button type="submit" value="Submit">Save</button>
+          <button type="submit" formaction="{{url_for('clear_table')}}" value="Clear">Clear</button>
+          <button type="submit" formaction="{{url_for('retrieve_data')}}" value="Retrieve">Retrieve</button>
+          <button type="submit" formaction="{{url_for('download_csv_data')}}" value="Download" >Download CSV</button>
+          <input type="file" id="csvfile" name="csvfile">
+          <button type="submit" formaction="{{url_for('upload_csv_data')}}" value="Upload">Upload CSV</button>
+    </form>
+{% endif%}
+{% if message != "" %}
+{{message}}
+{% endif%}
+{% endblock %}
+
