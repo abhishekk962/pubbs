@@ -1,33 +1,36 @@
 {% extends "dashboard.html" %}
 {% block content %}
-{% if message == "" %}
-    <form action="{{url_for('table_filled')}}" method="POST" enctype="multipart/form-data">
+{% if not message %}
+    <form action="{{url_for('table_selected')}}" method="POST">
       <label for="db_table"><b>Select the data you're entering:</b></label>
-        <select id="db_table" name="db_table">
-          <option>T_Passenger_Arrival_UP</option>
-          <option>T_Passenger_Arrival_DN</option>
-          <option>T_Fare_UP</option>
-          <option>T_Fare_DN</option>
-          <option>T_Alighting_Rate_UP</option>
-          <option>T_Alighting_Rate_DN</option>
-          <option>T_TraveTimeUP_ANN</option>
-          <option>T_TravelTimeDN_ANN</option>
-        </select>
+      <select id="db_table" name="db_table">
+        <option>T_Passenger_Arrival_UP</option>
+        <option>T_Passenger_Arrival_DN</option>
+        <option>T_Fare_UP</option>
+        <option>T_Fare_DN</option>
+        <option>T_Alighting_Rate_UP</option>
+        <option>T_Alighting_Rate_DN</option>
+        <option>T_TraveTimeUP_ANN</option>
+        <option>T_TravelTimeDN_ANN</option>
+      </select>
+      <button type="submit" value="submit">Submit</button>
+    </form>
+    <form action="{{url_for('table_filled')}}" method="POST" enctype="multipart/form-data">
       {% if not db_data %}
         <table>
           <thead>
             <tr>
-              <th>Periods</th>
+              <th> </th>
               {%for n in stops_list%}
               <th>{{n}}</th>
               {%endfor%}
             </tr>
           </thead>
-            {% for i in range(periods) %}
+            {% for i in rows %}
             <tr>
-              <td>{{i+1}}</td>
+              <td>{{i}}</td>
               {%for n in stops_list%}
-              <td><input type="number" name="{{n}}{{'_'}}{{i+1}}" value="0"/></td>
+              <td><input type="number" name="{{n}}{{'_'}}{{i}}" value="0"/></td>
               {% endfor %}
             </tr>
             {% endfor %}
@@ -37,22 +40,23 @@
         <table>
           <thead>
             <tr>
-              <th>Periods</th>
+              <th> </th>
               {%for n in stops_list%}
               <th>{{n}}</th>
               {%endfor%}
             </tr>
           </thead>
-            {% for i in range(periods) %}
+            {% for i in rows %}
             <tr>
-              <td>{{i+1}}</td>
+              <td>{{i}}</td>
               {%for n in stops_list%}
-              <td><input type="number" name="{{n}}{{'_'}}{{i+1}}" value="{{db_data[i][stops_list.index(n)]}}"/></td>
+              <td><input type="number" name="{{n}}{{'_'}}{{i}}" value="{{db_data[i][stops_list.index(n)]}}"/></td>
               {% endfor %}
             </tr>
             {% endfor %}
         </table>
       {% endif %}
+          <input id="selected_table" name="selected_table" value="{{selected_table}}" >
           <button type="submit" value="Submit">Save</button>
           <button type="submit" formaction="{{url_for('clear_table')}}" value="Clear">Clear</button>
           <button type="submit" formaction="{{url_for('retrieve_data')}}" value="Retrieve">Retrieve</button>
@@ -61,7 +65,7 @@
           <button type="submit" formaction="{{url_for('upload_csv_data')}}" value="Upload">Upload CSV</button>
     </form>
 {% endif%}
-{% if message != "" %}
+{% if message %}
 {{message}}
 {% endif%}
 {% endblock %}

@@ -127,23 +127,23 @@ def table_details():
     stops_list= c.fetchall()
     stops_list = tuple(sum(stops_list, ()))
     if stops_list and 'periods' in session:
-        message=""
-        return render_template('only_table.html', stops_list=stops_list, periods=session['periods'], message=message)
+        message=None
+        return render_template('only_table.html', stops_list=stops_list, rows=list(range(1,session['periods']+1)), message=message)
     elif stops_list:
         message = "Enter Route Information First"
-        return render_template('only_table.html', stops_list=stops_list, periods=0, message=message)
+        return render_template('only_table.html', stops_list=stops_list, rows=0, message=message)
     elif 'periods' in session:
         message = "Enter Stops Information First"
-        return render_template('only_table.html', stops_list=stops_list, periods=session['periods'], message=message)
+        return render_template('only_table.html', stops_list=stops_list, rows=list(range(1,session['periods']+1)), message=message)
     else:
         message = "Enter Route and Stops Information First"
-        return render_template('only_table.html', stops_list=[], periods=0, message=message)
-# new
+        return render_template('only_table.html', stops_list=[], rows=0, message=message)
+
 @app.route('/input-stops', methods=['GET', 'POST'])
 def input_stops():
     if 'periods' not in session:
         session['periods'] = int(request.form['Number_of_service_periods'])
-    return render_template('only_stops.html', periods=session['periods'])
+    return render_template('only_stops.html')
 
 # new
 @app.route('/save-stops', methods=['POST'])
@@ -176,9 +176,21 @@ def save_stops():
     c = conn.cursor()
     c.execute(f"DELETE FROM T_STOPS_INFO WHERE Project = '{session['project']}' and User = '{session['email']}' and uid != '{uid}';")
     conn.commit()
-    return render_template('only_table.html', stops_list=session['stops_list'], periods=session['periods'])
+    return render_template('only_table.html', stops_list=session['stops_list'], rows=list(range(1,session['periods']+1)))
 
-# new
+@app.route('/table-selected', methods=['GET', 'POST'])
+def table_selected():
+    c = conn.cursor()
+    c.execute(f"SELECT Stop_Name FROM T_STOPS_INFO WHERE User = '{session['email']}' and Project='{session['project']}' ORDER BY Stop_Num")
+    stops_list= c.fetchall()
+    stops_list = tuple(sum(stops_list, ()))
+    table = request.form.get("db_table")
+    if table in ["T_Passenger_Arrival_UP", "T_Passenger_Arrival_DN", "T_Alighting_Rate_UP", "T_Alighting_Rate_DN"]:
+        return render_template('only_table.html', stops_list=stops_list, rows=list(range(1,session['periods']+1)), selected_table=table)
+    elif table in ["T_Fare_DN","T_Fare_UP","T_TravelTimeDN_ANN","T_TraveTimeUP_ANN"]:
+        return render_template('only_table.html', stops_list=stops_list, rows=stops_list, selected_table=table)
+
+
 @app.route('/table-filled', methods=['GET', 'POST'])
 def table_filled():
     # Get filled data
@@ -189,7 +201,7 @@ def table_filled():
     stops_list = tuple(sum(stops_list, ()))
     # Upload to Database
     c = conn.cursor()
-    db_table = request.form['db_table']
+    db_table = request.form['selected_table']
     query = f"CREATE TABLE IF NOT EXISTS {db_table} (User TEXT,Project TEXT,Period INT,{','.join([f'`Stop {n+1}` FLOAT' for n in range(30)])});"
     c.execute(query)
     c.execute(f"DELETE FROM {db_table} WHERE Project = '{session['project']}' and User = '{session['email']}';")
@@ -205,7 +217,7 @@ def table_filled():
         conn.commit()
         row = []
 
-    return render_template('only_table.html', stops_list=stops_list, periods=session['periods'])
+    return render_template('only_table.html', stops_list=stops_list, rows=list(range(1,session['periods']+1)))
 
 # new
 @app.route('/clear-table', methods=['GET', 'POST'])
@@ -214,7 +226,7 @@ def clear_table():
     c.execute(f"SELECT Stop_Name FROM T_STOPS_INFO WHERE User = '{session['email']}' and Project='{session['project']}' ORDER BY Stop_Num")
     stops_list= c.fetchall()
     stops_list = tuple(sum(stops_list, ()))
-    return render_template('only_table.html', stops_list=stops_list, periods=session['periods'])
+    return render_template('only_table.html', stops_list=stops_list, rows=list(range(1,session['periods']+1)))
 
 # new
 @app.route('/retrieve-data', methods=['GET', 'POST'])
@@ -231,7 +243,7 @@ def retrieve_data():
         return "The specified number of periods don't match the data from the database. Please check and try again."
     if len(db_data[0]) != len(stops_list):
         return "The specified number of stops don't match the data from the database. Please check and try again."
-    return render_template('only_table.html', stops_list=stops_list, periods=session['periods'], db_data=db_data)
+    return render_template('only_table.html', stops_list=stops_list, rows=list(range(1,session['periods']+1)), db_data=db_data)
 
 # new
 @app.route('/upload-csv-data', methods=['GET', 'POST'])
@@ -249,7 +261,7 @@ def upload_csv_data():
         return "The specified number of periods don't match the csv data uploaded. Please check and try again."
     if len(csvdata[0]) != len(stops_list):
         return "The specified number of stops don't match the csv data uploaded. Please check and try again."
-    return render_template('only_table.html', stops_list=stops_list, periods=session['periods'], db_data=csvdata)
+    return render_template('only_table.html', stops_list=stops_list, rows=list(range(1,session['periods']+1)), db_data=csvdata)
 
 # new
 @app.route('/download-csv-data', methods=['GET', 'POST'])
