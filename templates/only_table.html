@@ -56,7 +56,7 @@
             {% endfor %}
         </table>
       {% endif %}
-          <input id="selected_table" name="selected_table" value="{{selected_table}}" >
+          <input id="selected_table" name="selected_table" value="{{selected_table}}" hidden>
           <button type="submit" value="Submit">Save</button>
           <button type="submit" formaction="{{url_for('clear_table')}}" value="Clear">Clear</button>
           <button type="submit" formaction="{{url_for('retrieve_data')}}" value="Retrieve">Retrieve</button>

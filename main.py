@@ -202,16 +202,23 @@ def table_filled():
     # Upload to Database
     c = conn.cursor()
     db_table = request.form['selected_table']
-    query = f"CREATE TABLE IF NOT EXISTS {db_table} (User TEXT,Project TEXT,Period INT,{','.join([f'`Stop {n+1}` FLOAT' for n in range(30)])});"
+    c.execute(f"DROP TABLE IF EXISTS {db_table}")
+    query = f"CREATE TABLE IF NOT EXISTS {db_table} (User TEXT,Project TEXT,Rows TEXT,{','.join([f'`Stop {n+1}` FLOAT' for n in range(30)])});"
     c.execute(query)
     c.execute(f"DELETE FROM {db_table} WHERE Project = '{session['project']}' and User = '{session['email']}';")
-    for p in range(session['periods']):
-        query = f"INSERT INTO {db_table} (User,Project,Period,{','.join([f'`Stop {n+1}`' for n in range(len(stops_list))])}) VALUES ('{session['email']}','{session['project']}','{p+1}',{','.join(['%s' for n in range(len(stops_list))])});"
+    
+    if db_table in ["T_Passenger_Arrival_UP", "T_Passenger_Arrival_DN", "T_Alighting_Rate_UP", "T_Alighting_Rate_DN"]:
+        rows=list(range(1,session['periods']+1))
+    elif db_table in ["T_Fare_DN","T_Fare_UP","T_TravelTimeDN_ANN","T_TraveTimeUP_ANN"]:
+        rows=stops_list
+    
+    for p in rows:
+        query = f"INSERT INTO {db_table} (User,Project,Rows,{','.join([f'`Stop {n+1}`' for n in range(len(stops_list))])}) VALUES ('{session['email']}','{session['project']}','{p}',{','.join(['%s' for n in range(len(stops_list))])});"
         print(query)
         row = []
         for s in stops_list:
-            row.append(float(data[f"{s}_{p+1}"]))
-            print(row, f"{s}_{p+1}")
+            row.append(float(data[f"{s}_{p}"]))
+            print(row, f"{s}_{p}")
         print(query)
         c.execute(query, tuple(row))
         conn.commit()
