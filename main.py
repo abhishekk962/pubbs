@@ -11,6 +11,8 @@ import pymysql
 import yaml
 from flask import send_file  
 from flask_session import Session
+import time
+import secrets
  
 app = Flask(__name__)
 # app.config["SESSION_PERMANENT"] = False
@@ -125,8 +127,12 @@ def input_stops():
     return render_template('coord.html', periods=session['periods'])
 
 # new
-@app.route('/save-stops', methods=['GET', 'POST'])
+@app.route('/save-stops', methods=['POST'])
 def save_stops():
+    # A unique id for the current user and the current project
+    uid = secrets.token_hex(12)
+    
+    # Form data
     stops = request.form.to_dict()
     stops_list = [stops[n] for n in stops if '_Name' in n]
     session['stops_list'] = stops_list
@@ -137,21 +143,20 @@ def save_stops():
     is_dummy = [True if f"{n}_Dummy" in stops else False for n in stops_list]
     is_intersection = [True if f"{n}_Cong" in stops else False for n in stops_list]
 
-    # Upload to Database
-    c = conn.cursor()
-    query = f"CREATE TABLE IF NOT EXISTS T_STOPS_INFO (User TEXT,Project TEXT,Stop_Num INT,Stop_Name TEXT,Stop_Lat FLOAT,Stop_Long FLOAT, UP_Dist FLOAT, DN_Dist FLOAT, Dummy BOOLEAN, Cong_Int BOOLEAN);"
-    c.execute(query)
-    conn.commit()
-
+    # # Upload to Database
     # c = conn.cursor()
-    # c.execute(f"DELETE FROM T_STOPS_INFO WHERE Project = '{session['project']}' and User = '{session['email']}';")
+    # query = f"CREATE TABLE IF NOT EXISTS T_STOPS_INFO (uid VARCHAR(50),User TEXT,Project TEXT,Stop_Num INT,Stop_Name TEXT,Stop_Lat FLOAT,Stop_Long FLOAT, UP_Dist FLOAT, DN_Dist FLOAT, Dummy BOOLEAN, Cong_Int BOOLEAN);"
+    # c.execute(query)
     # conn.commit()
 
     c = conn.cursor()
     for n in range(len(stops_list)):
-        c.execute(f"INSERT INTO T_STOPS_INFO (User,Project,Stop_Num,Stop_Name,Stop_Lat,Stop_Long,UP_Dist,DN_Dist,Dummy,Cong_Int) VALUES ('{session['email']}','{session['project']}','{n+1}','{stops_list[n]}','{latitudes[n]}','{longitudes[n]}','{up_distances[n]}','{dn_distances[n]}',{is_dummy[n]},{is_intersection[n]});")
+        c.execute(f"INSERT INTO T_STOPS_INFO (uid,User,Project,Stop_Num,Stop_Name,Stop_Lat,Stop_Long,UP_Dist,DN_Dist,Dummy,Cong_Int) VALUES ('{uid}','{session['email']}','{session['project']}','{n+1}','{stops_list[n]}','{latitudes[n]}','{longitudes[n]}','{up_distances[n]}','{dn_distances[n]}',{is_dummy[n]},{is_intersection[n]});")
         conn.commit()
-    
+
+    c = conn.cursor()
+    c.execute(f"DELETE FROM T_STOPS_INFO WHERE Project = '{session['project']}' and User = '{session['email']}' and uid != '{uid}';")
+    conn.commit()
     # c.execute(f"DROP TABLE IF EXISTS T_DistanceUP;")
     # query = f"CREATE TABLE T_DistanceUP ({','.join([f'`{n}` FLOAT' for n in session['stops_list']])});"
     # c.execute(query)
@@ -186,7 +191,7 @@ def table_filled():
     # c.execute(f"DROP TABLE IF EXISTS {db_table};")
     query = f"CREATE TABLE IF NOT EXISTS {db_table} (User TEXT,Project TEXT,Period INT,{','.join([f'`Stop {n+1}` FLOAT' for n in range(30)])});"
     c.execute(query)
-    c.execute(f"DELETE FROM {db_table} WHERE Project = '{session['project']}';")
+    c.execute(f"DELETE FROM {db_table} WHERE Project = '{session['project']}' and User = '{session['email']}';")
     for p in range(session['periods']):
         query = f"INSERT INTO {db_table} (User,Project,Period,{','.join([f'`Stop {n+1}`' for n in range(len(stops_list))])}) VALUES ('{session['email']}','{session['project']}','{p+1}',{','.join(['%s' for n in range(len(stops_list))])});"
         print(query)
