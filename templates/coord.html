@@ -1,4 +1,3 @@
-<!-- HTML code for navbar -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -14,7 +13,9 @@
 
     <!-- iconscout cdn link -->
     <link rel="stylesheet" href="https://unicons.iconscout.com/release/v4.0.0/css/line.css">
-    <title>Interactive Map</title>
+
+    <!-- custom css file link  -->
+    <link rel="stylesheet" href="{{url_for('static',filename='style.css')}}">
 
     <link rel="stylesheet" href="{{url_for('static',filename='table.css')}}">
     <!-- for map -->
@@ -34,6 +35,8 @@
     </style>
 </head>
 <body>
+
+<!-- header section starts  -->
 
   <header class="header">
 
@@ -58,9 +61,13 @@
 </header>
   <section class="home" id="home" style="display: flexbox;">
     <nav class="topnav">
-        <a href="/">HOME</a>
+      <a href="/logout">Logout</a>
       </nav>
   </section>
+
+<!-- home section ends -->
+
+<!-- products section starts  -->
 
 <section class="products" id="products">
   <h1 class="heading"> Plot Bus Stop <span>Locations</span> </h1>  

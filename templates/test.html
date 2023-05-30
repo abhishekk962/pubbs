@@ -21,7 +21,7 @@
       top: 0;
       left: 0;
       height: 100%;
-      width: 260px;
+      width: 300px;
       background: #000000;
       z-index: 100;
       transition: all 0.5s ease;
@@ -272,7 +272,7 @@
       </style>
 </head>
   <body class="text-bg-dark">
-    <header class="p-2 bg-gradient" style="background-color: #560098;">
+    <header class="p-2 bg-gradient" style="background-color: #560098; height: 8vh;">
         <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start">
             <a class="navbar-brand ms-2 me-2 fw-semibold" href="#"><b>MOHUA</b></a>
             <a href="https://mohua.gov.in/" target="_blank" class="logo"><img src="C:\Users\abhis\OneDrive\Desktop\Scripts\busproject\pubbs\pubbs\static\images\gov_logo_wt.png" class="navbar-brand ms-2" height="40"></a>
@@ -288,7 +288,7 @@
             </div>
         </div>
     </header>
-    <nav class="navbar navbar-expand-lg bg-black p-1 shadow d-flex justify-content-between">
+    <nav class="navbar navbar-expand-lg bg-black p-1 shadow d-flex justify-content-between" style="height: 7vh;">
         <i class='bx bx-menu ms-4' style="font-size:xx-large;"></i>
         <form class="d-flex p-1" role="search">
             <button class="btn text-bg-dark ms-2 me-2 focus-ring" type="submit">Stop Details</button>
@@ -298,78 +298,85 @@
             <button class="btn text-bg-dark me-2 focus-ring" type="submit">Cost Details</button>
         </form>
     </nav>
-    <div class="sidebar close" style="top:100px;">
-        <ul class="nav-links">
-          <li>
-            <div class="iocn-link">
-              <a href="#">
-                <i class='bx bx-collection' ></i>
-                <span class="link_name">Frequency Optimisation</span>
-              </a>
-              <i class='bx bxs-chevron-down arrow' ></i>
-            </div>
-            <ul class="sub-menu">
-              <li><a class="link_name" href="#">Frequency Optimisation</a></li>
-              <li><a href="#">Stop Locations</a></li>
-              <li><a href="#">Stop-wise Data</a></li>
-              <li><a href="#">Fare</a></li>
-              <li><a href="#">Distance</a></li>
-              <li><a href="#">Passenger Arrival</a></li>
-              <li><a href="#">Alighting Rate</a></li>
-              <li><a href="#">Travel Time</a></li>
-              <li><a href="#">O-D Data</a></li>
-              <li><a href="#">OLS Co-efficients</a></li>
-              <li><a href="#">Time Period</a></li>
-            </ul>
-          </li>
-          <li>
-            <div class="iocn-link">
-              <a href="#">
-                <i class='bx bx-book-alt' ></i>
-                <span class="link_name">Vehicle Scheduling</span>
-              </a>
-              <i class='bx bxs-chevron-down arrow' ></i>
-            </div>
-            <ul class="sub-menu">
-              <li><a class="link_name" href="#">Vehicle Scheduling</a></li>
-              <li><a href="#">Stop-wise Data</a></li>
-              <li><a href="#">Distance</a></li>
-              <li><a href="#">Alighting Rate</a></li>
-              <li><a href="#">O-D Data</a></li>
-              <li><a href="#">OLS Co-efficients</a></li>
-            </ul>
-          </li>
-    
-          <li>
-            <div class="iocn-link">
-              <a href="#">
-                <i class='bx bx-plug' ></i>
-                <span class="link_name">Holding Strategy</span>
-              </a>
-              <i class='bx bxs-chevron-down arrow' ></i>
-            </div>
-            <ul class="sub-menu">
-              <li><a class="link_name" href="#">Holding Strategy</a></li>
-              <li><a href="#">Departure Time</a></li>
-              <li><a href="#">Stop Arrival Time</a></li>
-              <li><a href="#">Travel Time</a></li>
-            </ul>
-          </li>
-    
-    
-          <li>
-        <div class="profile-details">
-          <div class="profile-content">
-            <img src="image/profile.jpg" alt="profileImg">
-          </div>
-          <div class="name-job">
-            <div class="profile_name">Username</div>
-            <div class="job">PUBBS Operator</div>
-          </div>
-          <i class='bx bx-log-out' ></i>
-        </div>
+    <div style="display: flex;">
+      <div style="background-color: #4e005e; width: 300px; height: 85vh ;overflow:hidden">
+        <div class="sidebar close" style="top:100px;">
+          <ul class="nav-links">
+            <li>
+              <div class="iocn-link">
+                <a href="#">
+                  <i class='bx bx-collection' ></i>
+                  <span class="link_name">Frequency Optimisation</span>
+                </a>
+                <i class='bx bxs-chevron-down arrow' ></i>
+              </div>
+              <ul class="sub-menu">
+                <li><a class="link_name" href="#">Frequency Optimisation</a></li>
+                <li><a href="#">Stop Locations</a></li>
+                <li><a href="#">Stop-wise Data</a></li>
+                <li><a href="#">Fare</a></li>
+                <li><a href="#">Distance</a></li>
+                <li><a href="#">Passenger Arrival</a></li>
+                <li><a href="#">Alighting Rate</a></li>
+                <li><a href="#">Travel Time</a></li>
+                <li><a href="#">O-D Data</a></li>
+                <li><a href="#">OLS Co-efficients</a></li>
+                <li><a href="#">Time Period</a></li>
+              </ul>
             </li>
-    </ul>
+            <li>
+              <div class="iocn-link">
+                <a href="#">
+                  <i class='bx bx-book-alt' ></i>
+                  <span class="link_name">Vehicle Scheduling</span>
+                </a>
+                <i class='bx bxs-chevron-down arrow' ></i>
+              </div>
+              <ul class="sub-menu">
+                <li><a class="link_name" href="#">Vehicle Scheduling</a></li>
+                <li><a href="#">Stop-wise Data</a></li>
+                <li><a href="#">Distance</a></li>
+                <li><a href="#">Alighting Rate</a></li>
+                <li><a href="#">O-D Data</a></li>
+                <li><a href="#">OLS Co-efficients</a></li>
+              </ul>
+            </li>
+      
+            <li>
+              <div class="iocn-link">
+                <a href="#">
+                  <i class='bx bx-plug' ></i>
+                  <span class="link_name">Holding Strategy</span>
+                </a>
+                <i class='bx bxs-chevron-down arrow' ></i>
+              </div>
+              <ul class="sub-menu">
+                <li><a class="link_name" href="#">Holding Strategy</a></li>
+                <li><a href="#">Departure Time</a></li>
+                <li><a href="#">Stop Arrival Time</a></li>
+                <li><a href="#">Travel Time</a></li>
+              </ul>
+            </li>
+      
+      
+            <li>
+          <div class="profile-details">
+            <div class="profile-content">
+              <img src="image/profile.jpg" alt="profileImg">
+            </div>
+            <div class="name-job">
+              <div class="profile_name">Username</div>
+              <div class="job">PUBBS Operator</div>
+            </div>
+            <i class='bx bx-log-out' ></i>
+          </div>
+              </li>
+      </ul>
+      </div>
+      </div>
+      <div style="margin: 20px;">
+        TestTestTestTestTestTestTestTestTestTestTestTestTest
+      </div>
     </div>
     <script>
         let arrow = document.querySelectorAll(".arrow");
