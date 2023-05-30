@@ -123,6 +123,7 @@ def stop_details():
 @app.route('/table', methods=['GET', 'POST'])
 def table_details():
     c = conn.cursor()
+    c.execute(f"CREATE TABLE IF NOT EXISTS T_STOPS_INFO (uid VARCHAR(50),User TEXT,Project TEXT,Stop_Num INT,Stop_Name TEXT,Stop_Lat FLOAT,Stop_Long FLOAT, UP_Dist FLOAT, DN_Dist FLOAT, Dummy BOOLEAN, Cong_Int BOOLEAN);")
     c.execute(f"SELECT Stop_Name FROM T_STOPS_INFO WHERE User = '{session['email']}' and Project='{session['project']}' ORDER BY Stop_Num")
     stops_list= c.fetchall()
     stops_list = tuple(sum(stops_list, ()))
@@ -162,11 +163,11 @@ def save_stops():
     is_dummy = [True if f"{n}_Dummy" in stops else False for n in stops_list]
     is_intersection = [True if f"{n}_Cong" in stops else False for n in stops_list]
 
-    # # Upload to Database
-    # c = conn.cursor()
-    # query = f"CREATE TABLE IF NOT EXISTS T_STOPS_INFO (uid VARCHAR(50),User TEXT,Project TEXT,Stop_Num INT,Stop_Name TEXT,Stop_Lat FLOAT,Stop_Long FLOAT, UP_Dist FLOAT, DN_Dist FLOAT, Dummy BOOLEAN, Cong_Int BOOLEAN);"
-    # c.execute(query)
-    # conn.commit()
+    # Upload to Database
+    c = conn.cursor()
+    query = f"CREATE TABLE IF NOT EXISTS T_STOPS_INFO (uid VARCHAR(50),User TEXT,Project TEXT,Stop_Num INT,Stop_Name TEXT,Stop_Lat FLOAT,Stop_Long FLOAT, UP_Dist FLOAT, DN_Dist FLOAT, Dummy BOOLEAN, Cong_Int BOOLEAN);"
+    c.execute(query)
+    conn.commit()
 
     c = conn.cursor()
     for n in range(len(stops_list)):
