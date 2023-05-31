@@ -44,7 +44,7 @@ nav > form{
 }
 
 .content{
-    padding: 20px;
+    margin: auto auto;
 }
 
 .mapdata{
@@ -58,4 +58,8 @@ nav > form{
 
 td > input{
     width: 50px;
+}
+
+form > div{
+    display: grid;
 }
