@@ -1,7 +1,7 @@
 import csv
 import pandas as pd
 import numpy as np
-from flask import Flask, render_template, make_response,request, Response, session, redirect
+from flask import Flask, render_template, make_response,request, Response, session, redirect, jsonify
 import os
 import re
 import datetime
@@ -116,6 +116,25 @@ def stop_details():
 @app.route('/ols', methods=['GET', 'POST'])
 def ols_details():
     return render_template('only_ols.html', message="")
+
+@app.route('/points', methods=['GET', 'POST'])
+def point_details():
+    return render_template('only_points.html', message="")
+
+@app.route('/data')
+def get_data():
+    c = conn.cursor()
+    c.execute(f"SELECT Stop_Name,Stop_Lat,Stop_Long FROM T_STOPS_INFO WHERE Operator = '{session['email']}'")
+    stops_list= c.fetchall()
+    data = []
+    for n in stops_list:
+        data.append({"name": n[0], "lat": n[1], "lng": n[2]})
+    # data = [
+    #     {"name": "Point 1", "lat": 51.505, "lng": -0.09},
+    #     {"name": "Point 2", "lat": 51.51, "lng": -0.1},
+    #     {"name": "Point 3", "lat": 51.505, "lng": -0.11}
+    # ]
+    return jsonify(data)
 
 @app.route('/table', methods=['GET', 'POST'])
 def table_details():
