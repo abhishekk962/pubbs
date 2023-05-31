@@ -55,6 +55,20 @@
 
     var markerCount = 0;
 
+    // Fetch data from Flask endpoint
+    fetch('/data')
+      .then(response => response.json())
+      .then(data => {
+        // Loop through the data and add markers
+        data.forEach(point => {
+          var marker = L.marker([point.lat, point.lng]).addTo(markersLayer);
+          marker.bindPopup(point.name);
+        });
+      })
+      .catch(error => {
+        console.error('Error:', error);
+      });
+
     // Search box
     var searchControl = L.Control.geocoder({
       defaultMarkGeocode: false,
@@ -194,7 +208,7 @@
           return marker.getLatLng();
         });
 
-        var polyline = L.polyline(latlngs, { color: '#3388ff' }).addTo(linesLayer);
+        // var polyline = L.polyline(latlngs, { color: '#3388ff' }).addTo(linesLayer);
       }
     }
   </script>

@@ -63,6 +63,16 @@
         data.forEach(point => {
           var marker = L.marker([point.lat, point.lng]).addTo(markersLayer);
           marker.bindPopup(point.name);
+
+          // Add click event handler to each marker
+          marker.on('click', function(event) {
+            // Add clicked marker to the markers layer
+            markersLayer.addLayer(marker);
+            // Update the table with the clicked marker
+            updateTable(marker);
+            // Update the lines
+            updateLines();
+          });
         });
       })
       .catch(error => {
@@ -81,8 +91,8 @@
       addMarker(e.geocode.center);
     }).addTo(map);
 
-    map.on('click', function(e) {
-      var markerName = 'Stop ' + (markerCount + 1);
+    function updateTable(marker) {
+      var markerName = marker.getPopup().getContent();
 
       var markerRow = document.createElement('tr');
       markerRow.id = 'markerRow' + markerCount;
@@ -160,7 +170,7 @@
       var latname = markerName + '_lat'
       latInputBox.id = latname;
       latInputBox.name = latname;
-      latInputBox.value = e.latlng.lat;
+      latInputBox.value = marker.getLatLng().lat;
       latInputBox.readonly = true;
       latCell.appendChild(latInputBox);
       markerRow.appendChild(latCell);
@@ -172,20 +182,20 @@
       var lngname = markerName + '_lng'
       lngInputBox.id = lngname;
       lngInputBox.name = lngname;
-      lngInputBox.value = e.latlng.lng;
+      lngInputBox.value = marker.getLatLng().lng;
       lngInputBox.readonly = true;
       lngCell.appendChild(lngInputBox);
       markerRow.appendChild(lngCell);
 
-      var marker = L.marker(e.latlng, { draggable: true }).addTo(markersLayer);
-      marker.bindPopup(markerName);
+      // var marker = L.marker(e.latlng, { draggable: true }).addTo(markersLayer);
+      // marker.bindPopup(markerName);
 
-      marker.on('dragend', function(event) {
-        updateLines();
-      });
+      // marker.on('dragend', function(event) {
+      //   updateLines();
+      // });
 
-      markersLayer.addLayer(marker);
-      updateLines();
+      // markersLayer.addLayer(marker);
+      // updateLines();
 
       deleteButton.addEventListener('click', function() {
         markersLayer.removeLayer(marker);
@@ -193,23 +203,23 @@
         updateLines();
       });
 
-      markerCount++;
+      // markerCount++;
 
       document.getElementById('markerTable').getElementsByTagName('tbody')[0].appendChild(markerRow);
-    });
+    };
 
-    // function updateLines() {
-    //   linesLayer.clearLayers();
+    function updateLines() {
+      linesLayer.clearLayers();
 
-    //   var markers = markersLayer.getLayers();
+      var markers = markersLayer.getLayers();
 
-    //   if (markers.length > 1) {
-    //     var latlngs = markers.map(function(marker) {
-    //       return marker.getLatLng();
-    //     });
+      if (markers.length > 1) {
+        var latlngs = markers.map(function(marker) {
+          return marker.getLatLng();
+        });
 
-    //     var polyline = L.polyline(latlngs, { color: '#3388ff' }).addTo(linesLayer);
-    //   }
-    // }
+        var polyline = L.polyline(latlngs, { color: '#3388ff' }).addTo(linesLayer);
+      }
+    }
   </script>
 {% endblock %}

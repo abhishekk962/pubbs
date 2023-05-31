@@ -34,7 +34,7 @@ conn = pymysql.connect(host="103.21.58.10",
 def login():
     message = ''
     if 'email' in session:
-        return render_template('only_route.html')
+        return render_template('only_service.html')
     else:
         return render_template('login1.html', message = message)
     
@@ -99,27 +99,31 @@ def registered():
 @app.route('/home', methods=['GET', 'POST'])
 def home():
     if 'email' in session:
-        return render_template('only_route.html')
+        return render_template('only_service.html')
     else:
         return redirect('/login')
 
 # DATA ENTRY================================================================================================================
 
-@app.route('/route', methods=['GET', 'POST'])
-def route_details():
-    return render_template('only_route.html', message="")
+@app.route('/service', methods=['GET', 'POST'])
+def service_details():
+    return render_template('only_service.html', message="")
 
 @app.route('/stops', methods=['GET', 'POST'])
 def stop_details():
     return render_template('only_stops.html', message="")
 
+@app.route('/route', methods=['GET', 'POST'])
+def route_details():
+    return render_template('only_route.html', message="")
+
 @app.route('/ols', methods=['GET', 'POST'])
 def ols_details():
     return render_template('only_ols.html', message="")
 
-@app.route('/points', methods=['GET', 'POST'])
-def point_details():
-    return render_template('only_points.html', message="")
+# @app.route('/points', methods=['GET', 'POST'])
+# def point_details():
+#     return render_template('only_points.html', message="")
 
 @app.route('/data')
 def get_data():
@@ -194,9 +198,9 @@ def save_stops():
         c.execute(f"INSERT INTO T_STOPS_INFO (uid,Operator,Route,Stop_Num,Stop_Name,Stop_Lat,Stop_Long,UP_Dist,DN_Dist,Dummy,Cong_Int) VALUES ('{uid}','{session['email']}','{session['route']}','{n+1}','{stops_list[n]}','{latitudes[n]}','{longitudes[n]}','{up_distances[n]}','{dn_distances[n]}',{is_dummy[n]},{is_intersection[n]});")
         conn.commit()
 
-    c = conn.cursor()
-    c.execute(f"DELETE FROM T_STOPS_INFO WHERE Route = '{session['route']}' and Operator = '{session['email']}' and uid != '{uid}';")
-    conn.commit()
+    # c = conn.cursor()
+    # c.execute(f"DELETE FROM T_STOPS_INFO WHERE Route = '{session['route']}' and Operator = '{session['email']}' and uid != '{uid}';")
+    # conn.commit()
     return render_template('only_table.html', stops_list=session['stops_list'], rows=list(range(1,session['periods']+1)))
 
 @app.route('/table-selected', methods=['GET', 'POST'])
