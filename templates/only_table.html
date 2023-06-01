@@ -17,9 +17,9 @@
         <button type="submit" value="submit">Submit</button>
       </div>
     </form>
+    {% if selected_table %}
     <h4>{{selected_table}}</h4>
     <form action="{{url_for('table_filled')}}" method="POST" enctype="multipart/form-data">
-      {% if not db_data %}
         <table>
           <thead>
             <tr>
@@ -33,33 +33,17 @@
             <tr>
               <td>{{i}}</td>
               {%for n in stops_list%}
-              <td><input type="number" name="{{n}}{{'_'}}{{i}}" value="0"/></td>
+                {% if db_data %}
+                <td><input type="number" name="{{n}}{{'_'}}{{i}}" value="{{db_data[i-1][stops_list.index(n)]}}"/></td>
+                {% endif %}
+                {% if not db_data %}
+                <td><input type="number" name="{{n}}{{'_'}}{{i}}" value="0"/></td>
+                {% endif %}
               {% endfor %}
               <td><button id="copy" type="button">=</button></td>
             </tr>
             {% endfor %}
         </table>
-      {% endif %}
-      {% if db_data %}
-        <table>
-          <thead>
-            <tr>
-              <th> </th>
-              {%for n in stops_list%}
-              <th>{{n}}</th>
-              {%endfor%}
-            </tr>
-          </thead>
-            {% for i in rows %}
-            <tr>
-              <td>{{i}}</td>
-              {%for n in stops_list%}
-              <td><input type="number" name="{{n}}{{'_'}}{{i}}" value="{{db_data[i][stops_list.index(n)]}}"/></td>
-              {% endfor %}
-            </tr>
-            {% endfor %}
-        </table>
-      {% endif %}
       <div>
           <input id="selected_table" name="selected_table" value="{{selected_table}}" hidden>
           <button type="submit" value="Submit">Save</button>
@@ -70,6 +54,7 @@
           <button type="submit" formaction="{{url_for('upload_csv_data')}}" value="Upload">Upload CSV</button>
       </div>
     </form>
+    {% endif %}
 {% endif%}
 {% if message %}
 {{message}}

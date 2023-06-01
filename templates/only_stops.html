@@ -16,6 +16,9 @@
   </style>
 {% endblock %}
 {% block content %}
+  {% if message %}
+  <h4>{{message}}</h4>
+  {% endif %}
   <div class="mapdata">
     <div id="map"></div>
     <div class="maptable">
@@ -25,8 +28,6 @@
             <tr>
               <th>Bus Stops</th>
               <th>Remove</th>
-              <th>UP Dist</th>
-              <th>DN Dist</th>
               <th>Dummy</th>
               <th>Cong./Int.</th>
               <th>Latitude</th>
@@ -108,28 +109,6 @@
       deleteButton.textContent = 'X';
       actionsCell.appendChild(deleteButton);
       markerRow.appendChild(actionsCell);
-
-      var distUPCell = document.createElement('td');
-      distUPCell.style.border = "None";
-      distUPCell.style.background = "White";
-      var distUPInputBox = document.createElement('input');
-      var distUPname = markerName + '_UP';
-      distUPInputBox.id = distUPname;
-      distUPInputBox.name = distUPname;
-      distUPInputBox.value = 0;
-      distUPCell.appendChild(distUPInputBox);
-      markerRow.appendChild(distUPCell);
-      
-      var distDNCell = document.createElement('td');
-      distDNCell.style.border = "None";
-      distDNCell.style.background = "White";
-      var distDNInputBox = document.createElement('input');
-      var distDNname = markerName + '_DN';
-      distDNInputBox.id = distDNname;
-      distDNInputBox.name = distDNname;
-      distDNInputBox.value = 0;
-      distDNCell.appendChild(distDNInputBox);
-      markerRow.appendChild(distDNCell);
 
       var dummyCell = document.createElement('td');
       dummyCell.style.border = "None";

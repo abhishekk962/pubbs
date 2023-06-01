@@ -38,21 +38,13 @@ def login():
     else:
         return render_template('login1.html', message = message)
     
-
-@app.route('/logout')
-def logout():
-    session.pop('email', None)
-    session.pop('password', None)
-    return redirect('/home')
-
-@app.route('/register', methods =['GET', 'POST'])
-def register():
-    message = ''
+@app.route('/home', methods=['GET', 'POST'])
+def home():
     if 'email' in session:
-        return render_template('index.html')
+        return render_template('only_service.html')
     else:
-        return render_template('register1.html', message = message)
-
+        return redirect('/login')
+    
 @app.route('/loggedin', methods = ['GET', 'POST'])
 def loggedin():
     if request.method == 'POST' and 'email' in request.form and 'password' in request.form:
@@ -69,6 +61,20 @@ def loggedin():
         else:
             message = 'Please enter correct email / password !'
         return render_template('login1.html', message = message)
+
+@app.route('/logout')
+def logout():
+    session.pop('email', None)
+    session.pop('password', None)
+    return redirect('/home')
+
+@app.route('/register', methods =['GET', 'POST'])
+def register():
+    message = ''
+    if 'email' in session:
+        return render_template('index.html')
+    else:
+        return render_template('register1.html', message = message)
 
 @app.route('/registered', methods =['GET', 'POST'])
 def registered():
@@ -95,14 +101,6 @@ def registered():
             message = 'You have successfully registered ! Please Login'
             return render_template('register1.html', message = message)
 
-
-@app.route('/home', methods=['GET', 'POST'])
-def home():
-    if 'email' in session:
-        return render_template('only_service.html')
-    else:
-        return redirect('/login')
-
 # DATA ENTRY================================================================================================================
 
 @app.route('/service', methods=['GET', 'POST'])
@@ -117,34 +115,11 @@ def stop_details():
 def route_details():
     return render_template('only_route.html', message="")
 
-@app.route('/ols', methods=['GET', 'POST'])
-def ols_details():
-    return render_template('only_ols.html', message="")
-
-# @app.route('/points', methods=['GET', 'POST'])
-# def point_details():
-#     return render_template('only_points.html', message="")
-
-@app.route('/data')
-def get_data():
-    c = conn.cursor()
-    c.execute(f"SELECT Stop_Name,Stop_Lat,Stop_Long FROM T_STOPS_INFO WHERE Operator = '{session['email']}'")
-    stops_list= c.fetchall()
-    data = []
-    for n in stops_list:
-        data.append({"name": n[0], "lat": n[1], "lng": n[2]})
-    # data = [
-    #     {"name": "Point 1", "lat": 51.505, "lng": -0.09},
-    #     {"name": "Point 2", "lat": 51.51, "lng": -0.1},
-    #     {"name": "Point 3", "lat": 51.505, "lng": -0.11}
-    # ]
-    return jsonify(data)
-
 @app.route('/table', methods=['GET', 'POST'])
 def table_details():
     c = conn.cursor()
-    c.execute(f"CREATE TABLE IF NOT EXISTS T_STOPS_INFO (uid VARCHAR(50),Operator TEXT,Route TEXT,Stop_Num INT,Stop_Name TEXT,Stop_Lat FLOAT,Stop_Long FLOAT, UP_Dist FLOAT, DN_Dist FLOAT, Dummy BOOLEAN, Cong_Int BOOLEAN);")
-    c.execute(f"SELECT Stop_Name FROM T_STOPS_INFO WHERE Operator = '{session['email']}' and Route='{session['route']}' ORDER BY Stop_Num")
+    c.execute(f"CREATE TABLE IF NOT EXISTS T_ROUTE_INFO (uid VARCHAR(50),Operator TEXT,Route TEXT,Stop_Num INT,Stop_Name TEXT,Stop_Lat FLOAT,Stop_Long FLOAT, UP_Dist FLOAT, DN_Dist FLOAT, Dummy BOOLEAN, Cong_Int BOOLEAN);")
+    c.execute(f"SELECT s.Stop_Name FROM T_ROUTE_INFO AS r INNER JOIN T_STOPS_INFO AS s ON (s.id = r.Stop_id) WHERE r.Operator = '{session['email']}' and r.Route='{session['route']}' ORDER BY r.Stop_Num")
     stops_list= c.fetchall()
     stops_list = tuple(sum(stops_list, ()))
     if stops_list and 'periods' in session:
@@ -160,6 +135,29 @@ def table_details():
         message = "Enter Route and Stops Information First"
         return render_template('only_table.html', stops_list=[], rows=0, message=message)
 
+@app.route('/ols', methods=['GET', 'POST'])
+def ols_details():
+    return render_template('only_ols.html', message="")
+
+# @app.route('/points', methods=['GET', 'POST'])
+# def point_details():
+#     return render_template('only_points.html', message="")
+
+@app.route('/data')
+def get_data():
+    c = conn.cursor()
+    c.execute(f"SELECT id,Stop_Name,Stop_Lat,Stop_Long FROM T_STOPS_INFO WHERE Operator = '{session['email']}'")
+    stops_list= c.fetchall()
+    data = []
+    for n in stops_list:
+        data.append({"id":n[0],"name": n[1], "lat": n[2], "lng": n[3]})
+    # data = [
+    #     {"name": "Point 1", "lat": 51.505, "lng": -0.09},
+    #     {"name": "Point 2", "lat": 51.51, "lng": -0.1},
+    #     {"name": "Point 3", "lat": 51.505, "lng": -0.11}
+    # ]
+    return jsonify(data)
+
 @app.route('/input-stops', methods=['GET', 'POST'])
 def input_stops():
     if 'periods' not in session:
@@ -170,7 +168,6 @@ def input_stops():
     to_time = request.form['Bus_service_timings_To']
     return render_template('only_stops.html')
 
-
 @app.route('/save-stops', methods=['POST'])
 def save_stops():
     # A unique id for the current user and the current route
@@ -180,8 +177,6 @@ def save_stops():
     stops = request.form.to_dict()
     stops_list = [stops[n] for n in stops if '_Name' in n]
     session['stops_list'] = stops_list
-    up_distances = [stops[n] for n in stops if '_UP' in n]
-    dn_distances = [stops[n] for n in stops if '_DN' in n]
     latitudes = [stops[n] for n in stops if '_lat' in n]
     longitudes = [stops[n] for n in stops if '_lng' in n]
     is_dummy = [True if f"{n}_Dummy" in stops else False for n in stops_list]
@@ -189,24 +184,54 @@ def save_stops():
 
     # Upload to Database
     c = conn.cursor()
-    query = f"CREATE TABLE IF NOT EXISTS T_STOPS_INFO (uid VARCHAR(50),Operator TEXT,Route TEXT,Stop_Num INT,Stop_Name TEXT,Stop_Lat FLOAT,Stop_Long FLOAT, UP_Dist FLOAT, DN_Dist FLOAT, Dummy BOOLEAN, Cong_Int BOOLEAN);"
+    query = f"CREATE TABLE IF NOT EXISTS T_STOPS_INFO (id INT NOT NULL AUTO_INCREMENT,uid VARCHAR(50),Operator TEXT,Route TEXT,Stop_Name TEXT,Stop_Lat FLOAT,Stop_Long FLOAT, Dummy BOOLEAN, Cong_Int BOOLEAN,PRIMARY KEY (id));"
     c.execute(query)
     conn.commit()
 
     c = conn.cursor()
     for n in range(len(stops_list)):
-        c.execute(f"INSERT INTO T_STOPS_INFO (uid,Operator,Route,Stop_Num,Stop_Name,Stop_Lat,Stop_Long,UP_Dist,DN_Dist,Dummy,Cong_Int) VALUES ('{uid}','{session['email']}','{session['route']}','{n+1}','{stops_list[n]}','{latitudes[n]}','{longitudes[n]}','{up_distances[n]}','{dn_distances[n]}',{is_dummy[n]},{is_intersection[n]});")
+        c.execute(f"INSERT INTO T_STOPS_INFO (uid,Operator,Route,Stop_Name,Stop_Lat,Stop_Long,Dummy,Cong_Int) VALUES ('{uid}','{session['email']}','{session['route']}','{stops_list[n]}','{latitudes[n]}','{longitudes[n]}',{is_dummy[n]},{is_intersection[n]});")
         conn.commit()
 
     # c = conn.cursor()
     # c.execute(f"DELETE FROM T_STOPS_INFO WHERE Route = '{session['route']}' and Operator = '{session['email']}' and uid != '{uid}';")
     # conn.commit()
+    # return render_template('only_table.html', stops_list=session['stops_list'], rows=list(range(1,session['periods']+1)))
+    return render_template('only_stops.html', message="Stops were saved. Now you can build the route.")
+
+@app.route('/save-route', methods=['POST'])
+def save_route():
+    # A unique id for the current user and the current route
+    uid = secrets.token_hex(12)
+    
+    # Form data
+    stops = request.form.to_dict()
+    stops_list = [stops[n] for n in stops if '_Name' in n]
+    session['stops_list'] = stops_list
+    up_distances = [stops[n] for n in stops if '_UP' in n]
+    dn_distances = [stops[n] for n in stops if '_DN' in n]
+    stop_ids = [stops[n] for n in stops if '_ID' in n]
+
+    # Upload to Database
+    c = conn.cursor()
+    query = f"CREATE TABLE IF NOT EXISTS T_ROUTE_INFO (id INT NOT NULL AUTO_INCREMENT,uid VARCHAR(50),Operator TEXT,Route TEXT,Stop_Num INT,Stop_id INT,UP_Dist FLOAT, DN_Dist FLOAT,PRIMARY KEY (id),FOREIGN KEY (Stop_id) REFERENCES T_STOPS_INFO(id) );"
+    c.execute(query)
+    conn.commit()
+
+    c = conn.cursor()
+    for n in range(len(stops_list)):
+        c.execute(f"INSERT INTO T_ROUTE_INFO (uid,Operator,Route,Stop_Num,Stop_id,UP_Dist,DN_Dist) VALUES ('{uid}','{session['email']}','{session['route']}','{n+1}','{stop_ids[n]}','{up_distances[n]}','{dn_distances[n]}');")
+        conn.commit()
+
+    c = conn.cursor()
+    c.execute(f"DELETE FROM T_ROUTE_INFO WHERE Route = '{session['route']}' and Operator = '{session['email']}' and uid != '{uid}';")
+    conn.commit()
     return render_template('only_table.html', stops_list=session['stops_list'], rows=list(range(1,session['periods']+1)))
 
 @app.route('/table-selected', methods=['GET', 'POST'])
 def table_selected():
     c = conn.cursor()
-    c.execute(f"SELECT Stop_Name FROM T_STOPS_INFO WHERE Operator = '{session['email']}' and Route='{session['route']}' ORDER BY Stop_Num")
+    c.execute(f"SELECT s.Stop_Name FROM T_ROUTE_INFO AS r INNER JOIN T_STOPS_INFO AS s ON (s.id = r.Stop_id) WHERE r.Operator = '{session['email']}' and r.Route='{session['route']}' ORDER BY r.Stop_Num")
     stops_list= c.fetchall()
     stops_list = tuple(sum(stops_list, ()))
     table = request.form.get("db_table")
@@ -221,7 +246,7 @@ def table_filled():
     # Get filled data
     data = request.form.to_dict()
     c = conn.cursor()
-    c.execute(f"SELECT Stop_Name FROM T_STOPS_INFO WHERE Operator = '{session['email']}' and Route='{session['route']}' ORDER BY Stop_Num")
+    c.execute(f"SELECT s.Stop_Name FROM T_ROUTE_INFO AS r INNER JOIN T_STOPS_INFO AS s ON (s.id = r.Stop_id) WHERE r.Operator = '{session['email']}' and r.Route='{session['route']}' ORDER BY r.Stop_Num")
     stops_list= c.fetchall()
     stops_list = tuple(sum(stops_list, ()))
     # Upload to Database
@@ -249,40 +274,40 @@ def table_filled():
         conn.commit()
         row = []
 
-    return render_template('only_table.html', stops_list=stops_list, rows=list(range(1,session['periods']+1)))
+    return render_template('only_table.html', stops_list=stops_list, rows=list(range(1,session['periods']+1)),selected_table=request.form.get('selected_table'))
 
 # new
 @app.route('/clear-table', methods=['GET', 'POST'])
 def clear_table():
     c = conn.cursor()
-    c.execute(f"SELECT Stop_Name FROM T_STOPS_INFO WHERE Operator = '{session['email']}' and Route='{session['route']}' ORDER BY Stop_Num")
+    c.execute(f"SELECT s.Stop_Name FROM T_ROUTE_INFO AS r INNER JOIN T_STOPS_INFO AS s ON (s.id = r.Stop_id) WHERE r.Operator = '{session['email']}' and r.Route='{session['route']}' ORDER BY r.Stop_Num")
     stops_list= c.fetchall()
     stops_list = tuple(sum(stops_list, ()))
-    return render_template('only_table.html', stops_list=stops_list, rows=list(range(1,session['periods']+1)))
+    return render_template('only_table.html', stops_list=stops_list, rows=list(range(1,session['periods']+1)),selected_table=request.form.get('selected_table'))
 
 # new
 @app.route('/retrieve-data', methods=['GET', 'POST'])
 def retrieve_data():
     # Retrieve from Database
-    db_table = request.form['db_table']
+    db_table = request.form['selected_table']
     c = conn.cursor()
-    c.execute(f"SELECT Stop_Name FROM T_STOPS_INFO WHERE Operator = '{session['email']}' and Route='{session['route']}' ORDER BY Stop_Num")
+    c.execute(f"SELECT s.Stop_Name FROM T_ROUTE_INFO AS r INNER JOIN T_STOPS_INFO AS s ON (s.id = r.Stop_id) WHERE r.Operator = '{session['email']}' and r.Route='{session['route']}' ORDER BY r.Stop_Num")
     stops_list= c.fetchall()
     stops_list = tuple(sum(stops_list, ()))
-    c.execute(f"SELECT {','.join([f'`Stop {n+1}`' for n in range(len(stops_list))])} FROM {db_table} WHERE Operator = '{session['email']}' and Route='{session['route']}' ORDER BY Period")
+    c.execute(f"SELECT {','.join([f'`Stop {n+1}`' for n in range(len(stops_list))])} FROM {db_table} WHERE Operator = '{session['email']}' and Route='{session['route']}' ORDER BY Rows")
     db_data= c.fetchall()
     if len(db_data) != session['periods']:
         return "The specified number of periods don't match the data from the database. Please check and try again."
     if len(db_data[0]) != len(stops_list):
         return "The specified number of stops don't match the data from the database. Please check and try again."
-    return render_template('only_table.html', stops_list=stops_list, rows=list(range(1,session['periods']+1)), db_data=db_data)
+    return render_template('only_table.html', stops_list=stops_list, rows=list(range(1,session['periods']+1)), db_data=db_data,selected_table=request.form.get('selected_table'))
 
 # new
 @app.route('/upload-csv-data', methods=['GET', 'POST'])
 def upload_csv_data():
     # Get stops list
     c = conn.cursor()
-    c.execute(f"SELECT Stop_Name FROM T_STOPS_INFO WHERE Operator = '{session['email']}' and Route='{session['route']}' ORDER BY Stop_Num")
+    c.execute(f"SELECT s.Stop_Name FROM T_ROUTE_INFO AS r INNER JOIN T_STOPS_INFO AS s ON (s.id = r.Stop_id) WHERE r.Operator = '{session['email']}' and r.Route='{session['route']}' ORDER BY r.Stop_Num")
     stops_list= c.fetchall()
     stops_list = tuple(sum(stops_list, ()))
 
@@ -293,7 +318,7 @@ def upload_csv_data():
         return "The specified number of periods don't match the csv data uploaded. Please check and try again."
     if len(csvdata[0]) != len(stops_list):
         return "The specified number of stops don't match the csv data uploaded. Please check and try again."
-    return render_template('only_table.html', stops_list=stops_list, rows=list(range(1,session['periods']+1)), db_data=csvdata)
+    return render_template('only_table.html', stops_list=stops_list, rows=list(range(1,session['periods']+1)), db_data=csvdata,selected_table=request.form.get('selected_table'))
 
 # new
 @app.route('/download-csv-data', methods=['GET', 'POST'])
@@ -303,7 +328,7 @@ def download_csv_data():
 
     # Get stops list
     c = conn.cursor()
-    c.execute(f"SELECT Stop_Name FROM T_STOPS_INFO WHERE Operator = '{session['email']}' and Route='{session['route']}' ORDER BY Stop_Num")
+    c.execute(f"SELECT s.Stop_Name FROM T_ROUTE_INFO AS r INNER JOIN T_STOPS_INFO AS s ON (s.id = r.Stop_id) WHERE r.Operator = '{session['email']}' and r.Route='{session['route']}' ORDER BY r.Stop_Num")
     stops_list= c.fetchall()
     stops_list = tuple(sum(stops_list, ()))
 

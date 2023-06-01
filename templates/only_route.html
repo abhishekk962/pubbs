@@ -19,7 +19,7 @@
   <div class="mapdata">
     <div id="map"></div>
     <div class="maptable">
-      <form action="{{url_for('save_stops')}}" method="post">
+      <form action="{{url_for('save_route')}}" method="post">
         <table id="markerTable">
           <thead>
             <tr>
@@ -27,10 +27,7 @@
               <th>Remove</th>
               <th>UP Dist</th>
               <th>DN Dist</th>
-              <th>Dummy</th>
-              <th>Cong./Int.</th>
-              <th>Latitude</th>
-              <th>Longitude</th>
+              <th>ID</th>
             </tr>
           </thead>
           <tbody></tbody>
@@ -67,6 +64,7 @@
         data.forEach(point => {
           var marker = L.marker([point.lat, point.lng]).addTo(markersLayer);
           marker.bindPopup(point.name);
+          marker.key = point.id;
 
           // Add click event handler to each marker
           marker.on('click', function(event) {
@@ -108,7 +106,7 @@
       markerNameCell.style.border = "None";
       markerNameCell.style.background = "White";
       var markerInputBox = document.createElement('input');
-      var markerNameName = markerName + '_Name';
+      var markerNameName = markerName + markerCount + '_Name';
       markerInputBox.id = markerNameName;
       markerInputBox.name = markerNameName;
       markerInputBox.value = markerName;
@@ -130,7 +128,7 @@
       distUPCell.style.border = "None";
       distUPCell.style.background = "White";
       var distUPInputBox = document.createElement('input');
-      var distUPname = markerName + '_UP';
+      var distUPname = markerName + markerCount + '_UP';
       distUPInputBox.id = distUPname;
       distUPInputBox.name = distUPname;
       distUPInputBox.value = 0;
@@ -141,58 +139,23 @@
       distDNCell.style.border = "None";
       distDNCell.style.background = "White";
       var distDNInputBox = document.createElement('input');
-      var distDNname = markerName + '_DN';
+      var distDNname = markerName + markerCount + '_DN';
       distDNInputBox.id = distDNname;
       distDNInputBox.name = distDNname;
       distDNInputBox.value = 0;
       distDNCell.appendChild(distDNInputBox);
       markerRow.appendChild(distDNCell);
 
-      var dummyCell = document.createElement('td');
-      dummyCell.style.border = "None";
-      dummyCell.style.background = "White";
-      var dummyInputBox = document.createElement('input');
-      var dummyname = markerName + '_Dummy';
-      dummyInputBox.id = dummyname;
-      dummyInputBox.name = dummyname;
-      dummyInputBox.type = "checkbox";
-      dummyCell.appendChild(dummyInputBox);
-      markerRow.appendChild(dummyCell);
-
-      var cong_int_Cell = document.createElement('td');
-      cong_int_Cell.style.border = "None";
-      cong_int_Cell.style.background = "White";
-      var cong_int_InputBox = document.createElement('input');
-      var cong_int_name = markerName + '_Cong';
-      cong_int_InputBox.id = cong_int_name;
-      cong_int_InputBox.name = cong_int_name;
-      cong_int_InputBox.type = "checkbox";
-      cong_int_Cell.appendChild(cong_int_InputBox);
-      markerRow.appendChild(cong_int_Cell);
-
-      var latCell = document.createElement('td');
-      latCell.style.border = "None";
-      latCell.style.background = "White";
-      var latInputBox = document.createElement('input');
-      var latname = markerName + '_lat'
-      latInputBox.id = latname;
-      latInputBox.name = latname;
-      latInputBox.value = marker.getLatLng().lat;
-      latInputBox.readonly = true;
-      latCell.appendChild(latInputBox);
-      markerRow.appendChild(latCell);
-
-      var lngCell = document.createElement('td');
-      lngCell.style.border = "None";
-      lngCell.style.background = "White";
-      var lngInputBox = document.createElement('input');
-      var lngname = markerName + '_lng'
-      lngInputBox.id = lngname;
-      lngInputBox.name = lngname;
-      lngInputBox.value = marker.getLatLng().lng;
-      lngInputBox.readonly = true;
-      lngCell.appendChild(lngInputBox);
-      markerRow.appendChild(lngCell);
+      var stopIDCell = document.createElement('td');
+      stopIDCell.style.border = "None";
+      stopIDCell.style.background = "White";
+      var stopIDInputBox = document.createElement('input');
+      var stopIDname = markerName + markerCount + '_ID';
+      stopIDInputBox.id = stopIDname;
+      stopIDInputBox.name = stopIDname;
+      stopIDInputBox.value = marker.key;
+      stopIDCell.appendChild(stopIDInputBox);
+      markerRow.appendChild(stopIDCell);
 
       // var marker = L.marker(e.latlng, { draggable: true }).addTo(markersLayer);
       // marker.bindPopup(markerName);
@@ -216,7 +179,7 @@
         updateLines();
       });
 
-      // markerCount++;
+      markerCount++;
 
       document.getElementById('markerTable').getElementsByTagName('tbody')[0].appendChild(markerRow);
     };
