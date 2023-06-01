@@ -184,13 +184,13 @@ def save_stops():
 
     # Upload to Database
     c = conn.cursor()
-    query = f"CREATE TABLE IF NOT EXISTS T_STOPS_INFO (id INT NOT NULL AUTO_INCREMENT,uid VARCHAR(50),Operator TEXT,Route TEXT,Stop_Name TEXT,Stop_Lat FLOAT,Stop_Long FLOAT, Dummy BOOLEAN, Cong_Int BOOLEAN,PRIMARY KEY (id));"
+    query = f"CREATE TABLE IF NOT EXISTS T_STOPS_INFO (id INT NOT NULL AUTO_INCREMENT,uid VARCHAR(50),Operator TEXT,Stop_Name TEXT,Stop_Lat FLOAT,Stop_Long FLOAT, Dummy BOOLEAN, Cong_Int BOOLEAN,PRIMARY KEY (id));"
     c.execute(query)
     conn.commit()
 
     c = conn.cursor()
     for n in range(len(stops_list)):
-        c.execute(f"INSERT INTO T_STOPS_INFO (uid,Operator,Route,Stop_Name,Stop_Lat,Stop_Long,Dummy,Cong_Int) VALUES ('{uid}','{session['email']}','{session['route']}','{stops_list[n]}','{latitudes[n]}','{longitudes[n]}',{is_dummy[n]},{is_intersection[n]});")
+        c.execute(f"INSERT INTO T_STOPS_INFO (uid,Operator,Stop_Name,Stop_Lat,Stop_Long,Dummy,Cong_Int) VALUES ('{uid}','{session['email']}','{stops_list[n]}','{latitudes[n]}','{longitudes[n]}',{is_dummy[n]},{is_intersection[n]});")
         conn.commit()
 
     # c = conn.cursor()
