@@ -1,0 +1,29 @@
+{% extends "dashboard.html" %}
+{% block content %}
+<h4>{{ message }}</h4>
+    <form action="{{url_for('stop_char')}}" method="POST">
+        <table>
+          <thead>
+            <tr>
+              <th>Stop Name</th>
+              <th>Before Intersection</th>
+              <th>Far from Intersection</th>
+              <th>Commercial (sqm.)</th>
+              <th>Transport hub (sqm.)</th>
+              <th>Bus Bay</th>
+            </tr>
+          </thead>
+            {% for n in range(stops|length) %}
+            <tr>
+              <td>{{stops[n]}}</td>
+              <td><input type="checkbox" name="{{stop_ids[n]}}{{'_before'}}"/></td>
+              <td><input type="checkbox" name="{{stop_ids[n]}}{{'_far'}}"/></td>
+              <td><input type="number" name="{{stop_ids[n]}}{{'_tran'}}" value="0"/></td>
+              <td><input type="number" name="{{stop_ids[n]}}{{'_comm'}}" value="0"/></td>
+              <td><input type="checkbox" name="{{stop_ids[n]}}{{'_busbay'}}"/></td>
+            </tr>
+            {% endfor %}
+        </table>
+        <button type="submit" value="Submit">Save</button>
+    </form>
+{% endblock %}

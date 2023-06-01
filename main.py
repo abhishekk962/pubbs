@@ -115,6 +115,40 @@ def stop_details():
 def route_details():
     return render_template('only_route.html', message="")
 
+@app.route('/stop-char', methods=['GET', 'POST'])
+def stop_char():
+    c = conn.cursor()
+    c.execute(f"SELECT s.id,s.Stop_Name FROM T_ROUTE_INFO AS r INNER JOIN T_STOPS_INFO AS s ON (s.id = r.Stop_id) WHERE r.Operator = '{session['email']}' and r.Route='{session['route']}' ORDER BY r.Stop_Num")
+    data= c.fetchall()
+    stop_ids = [n[0] for n in data]
+    stops = [n[1] for n in data]
+    # return str(stops)
+    if request.method == "POST":
+        # Form data
+        data = request.form.to_dict()
+        before_int = [True if f"{n}_before" in data else False for n in stop_ids]
+        far_from_int = [True if f"{n}_far" in data else False for n in stop_ids]
+        commercial = [data[n] for n in data if '_comm' in n]
+        transport_hub = [data[n] for n in data if '_tran' in n]
+        bus_bay = [True if f"{n}_busbay" in data else False for n in stop_ids]
+
+        # Upload to Database
+        c = conn.cursor()
+        query = f"CREATE TABLE IF NOT EXISTS T_STOPS_INFO (id INT NOT NULL AUTO_INCREMENT,uid VARCHAR(50),Operator TEXT,\
+                Stop_Name TEXT,Stop_Lat FLOAT,Stop_Long FLOAT, Dummy BOOLEAN, Cong_Int BOOLEAN,Before_Int BOOLEAN, \
+                Far_From_Int BOOLEAN, Commercial FLOAT, Transport_Hub FLOAT, Bus_bay BOOLEAN, PRIMARY KEY (id));"
+        c.execute(query)
+        conn.commit()
+
+        c = conn.cursor()
+        for n in range(len(stops)):
+            c.execute(f"UPDATE T_STOPS_INFO SET Before_Int = {before_int[n]}, Far_From_Int = {far_from_int[n]} , Commercial = \
+                      '{commercial[n]}' , Transport_Hub = '{transport_hub[n]}' , Bus_bay = {bus_bay[n]} WHERE id = '{stop_ids[n]}';")
+            conn.commit()
+        return render_template('only_stopchar.html',stops=stops, stop_ids=stop_ids, message="Data was Saved")
+
+    return render_template('only_stopchar.html',stops=stops,stop_ids=stop_ids, message="")
+
 @app.route('/table', methods=['GET', 'POST'])
 def table_details():
     c = conn.cursor()
@@ -184,13 +218,18 @@ def save_stops():
 
     # Upload to Database
     c = conn.cursor()
-    query = f"CREATE TABLE IF NOT EXISTS T_STOPS_INFO (id INT NOT NULL AUTO_INCREMENT,uid VARCHAR(50),Operator TEXT,Stop_Name TEXT,Stop_Lat FLOAT,Stop_Long FLOAT, Dummy BOOLEAN, Cong_Int BOOLEAN,PRIMARY KEY (id));"
+
+    query = f"CREATE TABLE IF NOT EXISTS T_STOPS_INFO (id INT NOT NULL AUTO_INCREMENT,uid VARCHAR(50),Operator TEXT,\
+            Stop_Name TEXT,Stop_Lat FLOAT,Stop_Long FLOAT, Dummy BOOLEAN, Cong_Int BOOLEAN,Before_Int BOOLEAN, \
+            Far_From_Int BOOLEAN, Commercial FLOAT, Transport_Hub FLOAT, Bus_bay BOOLEAN, PRIMARY KEY (id));"
     c.execute(query)
     conn.commit()
 
     c = conn.cursor()
     for n in range(len(stops_list)):
-        c.execute(f"INSERT INTO T_STOPS_INFO (uid,Operator,Stop_Name,Stop_Lat,Stop_Long,Dummy,Cong_Int) VALUES ('{uid}','{session['email']}','{stops_list[n]}','{latitudes[n]}','{longitudes[n]}',{is_dummy[n]},{is_intersection[n]});")
+        c.execute(f"INSERT INTO T_STOPS_INFO (uid,Operator,Stop_Name,Stop_Lat,Stop_Long,Dummy,Cong_Int) VALUES \
+                  ('{uid}','{session['email']}','{stops_list[n]}','{latitudes[n]}','{longitudes[n]}',{is_dummy[n]},\
+                  {is_intersection[n]});")
         conn.commit()
 
     # c = conn.cursor()
