@@ -1,5 +1,7 @@
 {% extends "dashboard.html" %}
 {% block content %}
+{% if not data %}
+<h4>{{ message }}</h4>
 <form id="myform" action="{{url_for('ols_details')}}" method="post">
   <div>
     <label for="A">Const:</label>
@@ -32,6 +34,50 @@
     <label for="A">Bus Bay:</label>
     <input value="-0.97" type="text" id="Bus_Bay" name="Bus_Bay" required>
   </div>
-  <button id="myBtn" value="Submit" class="nextBtn" type="submit">Submit</button>
+  <input type="submit" formaction="{{url_for('ols_details')}}" value="Submit" name="save" >
 </form>
+<form method="POST">
+  <input type="submit" formaction="{{url_for('ols_details')}}" value="Get From DB" name="getfromdb" >
+</form>
+{% endif %}
+{% if data %}
+<h4>{{ message }}</h4>
+<form id="myform" action="{{url_for('ols_details')}}" method="post">
+  <div>
+    <label for="A">Const:</label>
+    <input value="{{data['Const']}}" type="text" id="Const" name="Const" required>
+
+    <label for="A">No of Boarding:</label>
+    <input value="{{data['No_of_Boarding']}}" type="text" id="No_of_Boarding" name="No_of_Boarding" required>
+
+    <label for="A">No of Alighting:</label>
+    <input value="{{data['No_of_Alighting']}}" type="text" id="No_of_Alighting" name="No_of_Alighting" required>
+
+    <label for="A">Occupancy Level:</label>
+    <input value="{{data['Occupancy_Level']}}" type="text" id="Occupancy_Level" name="Occupancy_Level" required>
+
+    <label for="A">Morning Peak:</label>
+    <input value="{{data['Morning_Peak']}}" type="text" id="Morning_Peak" name="Morning_Peak" required>
+
+    <label for="A">Before Intersection:</label>
+    <input value="{{data['Before_Intersection']}}" type="text" id="Before_Intersection" name="Before_Intersection" required>
+
+    <label for="A">Far from Intersection:</label>
+    <input value="{{data['Far_from_Intersection']}}" type="text" id="Far_from_Intersection" name="Far_from_Intersection" required>
+
+    <label for="A">Commercial:</label>
+    <input value="{{data['Commercial']}}" type="text" id="Commercial" name="Commercial" required>
+
+    <label for="A">Transport hub:</label>
+    <input value="{{data['Transport_hub']}}" type="text" id="Transport_hub" name="Transport_hub" required>
+
+    <label for="A">Bus Bay:</label>
+    <input value="{{data['Bus_Bay']}}" type="text" id="Bus_Bay" name="Bus_Bay" required>
+  </div>
+  <input type="submit" formaction="{{url_for('ols_details')}}" value="Submit" name="save" >
+</form>
+<form method="POST">
+  <input type="submit" formaction="{{url_for('ols_details')}}" value="Get From DB" name="getfromdb" >
+</form>
+{% endif %}
 {% endblock %}

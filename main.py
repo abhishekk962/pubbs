@@ -205,7 +205,23 @@ def table_details():
 
 @app.route('/ols', methods=['GET', 'POST'])
 def ols_details():
-    return render_template('only_ols.html', message="")
+    if request.method == "POST":
+        if 'save' in request.form:
+            c = conn.cursor()
+            c.execute(f"CREATE TABLE IF NOT EXISTS T_OLS_COEFF (Operator TEXT,Route TEXT,Const FLOAT,No_of_Boarding FLOAT, No_of_Alighting FLOAT, Occupancy_Level FLOAT, Morning_Peak FLOAT, Before_Intersection FLOAT,Far_from_Intersection FLOAT,Commercial FLOAT,Transport_hub FLOAT,Bus_Bay FLOAT);")
+            conn.commit()
+
+            c.execute(f"DELETE FROM T_OLS_COEFF WHERE Route = '{session['route']}' and Operator = '{session['email']}'")
+            c.execute(f"INSERT INTO T_OLS_COEFF (Operator,Route,Const,No_of_Boarding,No_of_Alighting,Occupancy_Level,Morning_Peak,Before_Intersection,Far_from_Intersection,Commercial,Transport_hub,Bus_Bay) VALUES ('{session['email']}','{session['route']}','{request.form['Const']}','{request.form['No_of_Boarding']}','{request.form['No_of_Alighting']}','{request.form['Occupancy_Level']}','{request.form['Morning_Peak']}','{request.form['Before_Intersection']}','{request.form['Far_from_Intersection']}','{request.form['Commercial']}','{request.form['Transport_hub']}','{request.form['Bus_Bay']}')")
+            conn.commit()
+            return render_template('only_ols.html', message="Data was Saved")
+        elif 'getfromdb' in request.form:
+            c = conn.cursor(pymysql.cursors.DictCursor)
+            c.execute(f"SELECT * FROM T_OLS_COEFF WHERE Route = '{session['route']}' and Operator = '{session['email']}'")
+            data = c.fetchall()
+            return render_template('only_ols.html', message="Data was Retrieved", data=data[0])
+    else:
+        return render_template('only_ols.html', message="")
 
 @app.route('/scheduling', methods=['GET', 'POST'])
 def scheduling_details():
