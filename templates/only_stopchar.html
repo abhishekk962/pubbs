@@ -27,8 +27,8 @@
                 {% else %}
                 <td><input type="checkbox" name="{{stop_ids[n]}}{{'_far'}}"/></td>
                 {% endif %}
-                <td><input type="number" name="{{stop_ids[n]}}{{'_tran'}}" value="{{data[n][2]}}"/></td>
-                <td><input type="number" name="{{stop_ids[n]}}{{'_comm'}}" value="{{data[n][3]}}"/></td>
+                <td><input type="number" name="{{stop_ids[n]}}{{'_comm'}}" value="{{data[n][2]}}"/></td>
+                <td><input type="number" name="{{stop_ids[n]}}{{'_tran'}}" value="{{data[n][3]}}"/></td>
                 {% if data[n][4]==1 %}
                 <td><input type="checkbox" name="{{stop_ids[n]}}{{'_busbay'}}"checked/></td>
                 {% else %}
@@ -38,8 +38,8 @@
               {% else %}
               <td><input type="checkbox" name="{{stop_ids[n]}}{{'_before'}}"/></td>
               <td><input type="checkbox" name="{{stop_ids[n]}}{{'_far'}}"/></td>
-              <td><input type="number" name="{{stop_ids[n]}}{{'_tran'}}" value="0"/></td>
               <td><input type="number" name="{{stop_ids[n]}}{{'_comm'}}" value="0"/></td>
+              <td><input type="number" name="{{stop_ids[n]}}{{'_tran'}}" value="0"/></td>
               <td><input type="checkbox" name="{{stop_ids[n]}}{{'_busbay'}}"/></td>
               <td><input type="number" name="{{stop_ids[n]}}{{'_stoprad'}}" value="0"/></td>
               {% endif %}

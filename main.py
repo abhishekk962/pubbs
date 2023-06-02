@@ -173,7 +173,7 @@ def stop_char():
             return render_template('only_stopchar.html',stops=stops, stop_ids=stop_ids, message="Data was Saved")
         elif 'getfromdb' in request.form:
             c = conn.cursor()
-            c.execute(f"SELECT Before_Int,Far_From_Int,Commercial,Transport_Hub,Bus_bay,Stop_rad FROM T_STOPS_INFO WHERE id IN {tuple(stop_ids)}")
+            c.execute(f"SELECT s.Before_Int,s.Far_From_Int,s.Commercial,s.Transport_Hub,s.Bus_bay,s.Stop_rad FROM T_STOPS_INFO AS s INNER JOIN T_ROUTE_INFO AS r ON (s.id = r.Stop_id) WHERE s.id IN {tuple(stop_ids)} ORDER BY r.Stop_Num")
             data= c.fetchall()
             # return str(data)
             return render_template('only_stopchar.html',stops=stops, stop_ids=stop_ids, message="Data was updated from DB", data=data)
@@ -396,8 +396,12 @@ def table_filled():
         c.execute(query, tuple(row))
         conn.commit()
         row = []
-
-    return render_template('only_table.html', stops_list=stops_list, rows=list(range(1,session['periods']+1)),selected_table=request.form.get('selected_table'))
+    table = request.form.get("selected_table")
+    if table in ["T_Passenger_Arrival_UP", "T_Passenger_Arrival_DN", "T_Alighting_Rate_UP", "T_Alighting_Rate_DN"]:
+        return render_template('only_table.html', stops_list=stops_list, rows=list(range(1,session['periods']+1)), selected_table=table)
+    elif table in ["T_Fare_DN","T_Fare_UP","T_TravelTimeDN_ANN","T_TraveTimeUP_ANN"]:
+        return render_template('only_table.html', stops_list=stops_list, rows=stops_list, selected_table=table)
+    # return render_template('only_table.html', stops_list=stops_list, rows=list(range(1,session['periods']+1)),selected_table=request.form.get('selected_table'))
 
 # new
 @app.route('/clear-table', methods=['GET', 'POST'])
