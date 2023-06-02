@@ -122,9 +122,11 @@ def busroute():
                   max_ppl FLOAT, min_crr FLOAT, min_ppp FLOAT, max_pplpt FLOAT, min_rvpt FLOAT, max_opc FLOAT);")
         conn.commit()
         
-        c.execute(f"DELETE FROM T_PARAMETERS WHERE Route = '{session['route']}' and Operator = '{session['email']}'")
-        c.execute(f"INSERT INTO T_PARAMETERS (Operator,Route) VALUES ('{session['email']}','{session['route']}')")
-        conn.commit()
+        c.execute(f"SELECT * FROM T_PARAMETERS WHERE Route = '{session['route']}' and Operator = '{session['email']}'")
+        record = c.fetchall()
+        if not record:
+            c.execute(f"INSERT INTO T_PARAMETERS (Operator,Route) VALUES ('{session['email']}','{session['route']}')")
+            conn.commit()
 
         return render_template('only_busroute.html', message="Bus Route info was saved")
     return render_template('only_busroute.html', message="")
@@ -213,8 +215,11 @@ def scheduling_details():
             c.execute(f"UPDATE T_PARAMETERS SET dead_todepot_t1 = '{request.form['dead_todepot_t1']}', dead_todepot_t2 = '{request.form['dead_todepot_t2']}', layover_depot = '{request.form['layover_depot']}', start_ser = '{request.form['start_ser']}', end_ser = '{request.form['end_ser']}', shift = '{request.form['shift']}', max_ideal = '{request.form['max_ideal']}' WHERE Route = '{session['route']}' and Operator = '{session['email']}';")
             conn.commit()
             return render_template('only_scheduling.html', message="Saved")
-        elif 'getfromdb' in request.form: 
-            return render_template('only_scheduling.html', message="Saved")
+        elif 'getfromdb' in request.form:
+            c = conn.cursor(pymysql.cursors.DictCursor)
+            c.execute(f"SELECT * FROM T_PARAMETERS WHERE Route = '{session['route']}' and Operator = '{session['email']}'")
+            data = c.fetchall()
+            return render_template('only_scheduling.html', message="Saved",data=data[0])
     else:
         return render_template('only_scheduling.html', message="")
 
@@ -227,7 +232,10 @@ def constraints_details():
             conn.commit()
             return render_template('only_constraints.html', message="Saved")
         elif 'getfromdb' in request.form:
-            return render_template('only_constraints.html', message="Saved")
+            c = conn.cursor(pymysql.cursors.DictCursor)
+            c.execute(f"SELECT * FROM T_PARAMETERS WHERE Route = '{session['route']}' and Operator = '{session['email']}'")
+            data = c.fetchall()
+            return render_template('only_constraints.html', message="Saved",data=data[0])
     else:
         return render_template('only_constraints.html', message="")
 
@@ -240,7 +248,10 @@ def service_details():
             conn.commit()
             return render_template('only_service.html', message="Saved")
         elif 'getfromdb' in request.form:
-            return render_template('only_service.html', message="")
+            c = conn.cursor(pymysql.cursors.DictCursor)
+            c.execute(f"SELECT * FROM T_PARAMETERS WHERE Route = '{session['route']}' and Operator = '{session['email']}'")
+            data = c.fetchall()
+            return render_template('only_service.html', message="Saved",data=data[0])
     else:
         return render_template('only_service.html', message="")
 
@@ -253,7 +264,10 @@ def ga_params():
             conn.commit()
             return render_template('only_gaparams.html', message="Saved")
         elif 'getfromdb' in request.form:
-            return render_template('only_gaparams.html', message="Saved")
+            c = conn.cursor(pymysql.cursors.DictCursor)
+            c.execute(f"SELECT * FROM T_PARAMETERS WHERE Route = '{session['route']}' and Operator = '{session['email']}'")
+            data = c.fetchall()
+            return render_template('only_gaparams.html', message="Saved",data=data[0])
     else:
         return render_template('only_gaparams.html', message="")
 

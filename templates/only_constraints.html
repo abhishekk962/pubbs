@@ -1,5 +1,6 @@
 {% extends "dashboard.html" %}
 {% block content %}
+{% if not data %}
 <h4>{{ message }}</h4>
 <form id="myform" action="{{url_for('constraints_details')}}" method="post">
   <div>
@@ -44,7 +45,57 @@
   </div>
   <input type="submit" formaction="{{url_for('constraints_details')}}" value="Submit" name="save" >
 </form>
-<form>
+<form method="POST">
   <input type="submit" formaction="{{url_for('constraints_details')}}" value="Get From DB" name="getfromdb" >
 </form>
+{% endif %}
+{% if data %}
+<h4>{{ message }}</h4>
+<form id="myform" action="{{url_for('constraints_details')}}" method="post">
+  <div>
+    <span>CONSTRAINTS FULL DAY SERVICES</span>
+    <span> </span>
+
+    <label for="max_oppp">Maximum operation cost/person: </label>
+    <input value="{{data['max_oppp']}}" type="number" id="max_oppp" name="max_oppp" required>
+
+    <label for="min_ppvk">Min passenger per vehicle-km: </label>
+    <input value="{{data['min_ppvk']}}" type="number" id="min_ppvk" name="min_ppvk" required>
+
+    <label for="min_ppt">Minimum passenger per trip: </label>
+    <input value="{{data['min_ppt']}}" type="number" id="min_ppt" name="min_ppt" required>
+
+    <label for="max_ocpp">Max operation cost per trip: </label>
+    <input value="{{data['max_ocpp']}}" type="number" id="max_ocpp" name="max_ocpp" required>
+
+    <label for="max_fleet">Maximum fleet size: </label>
+    <input value="{{data['max_fleet']}}" type="number" id="max_fleet" name="max_fleet" required>
+
+    <label for="max_ppl">Max % of passenger lost: </label>
+    <input value="{{data['max_ppl']}}" type="number" id="max_ppl" name="max_ppl" required>
+
+    <label for="min_crr"> Min cost recovery ratio: </label>
+    <input value="{{data['min_crr']}}" type="number" id="min_crr" name="min_crr" required>
+
+    <span class="title">CONSTRAINTS TRIP WISE</span>
+    <span class="title"></span>
+
+    <label for="min_ppp">Minimum Passenger per trip: </label>
+    <input value="{{data['min_ppp']}}" type="number" id="min_ppp" name="min_ppp" required>
+
+    <label for="max_pplpt">Max % of passenger lost/trip: </label>
+    <input value="{{data['max_pplpt']}}" type="number" id="max_pplpt" name="max_pplpt" required>
+
+    <label for="min_rvpt">Minimum revenue per trip: </label>
+    <input value="{{data['min_rvpt']}}" type="number" id="min_rvpt" name="min_rvpt" required>
+
+    <label for="max_opc">Maximum operation cost: </label>
+    <input value="{{data['max_opc']}}" type="number" id="max_opc" name="max_opc" required>
+  </div>
+  <input type="submit" formaction="{{url_for('constraints_details')}}" value="Submit" name="save" >
+</form>
+<form method="POST">
+  <input type="submit" formaction="{{url_for('constraints_details')}}" value="Get From DB" name="getfromdb" >
+</form>
+{% endif %}
 {% endblock %}

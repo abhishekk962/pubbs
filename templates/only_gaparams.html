@@ -1,5 +1,6 @@
 {% extends "dashboard.html" %}
 {% block content %}
+{% if not data %}
 <h4>{{ message }}</h4>
 <form id="myform" action="{{url_for('ga_params')}}" method="post">
   <div>
@@ -11,7 +12,24 @@
   </div>
   <input type="submit" formaction="{{url_for('ga_params')}}" value="Submit" name="save" >
 </form>
-<form>
+<form method="POST">
   <input type="submit" formaction="{{url_for('ga_params')}}" value="Get From DB" name="getfromdb" >
 </form>
+{% endif %}
+{% if data %}
+<h4>{{ message }}</h4>
+<form id="myform" action="{{url_for('ga_params')}}" method="post">
+  <div>
+    <label for="sol_per_pop">No of sol set of freq in one popl. for GA: </label>
+    <input value="{{data['sol_per_pop']}}" type="number" id="sol_per_pop" name="sol_per_pop" required>
+
+    <label for="num_generations">Number of generations for GA: </label>
+    <input value="{{data['num_generations']}}" type="number" id="num_generations" name="num_generations" required>
+  </div>
+  <input type="submit" formaction="{{url_for('ga_params')}}" value="Submit" name="save" >
+</form>
+<form method="POST">
+  <input type="submit" formaction="{{url_for('ga_params')}}" value="Get From DB" name="getfromdb" >
+</form>
+{% endif %}
 {% endblock %}

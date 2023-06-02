@@ -1,5 +1,6 @@
 {% extends "dashboard.html" %}
 {% block content %}
+{% if not data %}
 <h4>{{ message }}</h4>
 <form id="myform" action="{{url_for('scheduling_details')}}" method="post">
   <div>
@@ -26,7 +27,39 @@
   </div>
   <input type="submit" formaction="{{url_for('scheduling_details')}}" value="Submit" name="save" >
 </form>
-<form>
+<form method="POST">
   <input type="submit" formaction="{{url_for('scheduling_details')}}" value="Get From DB" name="getfromdb" >
 </form>
+{% endif %}
+{% if data %}
+<h4>{{ message }}</h4>
+<form id="myform" action="{{url_for('scheduling_details')}}" method="post">
+  <div>
+    <label for="dead_todepot_t1">Deadheading time t1 to depot: </label>
+    <input value="{{data['dead_todepot_t1']}}" type="number" id="dead_todepot_t1" name="dead_todepot_t1" required>
+
+    <label for="dead_todepot_t2">Deadheading time t2 to depot: </label>
+    <input value="{{data['dead_todepot_t2']}}" type="number" id="dead_todepot_t2" name="dead_todepot_t2" required>
+
+    <label for="layover_depot">Layover at depot in min: </label>
+    <input value="{{data['layover_depot']}}" type="number" id="layover_depot" name="layover_depot" required>
+
+    <label for="start_ser">Start service: </label>
+    <input value="{{data['start_ser']}}" type="number" id="start_ser" name="start_ser" required>
+
+    <label for="end_ser">End service: </label>
+    <input value="{{data['end_ser']}}" type="number" id="end_ser" name="end_ser" required>
+
+    <label for="shift">Shift of buses in hrs: </label>
+    <input value="{{data['shift']}}" type="number" id="shift" name="shift" required>
+
+    <label for="max_ideal">Max ideal time of bus: </label>
+    <input value="{{data['max_ideal']}}" type="number" id="max_ideal" name="max_ideal" required>
+  </div>
+  <input type="submit" formaction="{{url_for('scheduling_details')}}" value="Submit" name="save" >
+</form>
+<form method="POST">
+  <input type="submit" formaction="{{url_for('scheduling_details')}}" value="Get From DB" name="getfromdb" >
+</form>
+{% endif %}
 {% endblock %}

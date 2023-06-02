@@ -1,5 +1,6 @@
 {% extends "dashboard.html" %}
 {% block content %}
+{% if not data %}
 <h4>{{ message }}</h4>
 <form id="myform" action="{{url_for('service_details')}}" method="post">
   <div>
@@ -86,7 +87,99 @@
   </div>
   <input type="submit" formaction="{{url_for('service_details')}}" value="Submit" name="save" >
 </form>
-<form>
+<form method="POST">
   <input type="submit" formaction="{{url_for('service_details')}}" value="Get From DB" name="getfromdb" >
 </form>
+{% endif %}
+{% if data %}
+<h4>{{ message }}</h4>
+<form id="myform" action="{{url_for('service_details')}}" method="post">
+  <div>
+    <label for="A">Terminal 1:</label>
+    <input value="{{data['A']}}" type="text" id="A" name="A" required>
+
+    <label for="B">Terminal 2:</label>
+    <input value="{{data['B']}}" type="text" id="B" name="B" required>
+
+    <label for="frequencydefault">Frequency Default:</label>
+    <input value="{{data['frequencydefault']}}" type="number" id="frequencydefault" name="frequencydefault" required>
+
+    <label for="seatcap">Seating capacity:</label>
+    <input value="{{data['seatcap']}}" type="number" id="seatcap" name="seatcap" required>
+
+    <label for="min_c_lvl">Minimum crowding level:</label>
+    <input value="{{data['min_c_lvl']}}" type="number" step="0.01" id="min_c_lvl" name="min_c_lvl" required>
+
+    <label for="max_c_lvl">Maximum crowding level:</label>
+    <input value="{{data['max_c_lvl']}}" type="number" step="0.01" id="max_c_lvl" name="max_c_lvl" required>
+
+    <label for="max_wait">Max wait time of a passenger: </label>
+    <input value="{{data['max_wait']}}" type="number" id="max_wait" name="max_wait" required>
+
+    <label for="bus_left">Buses Left: </label>
+    <input value="{{data['bus_left']}}" type="number" id="bus_left" name="bus_left" required>
+
+    <label for="min_dwell">Minimum dwell time: </label>
+    <input value="{{data['min_dwell']}}" type="number" id="min_dwell" name="min_dwell" required>
+
+    <label for="slack">Slack time for a trip: </label>
+    <input value="{{data['slack']}}" type="number" id="slack" name="slack" required>
+
+    <label for="lay_overtime">Lay over time for buses: </label>
+    <input value="{{data['lay_overtime']}}" type="number" id="lay_overtime" name="lay_overtime" required>
+
+    <label for="buscost">Cost of bus (inc loan interest): </label>
+    <input value="{{data['buscost']}}" type="number" id="buscost" name="buscost" required>
+
+    <label for="buslifecycle">Bus Life Cycle: </label>
+    <input value="{{data['buslifecycle']}}" type="number" id="buslifecycle" name="buslifecycle" required>
+
+    <label for="crewperbus">No. of crew per bus: </label>
+    <input value="{{data['crewperbus']}}" type="number" id="crewperbus" name="crewperbus" required>
+
+    <label for="creqincome">Avg monthly wage of crew: </label>
+    <input value="{{data['creqincome']}}" type="number" id="creqincome" name="creqincome" required>
+
+    <label for="cr_trip">no of round trips: </label>
+    <input value="{{data['cr_trip']}}" type="number" id="cr_trip" name="cr_trip" required>
+
+    <label for="cr_day">Avg no of work days/month: </label>
+    <input value="{{data['cr_day']}}" type="number" id="cr_day" name="cr_day" required>
+
+    <label for="busmaintenance">Bus maintenance cost/km: </label>
+    <input value="{{data['busmaintenance']}}" type="number" id="busmaintenance" name="busmaintenance" required>
+
+    <label for="fuelprice">Fuel cost: </label>
+    <input value="{{data['fuelprice']}}" type="number" id="fuelprice" name="fuelprice" required>
+
+    <label for="kmperliter">Mileage running: </label>
+    <input value="{{data['kmperliter']}}" type="number" id="kmperliter" name="kmperliter" required>
+
+    <label for="kmperliter2">Mileage engine idle: </label>
+    <input value="{{data['kmperliter2']}}" type="number" id="kmperliter2" name="kmperliter2" required>
+
+    <label for="c_cantboard">Cost incurred </label>
+    <input value="{{data['c_cantboard']}}" type="number" id="c_cantboard" name="c_cantboard" required>
+
+    <label for="c_waittime">Waiting at bus stop cost: </label>
+    <input value="{{data['c_waittime']}}" type="number" id="c_waittime" name="c_waittime" required>
+
+    <label for="c_invehtime">Invehicle traveltime cost:</label>
+    <input value="{{data['c_invehtime']}}" type="number" id="c_invehtime" name="c_invehtime" required>
+
+    <label for="penalty">Penalty: </label>
+    <input value="{{data['penalty']}}" type="number" id="penalty" name="penalty" required>
+
+    <label for="hrinperiod">Length of a period: </label>
+    <input value="{{data['hrinperiod']}}" type="number" id="hrinperiod" name="hrinperiod" required>
+
+    <label for="ser_period">service hours: </label>
+    <input value="{{data['ser_period']}}" type="number" id="ser_period" name="ser_period" required>
+  </div>
+  <input type="submit" formaction="{{url_for('service_details')}}" value="Submit" name="save" >
+</form>
+<form method="POST">
+  <input type="submit" formaction="{{url_for('service_details')}}" value="Get From DB" name="getfromdb" >
+</form>
+{% endif %}
 {% endblock %}
