@@ -24,6 +24,9 @@
     <label for="max_ideal">Max ideal time of bus: </label>
     <input value="3" type="number" id="max_ideal" name="max_ideal" required>
   </div>
-  <button id="myBtn" value="Submit" class="nextBtn" type="submit">Submit</button>
+  <input type="submit" formaction="{{url_for('scheduling_details')}}" value="Submit" name="save" >
+</form>
+<form>
+  <input type="submit" formaction="{{url_for('scheduling_details')}}" value="Get From DB" name="getfromdb" >
 </form>
 {% endblock %}

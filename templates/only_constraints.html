@@ -42,6 +42,9 @@
     <label for="max_opc">Maximum operation cost: </label>
     <input value="15000" type="number" id="max_opc" name="max_opc" required>
   </div>
-  <button id="myBtn" value="Submit" class="nextBtn" type="submit">Submit</button>
+  <input type="submit" formaction="{{url_for('constraints_details')}}" value="Submit" name="save" >
+</form>
+<form>
+  <input type="submit" formaction="{{url_for('constraints_details')}}" value="Get From DB" name="getfromdb" >
 </form>
 {% endblock %}

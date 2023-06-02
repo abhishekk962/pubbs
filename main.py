@@ -110,6 +110,22 @@ def busroute():
             session['periods'] = int(request.form['Number_of_service_periods'])
         if 'route' not in session:
                 session['route'] = request.form['Bus_route_name']
+
+        c = conn.cursor()
+        c.execute("CREATE TABLE IF NOT EXISTS T_PARAMETERS (Operator TEXT,Route TEXT,A VARCHAR(50), B VARCHAR(50), frequencydefault FLOAT, seatcap FLOAT, \
+                  min_c_lvl FLOAT, max_c_lvl FLOAT, max_wait FLOAT, bus_left FLOAT, min_dwell FLOAT, slack FLOAT, lay_overtime FLOAT, \
+                  buscost FLOAT, buslifecycle FLOAT, crewperbus FLOAT, creqincome FLOAT, cr_trip FLOAT, cr_day FLOAT, \
+                  busmaintenance FLOAT, fuelprice FLOAT, kmperliter FLOAT, kmperliter2 FLOAT, c_cantboard FLOAT, c_waittime FLOAT, \
+                  c_invehtime FLOAT, penalty FLOAT, hrinperiod FLOAT, ser_period FLOAT, dead_todepot_t1 FLOAT, dead_todepot_t2 FLOAT, \
+                  layover_depot FLOAT, start_ser FLOAT, end_ser FLOAT, shift FLOAT, max_ideal FLOAT, sol_per_pop FLOAT, \
+                  num_generations FLOAT, max_oppp FLOAT, min_ppvk FLOAT, min_ppt FLOAT, max_ocpp FLOAT, max_fleet FLOAT, \
+                  max_ppl FLOAT, min_crr FLOAT, min_ppp FLOAT, max_pplpt FLOAT, min_rvpt FLOAT, max_opc FLOAT);")
+        conn.commit()
+        
+        c.execute(f"DELETE FROM T_PARAMETERS WHERE Route = '{session['route']}' and Operator = '{session['email']}'")
+        c.execute(f"INSERT INTO T_PARAMETERS (Operator,Route) VALUES ('{session['email']}','{session['route']}')")
+        conn.commit()
+
         return render_template('only_busroute.html', message="Bus Route info was saved")
     return render_template('only_busroute.html', message="")
 
@@ -138,24 +154,26 @@ def stop_char():
             commercial = [data[n] for n in data if '_comm' in n]
             transport_hub = [data[n] for n in data if '_tran' in n]
             bus_bay = [True if f"{n}_busbay" in data else False for n in stop_ids]
+            stop_rad = [data[n] for n in data if '_stoprad' in n]
 
             # Upload to Database
             c = conn.cursor()
             query = f"CREATE TABLE IF NOT EXISTS T_STOPS_INFO (id INT NOT NULL AUTO_INCREMENT,uid VARCHAR(50),Operator TEXT,\
                     Stop_Name TEXT,Stop_Lat FLOAT,Stop_Long FLOAT, Dummy BOOLEAN, Cong_Int BOOLEAN,Before_Int BOOLEAN, \
-                    Far_From_Int BOOLEAN, Commercial FLOAT, Transport_Hub FLOAT, Bus_bay BOOLEAN, PRIMARY KEY (id));"
+                    Far_From_Int BOOLEAN, Commercial FLOAT, Transport_Hub FLOAT, Bus_bay BOOLEAN,Stop_rad FLOAT, PRIMARY KEY (id));"
             c.execute(query)
             conn.commit()
 
             c = conn.cursor()
             for n in range(len(stops)):
                 c.execute(f"UPDATE T_STOPS_INFO SET Before_Int = {before_int[n]}, Far_From_Int = {far_from_int[n]} , Commercial = \
-                        '{commercial[n]}' , Transport_Hub = '{transport_hub[n]}' , Bus_bay = {bus_bay[n]} WHERE id = '{stop_ids[n]}';")
+                        '{commercial[n]}' , Transport_Hub = '{transport_hub[n]}' , Bus_bay = {bus_bay[n]} , Stop_rad = '{stop_rad[n]}'\
+                         WHERE id = '{stop_ids[n]}';")
                 conn.commit()
             return render_template('only_stopchar.html',stops=stops, stop_ids=stop_ids, message="Data was Saved")
         elif 'getfromdb' in request.form:
             c = conn.cursor()
-            c.execute(f"SELECT Before_Int,Far_From_Int,Commercial,Transport_Hub,Bus_bay FROM T_STOPS_INFO WHERE id IN {tuple(stop_ids)}")
+            c.execute(f"SELECT Before_Int,Far_From_Int,Commercial,Transport_Hub,Bus_bay,Stop_rad FROM T_STOPS_INFO WHERE id IN {tuple(stop_ids)}")
             data= c.fetchall()
             # return str(data)
             return render_template('only_stopchar.html',stops=stops, stop_ids=stop_ids, message="Data was updated from DB", data=data)
@@ -189,19 +207,55 @@ def ols_details():
 
 @app.route('/scheduling', methods=['GET', 'POST'])
 def scheduling_details():
-    return render_template('only_scheduling.html', message="")
+    if request.method == "POST":
+        if 'save' in request.form:
+            c = conn.cursor()
+            c.execute(f"UPDATE T_PARAMETERS SET dead_todepot_t1 = '{request.form['dead_todepot_t1']}', dead_todepot_t2 = '{request.form['dead_todepot_t2']}', layover_depot = '{request.form['layover_depot']}', start_ser = '{request.form['start_ser']}', end_ser = '{request.form['end_ser']}', shift = '{request.form['shift']}', max_ideal = '{request.form['max_ideal']}' WHERE Route = '{session['route']}' and Operator = '{session['email']}';")
+            conn.commit()
+            return render_template('only_scheduling.html', message="Saved")
+        elif 'getfromdb' in request.form: 
+            return render_template('only_scheduling.html', message="Saved")
+    else:
+        return render_template('only_scheduling.html', message="")
 
 @app.route('/constraints', methods=['GET', 'POST'])
 def constraints_details():
-    return render_template('only_constraints.html', message="")
+    if request.method == "POST":
+        if 'save' in request.form:
+            c = conn.cursor()
+            c.execute(f"UPDATE T_PARAMETERS SET max_oppp = '{request.form['max_oppp']}', min_ppvk = '{request.form['min_ppvk']}', min_ppt = '{request.form['min_ppt']}', max_ocpp = '{request.form['max_ocpp']}', max_fleet = '{request.form['max_fleet']}', max_ppl = '{request.form['max_ppl']}', min_crr = '{request.form['min_crr']}', min_ppp = '{request.form['min_ppp']}', max_pplpt = '{request.form['max_pplpt']}', min_rvpt = '{request.form['min_rvpt']}', max_opc = '{request.form['max_opc']}' WHERE Route = '{session['route']}' and Operator = '{session['email']}';")
+            conn.commit()
+            return render_template('only_constraints.html', message="Saved")
+        elif 'getfromdb' in request.form:
+            return render_template('only_constraints.html', message="Saved")
+    else:
+        return render_template('only_constraints.html', message="")
 
 @app.route('/service', methods=['GET', 'POST'])
 def service_details():
-    return render_template('only_service.html', message="")
+    if request.method == "POST":
+        if 'save' in request.form:
+            c = conn.cursor()
+            c.execute(f"UPDATE T_PARAMETERS SET A = '{request.form['A']}', B = '{request.form['B']}', frequencydefault = '{request.form['frequencydefault']}', seatcap = '{request.form['seatcap']}', min_c_lvl = '{request.form['min_c_lvl']}', max_c_lvl = '{request.form['max_c_lvl']}', max_wait = '{request.form['max_wait']}', bus_left = '{request.form['bus_left']}', min_dwell = '{request.form['min_dwell']}', slack = '{request.form['slack']}', lay_overtime = '{request.form['lay_overtime']}', buscost = '{request.form['buscost']}', buslifecycle = '{request.form['buslifecycle']}', crewperbus = '{request.form['crewperbus']}', creqincome = '{request.form['creqincome']}', cr_trip = '{request.form['cr_trip']}', cr_day = '{request.form['cr_day']}', busmaintenance = '{request.form['busmaintenance']}', fuelprice = '{request.form['fuelprice']}', kmperliter = '{request.form['kmperliter']}', kmperliter2 = '{request.form['kmperliter2']}', c_cantboard = '{request.form['c_cantboard']}', c_waittime = '{request.form['c_waittime']}', c_invehtime = '{request.form['c_invehtime']}', penalty = '{request.form['penalty']}', hrinperiod = '{request.form['hrinperiod']}', ser_period = '{request.form['ser_period']}' WHERE Route = '{session['route']}' and Operator = '{session['email']}';")
+            conn.commit()
+            return render_template('only_service.html', message="Saved")
+        elif 'getfromdb' in request.form:
+            return render_template('only_service.html', message="")
+    else:
+        return render_template('only_service.html', message="")
 
 @app.route('/ga-params', methods=['GET', 'POST'])
 def ga_params():
-    return render_template('only_gaparams.html', message="")
+    if request.method == "POST":
+        if 'save' in request.form:
+            c = conn.cursor()
+            c.execute(f"UPDATE T_PARAMETERS SET sol_per_pop = '{request.form['sol_per_pop']}', num_generations = '{request.form['num_generations']}' WHERE Route = '{session['route']}' and Operator = '{session['email']}';")
+            conn.commit()
+            return render_template('only_gaparams.html', message="Saved")
+        elif 'getfromdb' in request.form:
+            return render_template('only_gaparams.html', message="Saved")
+    else:
+        return render_template('only_gaparams.html', message="")
 
 # @app.route('/points', methods=['GET', 'POST'])
 # def point_details():
@@ -251,7 +305,7 @@ def save_stops():
 
     query = f"CREATE TABLE IF NOT EXISTS T_STOPS_INFO (id INT NOT NULL AUTO_INCREMENT,uid VARCHAR(50),Operator TEXT,\
             Stop_Name TEXT,Stop_Lat FLOAT,Stop_Long FLOAT, Dummy BOOLEAN, Cong_Int BOOLEAN,Before_Int BOOLEAN, \
-            Far_From_Int BOOLEAN, Commercial FLOAT, Transport_Hub FLOAT, Bus_bay BOOLEAN, PRIMARY KEY (id));"
+            Far_From_Int BOOLEAN, Commercial FLOAT, Transport_Hub FLOAT, Bus_bay BOOLEAN,Stop_rad FLOAT, PRIMARY KEY (id));"
     c.execute(query)
     conn.commit()
 

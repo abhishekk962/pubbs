@@ -9,6 +9,9 @@
     <label for="num_generations">Number of generations for GA: </label>
     <input value="5" type="number" id="num_generations" name="num_generations" required>
   </div>
-  <button id="myBtn" value="Submit" class="nextBtn" type="submit">Submit</button>
+  <input type="submit" formaction="{{url_for('ga_params')}}" value="Submit" name="save" >
+</form>
+<form>
+  <input type="submit" formaction="{{url_for('ga_params')}}" value="Get From DB" name="getfromdb" >
 </form>
 {% endblock %}

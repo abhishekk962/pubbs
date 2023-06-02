@@ -45,8 +45,8 @@
     <label for="crewperbus">No. of crew per bus: </label>
     <input value="2" type="number" id="crewperbus" name="crewperbus" required>
 
-    <label for="crewincome">Avg monthly wage of crew: </label>
-    <input value="27500" type="number" id="crewincome" name="crewincome" required>
+    <label for="creqincome">Avg monthly wage of crew: </label>
+    <input value="27500" type="number" id="creqincome" name="creqincome" required>
 
     <label for="cr_trip">no of round trips: </label>
     <input value="4" type="number" id="cr_trip" name="cr_trip" required>
@@ -84,6 +84,9 @@
     <label for="ser_period">service hours: </label>
     <input value="16" type="number" id="ser_period" name="ser_period" required>
   </div>
-  <button id="myBtn" value="Submit" class="nextBtn" type="submit">Submit</button>
+  <input type="submit" formaction="{{url_for('service_details')}}" value="Submit" name="save" >
+</form>
+<form>
+  <input type="submit" formaction="{{url_for('service_details')}}" value="Get From DB" name="getfromdb" >
 </form>
 {% endblock %}
