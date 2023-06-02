@@ -66,6 +66,9 @@ def loggedin():
 def logout():
     session.pop('email', None)
     session.pop('password', None)
+    key_list = list(session.keys())
+    for key in key_list:
+        session.pop(key)
     return redirect('/home')
 
 @app.route('/register', methods =['GET', 'POST'])
