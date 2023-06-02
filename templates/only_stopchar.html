@@ -16,14 +16,37 @@
             {% for n in range(stops|length) %}
             <tr>
               <td>{{stops[n]}}</td>
+              {% if data %}
+                {% if data[n][0]==1 %}
+                <td><input type="checkbox" name="{{stop_ids[n]}}{{'_before'}}"checked/></td>
+                {% else %}
+                <td><input type="checkbox" name="{{stop_ids[n]}}{{'_before'}}"/></td>
+                {% endif %}
+                {% if data[n][1]==1 %}
+                <td><input type="checkbox" name="{{stop_ids[n]}}{{'_far'}}"checked/></td>
+                {% else %}
+                <td><input type="checkbox" name="{{stop_ids[n]}}{{'_far'}}"/></td>
+                {% endif %}
+                <td><input type="number" name="{{stop_ids[n]}}{{'_tran'}}" value="{{data[n][2]}}"/></td>
+                <td><input type="number" name="{{stop_ids[n]}}{{'_comm'}}" value="{{data[n][3]}}"/></td>
+                {% if data[n][4]==1 %}
+                <td><input type="checkbox" name="{{stop_ids[n]}}{{'_busbay'}}"checked/></td>
+                {% else %}
+                <td><input type="checkbox" name="{{stop_ids[n]}}{{'_busbay'}}"/></td>
+                {% endif %}
+              {% else %}
               <td><input type="checkbox" name="{{stop_ids[n]}}{{'_before'}}"/></td>
               <td><input type="checkbox" name="{{stop_ids[n]}}{{'_far'}}"/></td>
               <td><input type="number" name="{{stop_ids[n]}}{{'_tran'}}" value="0"/></td>
               <td><input type="number" name="{{stop_ids[n]}}{{'_comm'}}" value="0"/></td>
               <td><input type="checkbox" name="{{stop_ids[n]}}{{'_busbay'}}"/></td>
+              {% endif %}
             </tr>
             {% endfor %}
         </table>
-        <button type="submit" value="Submit">Save</button>
+        <input type="submit" formaction="{{url_for('stop_char')}}" value="Save" name="save" >
+    </form>
+    <form action="{{url_for('stop_char')}}" method="POST">
+      <input type="submit" formaction="{{url_for('stop_char')}}" value="Get From DB" name="getfromdb" >
     </form>
 {% endblock %}
