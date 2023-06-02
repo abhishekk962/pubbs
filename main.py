@@ -34,14 +34,14 @@ conn = pymysql.connect(host="103.21.58.10",
 def login():
     message = ''
     if 'email' in session:
-        return render_template('only_service.html')
+        return render_template('only_busroute.html')
     else:
         return render_template('login1.html', message = message)
     
 @app.route('/home', methods=['GET', 'POST'])
 def home():
     if 'email' in session:
-        return render_template('only_service.html')
+        return render_template('only_busroute.html')
     else:
         return redirect('/login')
     
@@ -103,15 +103,15 @@ def registered():
 
 # DATA ENTRY================================================================================================================
 
-@app.route('/service', methods=['GET', 'POST'])
-def service_details():
-    return render_template('only_service.html', message="")
+@app.route('/bus-route', methods=['GET', 'POST'])
+def busroute():
+    return render_template('only_busroute.html', message="")
 
 @app.route('/stops', methods=['GET', 'POST'])
 def stop_details():
     return render_template('only_stops.html', message="")
 
-@app.route('/route', methods=['GET', 'POST'])
+@app.route('/build-route', methods=['GET', 'POST'])
 def route_details():
     return render_template('only_route.html', message="")
 
@@ -156,39 +156,6 @@ def stop_char():
 
     return render_template('only_stopchar.html',stops=stops,stop_ids=stop_ids, message="")
 
-# @app.route('/get-stop-char', methods=['GET', 'POST'])
-# def get_stop_char():
-#     c = conn.cursor()
-#     c.execute(f"SELECT Before_Int,Far_From_Int,Commercial,Transport_Hub,Bus_bay FROM T_ROUTE_INFO AS r INNER JOIN T_STOPS_INFO AS s ON (s.id = r.Stop_id) WHERE r.Operator = '{session['email']}' and r.Route='{session['route']}' ORDER BY r.Stop_Num")
-#     data= c.fetchall()
-#     stop_ids = [n[0] for n in data]
-#     stops = [n[1] for n in data]
-#     # return str(stops)
-#     if request.method == "POST":
-#         # Form data
-#         data = request.form.to_dict()
-#         before_int = [True if f"{n}_before" in data else False for n in stop_ids]
-#         far_from_int = [True if f"{n}_far" in data else False for n in stop_ids]
-#         commercial = [data[n] for n in data if '_comm' in n]
-#         transport_hub = [data[n] for n in data if '_tran' in n]
-#         bus_bay = [True if f"{n}_busbay" in data else False for n in stop_ids]
-
-#         # Upload to Database
-#         c = conn.cursor()
-#         query = f"CREATE TABLE IF NOT EXISTS T_STOPS_INFO (id INT NOT NULL AUTO_INCREMENT,uid VARCHAR(50),Operator TEXT,\
-#                 Stop_Name TEXT,Stop_Lat FLOAT,Stop_Long FLOAT, Dummy BOOLEAN, Cong_Int BOOLEAN,Before_Int BOOLEAN, \
-#                 Far_From_Int BOOLEAN, Commercial FLOAT, Transport_Hub FLOAT, Bus_bay BOOLEAN, PRIMARY KEY (id));"
-#         c.execute(query)
-#         conn.commit()
-
-#         c = conn.cursor()
-#         for n in range(len(stops)):
-#             c.execute(f"UPDATE T_STOPS_INFO SET Before_Int = {before_int[n]}, Far_From_Int = {far_from_int[n]} , Commercial = \
-#                       '{commercial[n]}' , Transport_Hub = '{transport_hub[n]}' , Bus_bay = {bus_bay[n]} WHERE id = '{stop_ids[n]}';")
-#             conn.commit()
-#         return render_template('only_stopchar.html',stops=stops, stop_ids=stop_ids, message="Data was Saved")
-
-#     return render_template('only_stopchar.html',stops=stops,stop_ids=stop_ids, message="")
 
 @app.route('/table', methods=['GET', 'POST'])
 def table_details():
@@ -213,6 +180,14 @@ def table_details():
 @app.route('/ols', methods=['GET', 'POST'])
 def ols_details():
     return render_template('only_ols.html', message="")
+
+@app.route('/scheduling', methods=['GET', 'POST'])
+def scheduling_details():
+    return render_template('only_scheduling.html', message="")
+
+@app.route('/constraints', methods=['GET', 'POST'])
+def constraints_details():
+    return render_template('only_constraints.html', message="")
 
 # @app.route('/points', methods=['GET', 'POST'])
 # def point_details():

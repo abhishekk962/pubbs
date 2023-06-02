@@ -21,14 +21,15 @@
     </header>
     <nav>
       <form>
-        <button type="submit" formaction="{{url_for('service_details')}}">Service Details</button>
+        <button type="submit" formaction="{{url_for('busroute')}}">Bus Route</button>
         <button type="submit" formaction="{{url_for('stop_details')}}">Stop Details</button>
-        <button type="submit" formaction="{{url_for('route_details')}}">Route Details</button>
+        <button type="submit" formaction="{{url_for('route_details')}}">Build Route</button>
         <button type="submit" formaction="{{url_for('stop_char')}}">Stop Characteristics</button>
         <button type="submit" formaction="{{url_for('table_details')}}">Table Details</button>
         <button type="submit" formaction="{{url_for('ols_details')}}">OLS Details</button>
+        <button type="submit" formaction="{{url_for('scheduling_details')}}">Scheduling</button>
+        <button type="submit" formaction="{{url_for('constraints_details')}}">Constraints</button>
         <button type="submit">Bus Fleet Details</button>
-        <button type="submit">Constraints</button>
         <button type="submit">Cost Details</button>
       </form>
     </nav>

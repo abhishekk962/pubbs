@@ -1,0 +1,44 @@
+{% extends "dashboard.html" %}
+{% block content %}
+<form id="myform" action="{{url_for('ols_details')}}" method="post">
+  <div>
+    <span>CONSTRAINTS FULL DAY SERVICES</span>
+
+    <label for="max_oppp">Maximum operation cost/person: </label>
+    <input type="number" id="max_oppp" name="max_oppp" required>
+
+    <label for="min_ppvk">Min passenger per vehicle-km: </label>
+    <input type="number" id="min_ppvk" name="min_ppvk" required>
+
+    <label for="min_ppt">Minimum passenger per trip: </label>
+    <input type="number" id="min_ppt" name="min_ppt" required>
+
+    <label for="max_ocpp">Max operation cost per trip: </label>
+    <input type="number" id="max_ocpp" name="max_ocpp" required>
+
+    <label for="max_fleet">Maximum fleet size: </label>
+    <input type="number" id="max_fleet" name="max_fleet" required>
+
+    <label for="max_ppl">Max % of passenger lost: </label>
+    <input type="number" id="max_ppl" name="max_ppl" required>
+
+    <label for="min_crr"> Min cost recovery ratio: </label>
+    <input type="number" id="min_crr" name="min_crr" required>
+
+    <span class="title">CONSTRAINTS TRIP WISE</span>
+
+    <label for="min_ppp">Minimum Passenger per trip: </label>
+    <input type="number" id="min_ppp" name="min_ppp" required>
+
+    <label for="max_pplpt">Max % of passenger lost/trip: </label>
+    <input type="number" id="max_pplpt" name="max_pplpt" required>
+
+    <label for="min_rvpt">Minimum revenue per trip: </label>
+    <input type="number" id="min_rvpt" name="min_rvpt" required>
+
+    <label for="max_opc">Maximum operation cost: </label>
+    <input type="number" id="max_opc" name="max_opc" required>
+  </div>
+  <button id="myBtn" value="Submit" class="nextBtn" type="submit">Submit</button>
+</form>
+{% endblock %}
