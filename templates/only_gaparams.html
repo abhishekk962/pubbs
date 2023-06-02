@@ -1,0 +1,14 @@
+{% extends "dashboard.html" %}
+{% block content %}
+<h4>{{ message }}</h4>
+<form id="myform" action="{{url_for('ga_params')}}" method="post">
+  <div>
+    <label for="sol_per_pop">No of sol set of freq in one popl. for GA: </label>
+    <input value="20" type="number" id="sol_per_pop" name="sol_per_pop" required>
+
+    <label for="num_generations">Number of generations for GA: </label>
+    <input value="5" type="number" id="num_generations" name="num_generations" required>
+  </div>
+  <button id="myBtn" value="Submit" class="nextBtn" type="submit">Submit</button>
+</form>
+{% endblock %}

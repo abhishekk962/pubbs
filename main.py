@@ -105,6 +105,12 @@ def registered():
 
 @app.route('/bus-route', methods=['GET', 'POST'])
 def busroute():
+    if request.method == "POST":
+        if 'periods' not in session:
+            session['periods'] = int(request.form['Number_of_service_periods'])
+        if 'route' not in session:
+                session['route'] = request.form['Bus_route_name']
+        return render_template('only_busroute.html', message="Bus Route info was saved")
     return render_template('only_busroute.html', message="")
 
 @app.route('/stops', methods=['GET', 'POST'])
@@ -189,6 +195,14 @@ def scheduling_details():
 def constraints_details():
     return render_template('only_constraints.html', message="")
 
+@app.route('/service', methods=['GET', 'POST'])
+def service_details():
+    return render_template('only_service.html', message="")
+
+@app.route('/ga-params', methods=['GET', 'POST'])
+def ga_params():
+    return render_template('only_gaparams.html', message="")
+
 # @app.route('/points', methods=['GET', 'POST'])
 # def point_details():
 #     return render_template('only_points.html', message="")
@@ -208,15 +222,15 @@ def get_data():
     # ]
     return jsonify(data)
 
-@app.route('/input-stops', methods=['GET', 'POST'])
-def input_stops():
-    if 'periods' not in session:
-        session['periods'] = int(request.form['Number_of_service_periods'])
-    if 'route' not in session:
-            session['route'] = request.form['Bus_route_name']
-    from_time = request.form['Bus_service_timings_From']
-    to_time = request.form['Bus_service_timings_To']
-    return render_template('only_stops.html')
+# @app.route('/input-stops', methods=['GET', 'POST'])
+# def input_stops():
+#     if 'periods' not in session:
+#         session['periods'] = int(request.form['Number_of_service_periods'])
+#     if 'route' not in session:
+#             session['route'] = request.form['Bus_route_name']
+#     from_time = request.form['Bus_service_timings_From']
+#     to_time = request.form['Bus_service_timings_To']
+#     return render_template('only_stops.html')
 
 @app.route('/save-stops', methods=['POST'])
 def save_stops():

@@ -1,6 +1,7 @@
 {% extends "dashboard.html" %}
 {% block content %}
-<form id="myform" action="{{url_for('input_stops')}}" method="post">
+<h4>{{ message }}</h4>
+<form id="myform" action="{{url_for('busroute')}}" method="post">
   <div>
     <label for="Bus_route_name">Bus Route Name:</label>
     <input type="text" id="Bus_route_name" name="Bus_route_name" required/>

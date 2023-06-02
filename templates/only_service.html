@@ -1,0 +1,89 @@
+{% extends "dashboard.html" %}
+{% block content %}
+<h4>{{ message }}</h4>
+<form id="myform" action="{{url_for('service_details')}}" method="post">
+  <div>
+    <label for="A">Terminal 1:</label>
+    <input type="text" id="A" name="A" required>
+
+    <label for="B">Terminal 2:</label>
+    <input type="text" id="B" name="B" required>
+
+    <label for="frequencydefault">Frequency Default:</label>
+    <input value="3" type="number" id="frequencydefault" name="frequencydefault" required>
+
+    <label for="seatcap">Seating capacity:</label>
+    <input value="43" type="number" id="seatcap" name="seatcap" required>
+
+    <label for="min_c_lvl">Minimum crowding level:</label>
+    <input value="1.5" type="number" step="0.01" id="min_c_lvl" name="min_c_lvl" required>
+
+    <label for="max_c_lvl">Maximum crowding level:</label>
+    <input value="2.2" type="number" step="0.01" id="max_c_lvl" name="max_c_lvl" required>
+
+    <label for="max_wait">Max wait time of a passenger: </label>
+    <input value="21" type="number" id="max_wait" name="max_wait" required>
+
+    <label for="bus_left">Buses Left: </label>
+    <input value="2" type="number" id="bus_left" name="bus_left" required>
+
+    <label for="min_dwell">Minimum dwell time: </label>
+    <input value="30" type="number" id="min_dwell" name="min_dwell" required>
+
+    <label for="slack">Slack time for a trip: </label>
+    <input value="5" type="number" id="slack" name="slack" required>
+
+    <label for="lay_overtime">Lay over time for buses: </label>
+    <input value="10" type="number" id="lay_overtime" name="lay_overtime" required>
+
+    <label for="buscost">Cost of bus (inc loan interest): </label>
+    <input value="7000000" type="number" id="buscost" name="buscost" required>
+
+    <label for="buslifecycle">Bus Life Cycle: </label>
+    <input value="800000" type="number" id="buslifecycle" name="buslifecycle" required>
+
+    <label for="crewperbus">No. of crew per bus: </label>
+    <input value="2" type="number" id="crewperbus" name="crewperbus" required>
+
+    <label for="crewincome">Avg monthly wage of crew: </label>
+    <input value="27500" type="number" id="crewincome" name="crewincome" required>
+
+    <label for="cr_trip">no of round trips: </label>
+    <input value="4" type="number" id="cr_trip" name="cr_trip" required>
+
+    <label for="cr_day">Avg no of work days/month: </label>
+    <input value="25" type="number" id="cr_day" name="cr_day" required>
+
+    <label for="busmaintenance">Bus maintenance cost/km: </label>
+    <input value="5" type="number" id="busmaintenance" name="busmaintenance" required>
+
+    <label for="fuelprice">Fuel cost: </label>
+    <input value="88" type="number" id="fuelprice" name="fuelprice" required>
+
+    <label for="kmperliter">Mileage running: </label>
+    <input value="5" type="number" id="kmperliter" name="kmperliter" required>
+
+    <label for="kmperliter2">Mileage engine idle: </label>
+    <input value="2" type="number" id="kmperliter2" name="kmperliter2" required>
+
+    <label for="c_cantboard">Cost incurred </label>
+    <input value="7" type="number" id="c_cantboard" name="c_cantboard" required>
+
+    <label for="c_waittime">Waiting at bus stop cost: </label>
+    <input value="0.8" type="number" id="c_waittime" name="c_waittime" required>
+
+    <label for="c_invehtime">Invehicle traveltime cost:</label>
+    <input value="0.4" type="number" id="c_invehtime" name="c_invehtime" required>
+
+    <label for="penalty">Penalty: </label>
+    <input value="7" type="number" id="penalty" name="penalty" required>
+
+    <label for="hrinperiod">Length of a period: </label>
+    <input value="1" type="number" id="hrinperiod" name="hrinperiod" required>
+
+    <label for="ser_period">service hours: </label>
+    <input value="16" type="number" id="ser_period" name="ser_period" required>
+  </div>
+  <button id="myBtn" value="Submit" class="nextBtn" type="submit">Submit</button>
+</form>
+{% endblock %}
