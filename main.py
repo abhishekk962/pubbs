@@ -1,7 +1,7 @@
 import csv
 import pandas as pd
 import numpy as np
-from flask import Flask, render_template, make_response,request, Response, session, redirect, jsonify
+from flask import Flask, render_template, make_response,request, Response, session, redirect, jsonify,url_for
 import os
 import re
 import datetime
@@ -34,6 +34,7 @@ conn = pymysql.connect(host="103.21.58.10",
 def login():
     message = ''
     if 'email' in session:
+        return redirect(url_for('busroute'))
         return render_template('only_busroute.html')
     else:
         return render_template('login1.html', message = message)
@@ -41,6 +42,7 @@ def login():
 @app.route('/home', methods=['GET', 'POST'])
 def home():
     if 'email' in session:
+        return redirect(url_for('busroute'))
         return render_template('only_busroute.html')
     else:
         return redirect('/login')
@@ -118,9 +120,12 @@ def busroute():
         if 'p_end' not in session:
             session['p_end'] = int(request.form['Bus_service_timings_To'][:2])
         # return [session[n] for n in session.keys()]
-        # return str(request.form.to_dict())
+        columns = list(request.form.to_dict())
 
         c = conn.cursor()
+        c.execute("CREATE TABLE IF NOT EXISTS T_ONLY_ROUTES (Operator TEXT,Bus_route_name TEXT,Terminal_1_origin TEXT,Terminal_2_destination TEXT,Bus_service_timings_From TEXT,Bus_service_timings_To TEXT,Number_of_service_periods TEXT)")
+        c.execute(f"DELETE FROM T_ONLY_ROUTES WHERE Bus_route_name = '{session['route']}' and Operator = '{session['email']}'")
+        c.execute(f"""INSERT INTO T_ONLY_ROUTES (Operator,{','.join([f'{n}' for n in columns])}) VALUES ('{session['email']}',{','.join([f'"{request.form.get(n)}"' for n in columns])})""")
         c.execute("CREATE TABLE IF NOT EXISTS T_PARAMETERS (Operator TEXT,Route TEXT,A VARCHAR(50), B VARCHAR(50), frequencydefault FLOAT, seatcap FLOAT, \
                   min_c_lvl FLOAT, max_c_lvl FLOAT, max_wait FLOAT, bus_left FLOAT, min_dwell FLOAT, slack FLOAT, lay_overtime FLOAT, \
                   buscost FLOAT, buslifecycle FLOAT, crewperbus FLOAT, creqincome FLOAT, cr_trip FLOAT, cr_day FLOAT, \
@@ -138,7 +143,33 @@ def busroute():
             conn.commit()
 
         return render_template('only_busroute.html', message="Bus Route info was saved")
-    return render_template('only_busroute.html', message="")
+    
+    c = conn.cursor()
+    c.execute("CREATE TABLE IF NOT EXISTS T_ONLY_ROUTES (Operator TEXT,Bus_route_name TEXT,Terminal_1_origin TEXT,Terminal_2_destination TEXT,Bus_service_timings_From TEXT,Bus_service_timings_To TEXT,Number_of_service_periods TEXT)")
+    c.execute(f"SELECT DISTINCT Bus_route_name FROM T_ONLY_ROUTES WHERE Operator = '{session['email']}'")
+    data = c.fetchall()
+    routes = [n[0] for n in data]
+    return render_template('only_busroute.html', message="",routes=routes)
+
+@app.route('/import-route', methods=['GET', 'POST'])
+def import_route():
+    c = conn.cursor()
+    c.execute(f"SELECT DISTINCT Bus_route_name FROM T_ONLY_ROUTES WHERE Operator = '{session['email']}'")
+    data = c.fetchall()
+    routes = [n[0] for n in data]
+
+    route_for_import = request.form['route_for_import']
+    c = conn.cursor(pymysql.cursors.DictCursor)
+    c.execute(f"SELECT * FROM T_ONLY_ROUTES WHERE Operator = '{session['email']}' AND Bus_route_name = '{route_for_import}'")
+    data = c.fetchall()
+    data=data[0]
+
+    session['periods'] = data['Number_of_service_periods']
+    session['route'] = data['Bus_route_name']
+    session['p_start'] = int(data['Bus_service_timings_From'][:2])
+    session['p_end'] = int(data['Bus_service_timings_To'][:2])
+
+    return render_template('only_busroute.html', message="Route was imported", routes=routes)
 
 @app.route('/stops', methods=['GET', 'POST'])
 def stop_details():

@@ -21,6 +21,16 @@
     <label for="Number_of_service_periods">Number of service periods: </label>
     <input type="number" id="Number_of_service_periods" name="Number_of_service_periods" min="2" max="30" required/>
   </div>
-  <button id="myBtn" value="Submit" class="nextBtn" type="submit">Generate</button>
+  <button id="myBtn" value="Submit" class="nextBtn" type="submit">Submit</button>
 </form>
+{% if routes %}
+<form method="POST">
+  <select id="route_for_import" name="route_for_import">
+    {% for route in routes %}
+    <option>{{route}}</option>
+    {% endfor %}
+    <input type="submit" formaction="{{url_for('import_route')}}" value="Import Route" name="importroute" >
+  </select>
+</form>
+{% endif %}
 {% endblock %}
