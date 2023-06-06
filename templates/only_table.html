@@ -29,15 +29,15 @@
               {%endfor%}
             </tr>
           </thead>
-            {% for i in rows %}
+            {% for i in range(rows|length) %}
             <tr>
-              <td>{{i}}</td>
-              {%for n in stops_list%}
+              <td>{{rowheader[i]}}</td>
+              {%for n in range(stop_ids|length) %}
                 {% if db_data %}
-                <td><input type="number" name="{{n}}{{'_'}}{{i}}" value="{{db_data[i-1][stops_list.index(n)]}}"/></td>
+                <td><input type="number" name="{{stop_ids[n]}}{{'_'}}{{rows[i]}}" value="{{db_data[n][i]}}"/></td>
                 {% endif %}
                 {% if not db_data %}
-                <td><input type="number" name="{{n}}{{'_'}}{{i}}" value="0"/></td>
+                <td><input type="number" name="{{stop_ids[n]}}{{'_'}}{{rows[i]}}" value="0"/></td>
                 {% endif %}
               {% endfor %}
               <td><button id="copy" type="button">=</button></td>

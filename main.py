@@ -112,7 +112,13 @@ def busroute():
         if 'periods' not in session:
             session['periods'] = int(request.form['Number_of_service_periods'])
         if 'route' not in session:
-                session['route'] = request.form['Bus_route_name']
+            session['route'] = request.form['Bus_route_name']
+        if 'p_start' not in session:
+            session['p_start'] = int(request.form['Bus_service_timings_From'][:2])
+        if 'p_end' not in session:
+            session['p_end'] = int(request.form['Bus_service_timings_To'][:2])
+        # return [session[n] for n in session.keys()]
+        # return str(request.form.to_dict())
 
         c = conn.cursor()
         c.execute("CREATE TABLE IF NOT EXISTS T_PARAMETERS (Operator TEXT,Route TEXT,A VARCHAR(50), B VARCHAR(50), frequencydefault FLOAT, seatcap FLOAT, \
@@ -195,13 +201,13 @@ def table_details():
     stops_list = tuple(sum(stops_list, ()))
     if stops_list and 'periods' in session:
         message=None
-        return render_template('only_table.html', stops_list=stops_list, rows=list(range(1,session['periods']+1)), message=message)
+        return render_template('only_table.html', stops_list=stops_list, rows=list(range(session['p_start'],session['p_end'])), message=message)
     elif stops_list:
         message = "Enter Route Information First"
         return render_template('only_table.html', stops_list=stops_list, rows=0, message=message)
     elif 'periods' in session:
         message = "Enter Stops Information First"
-        return render_template('only_table.html', stops_list=stops_list, rows=list(range(1,session['periods']+1)), message=message)
+        return render_template('only_table.html', stops_list=stops_list, rows=list(range(session['p_start'],session['p_end'])), message=message)
     else:
         message = "Enter Route and Stops Information First"
         return render_template('only_table.html', stops_list=[], rows=0, message=message)
@@ -382,19 +388,24 @@ def save_route():
     c = conn.cursor()
     c.execute(f"DELETE FROM T_ROUTE_INFO WHERE Route = '{session['route']}' and Operator = '{session['email']}' and uid != '{uid}';")
     conn.commit()
-    return render_template('only_table.html', stops_list=session['stops_list'], rows=list(range(1,session['periods']+1)))
+    return render_template('only_table.html', stops_list=session['stops_list'], rows=list(range(session['p_start'],session['p_end'])))
 
 @app.route('/table-selected', methods=['GET', 'POST'])
 def table_selected():
     c = conn.cursor()
-    c.execute(f"SELECT s.Stop_Name FROM T_ROUTE_INFO AS r INNER JOIN T_STOPS_INFO AS s ON (s.id = r.Stop_id) WHERE r.Operator = '{session['email']}' and r.Route='{session['route']}' ORDER BY r.Stop_Num")
-    stops_list= c.fetchall()
-    stops_list = tuple(sum(stops_list, ()))
+    c.execute(f"SELECT s.id,s.Stop_Name FROM T_ROUTE_INFO AS r INNER JOIN T_STOPS_INFO AS s ON (s.id = r.Stop_id) WHERE r.Operator = '{session['email']}' and r.Route='{session['route']}' ORDER BY r.Stop_Num")
+    stops= c.fetchall()
+    stop_ids = [n[0] for n in stops]
+    stops_list = [n[1] for n in stops]
     table = request.form.get("db_table")
-    if table in ["T_Passenger_Arrival_UP", "T_Passenger_Arrival_DN", "T_Alighting_Rate_UP", "T_Alighting_Rate_DN"]:
-        return render_template('only_table.html', stops_list=stops_list, rows=list(range(1,session['periods']+1)), selected_table=table)
-    elif table in ["T_Fare_DN","T_Fare_UP","T_TravelTimeDN_ANN","T_TraveTimeUP_ANN"]:
-        return render_template('only_table.html', stops_list=stops_list, rows=stops_list, selected_table=table)
+    rows = []
+    if table in ["T_Passenger_Arrival_UP", "T_Passenger_Arrival_DN", "T_Alighting_Rate_UP", "T_Alighting_Rate_DN","T_TravelTimeDN_ANN","T_TraveTimeUP_ANN"]:
+        rows=list(range(session['p_start'],session['p_end']))
+        rowheader = rows
+    elif table in ["T_Fare_DN","T_Fare_UP"]:
+        rows=stop_ids
+        rowheader=stops_list
+    return render_template('only_table.html', rowheader=rowheader, stop_ids=stop_ids, stops_list=stops_list, rows=rows, selected_table=table)
 
 
 @app.route('/table-filled', methods=['GET', 'POST'])
@@ -402,48 +413,49 @@ def table_filled():
     # Get filled data
     data = request.form.to_dict()
     c = conn.cursor()
-    c.execute(f"SELECT s.Stop_Name FROM T_ROUTE_INFO AS r INNER JOIN T_STOPS_INFO AS s ON (s.id = r.Stop_id) WHERE r.Operator = '{session['email']}' and r.Route='{session['route']}' ORDER BY r.Stop_Num")
-    stops_list= c.fetchall()
-    stops_list = tuple(sum(stops_list, ()))
+    c.execute(f"SELECT s.id,s.Stop_Name FROM T_ROUTE_INFO AS r INNER JOIN T_STOPS_INFO AS s ON (s.id = r.Stop_id) WHERE r.Operator = '{session['email']}' and r.Route='{session['route']}' ORDER BY r.Stop_Num")
+    stops= c.fetchall()
+    stop_ids = [n[0] for n in stops]
+    stops_list = [n[1] for n in stops]
     # Upload to Database
     c = conn.cursor()
     db_table = request.form['selected_table']
     c.execute(f"DROP TABLE IF EXISTS {db_table}")
-    query = f"CREATE TABLE IF NOT EXISTS {db_table} (Operator TEXT,Route TEXT,Rows TEXT,{','.join([f'`Stop {n+1}` FLOAT' for n in range(30)])});"
-    c.execute(query)
-    c.execute(f"DELETE FROM {db_table} WHERE Route = '{session['route']}' and Operator = '{session['email']}';")
-    
-    if db_table in ["T_Passenger_Arrival_UP", "T_Passenger_Arrival_DN", "T_Alighting_Rate_UP", "T_Alighting_Rate_DN"]:
-        rows=list(range(1,session['periods']+1))
-    elif db_table in ["T_Fare_DN","T_Fare_UP","T_TravelTimeDN_ANN","T_TraveTimeUP_ANN"]:
-        rows=stops_list
-    
-    for p in rows:
-        query = f"INSERT INTO {db_table} (Operator,Route,Rows,{','.join([f'`Stop {n+1}`' for n in range(len(stops_list))])}) VALUES ('{session['email']}','{session['route']}','{p}',{','.join(['%s' for n in range(len(stops_list))])});"
-        print(query)
-        row = []
-        for s in stops_list:
-            row.append(float(data[f"{s}_{p}"]))
-            print(row, f"{s}_{p}")
-        print(query)
-        c.execute(query, tuple(row))
-        conn.commit()
-        row = []
+    # query = f"CREATE TABLE IF NOT EXISTS {db_table} (Operator TEXT,Route TEXT,Rows TEXT,{','.join([f'`Stop {n+1}` FLOAT' for n in range(30)])});"
     table = request.form.get("selected_table")
-    if table in ["T_Passenger_Arrival_UP", "T_Passenger_Arrival_DN", "T_Alighting_Rate_UP", "T_Alighting_Rate_DN"]:
-        return render_template('only_table.html', stops_list=stops_list, rows=list(range(1,session['periods']+1)), selected_table=table)
-    elif table in ["T_Fare_DN","T_Fare_UP","T_TravelTimeDN_ANN","T_TraveTimeUP_ANN"]:
-        return render_template('only_table.html', stops_list=stops_list, rows=stops_list, selected_table=table)
-    # return render_template('only_table.html', stops_list=stops_list, rows=list(range(1,session['periods']+1)),selected_table=request.form.get('selected_table'))
 
-# new
-@app.route('/clear-table', methods=['GET', 'POST'])
-def clear_table():
-    c = conn.cursor()
-    c.execute(f"SELECT s.Stop_Name FROM T_ROUTE_INFO AS r INNER JOIN T_STOPS_INFO AS s ON (s.id = r.Stop_id) WHERE r.Operator = '{session['email']}' and r.Route='{session['route']}' ORDER BY r.Stop_Num")
-    stops_list= c.fetchall()
-    stops_list = tuple(sum(stops_list, ()))
-    return render_template('only_table.html', stops_list=stops_list, rows=list(range(1,session['periods']+1)),selected_table=request.form.get('selected_table'))
+    if db_table in ["T_Passenger_Arrival_UP", "T_Passenger_Arrival_DN", "T_Alighting_Rate_UP", "T_Alighting_Rate_DN","T_TravelTimeDN_ANN","T_TraveTimeUP_ANN"]:
+        rows=list(range(session['p_start'],session['p_end']))
+        rowheader = rows
+        query = f"CREATE TABLE IF NOT EXISTS {db_table} (Operator TEXT,Route TEXT,Stop_num INT,Stop_id INT,{','.join([f'`{n}` FLOAT' for n in range(24)])});"
+        c.execute(query)
+        c.execute(f"DELETE FROM {db_table} WHERE Route = '{session['route']}' and Operator = '{session['email']}';")
+        for s in stop_ids:
+            query = f"INSERT INTO {db_table} (Operator,Route,Stop_num,Stop_id,{','.join([f'`{n}`' for n in rows])}) VALUES ('{session['email']}','{session['route']}','{stop_ids.index(s)}','{s}',{','.join(['%s' for n in range(len(rows))])});"
+            print(query)
+            row = []
+            for r in rows:
+                row.append(float(data[f"{s}_{r}"]))
+                print(row, f"{s}_{r}")
+            print(query)
+            c.execute(query, tuple(row))
+            conn.commit()
+            row = []
+    
+    elif db_table in ["T_Fare_DN","T_Fare_UP"]:
+        rows=stop_ids
+        rowheader=stops_list
+        query = f"CREATE TABLE IF NOT EXISTS {db_table} (Operator TEXT,Route TEXT,Stop_num INT,Stop_id INT,{','.join([f'`Stop_{n+1}` FLOAT' for n in range(30)])});"
+        c.execute(query)
+        c.execute(f"DELETE FROM {db_table} WHERE Route = '{session['route']}' and Operator = '{session['email']}';")
+        for s in stop_ids:
+            row = [data[f"{s}_{r}"] for r in stop_ids]
+            query = f"INSERT INTO {db_table} (Operator,Route,Stop_num,Stop_id,{','.join([f'`Stop_{n+1}`' for n in range(len(stop_ids))])}) VALUES ('{session['email']}','{session['route']}','{stop_ids.index(s)+1}','{s}',{','.join(['%s' for n in range(len(rows))])});"
+            c.execute(query, tuple(row))
+            # c.execute(f"INSERT INTO {db_table} (Operator,Route,Stop_num,Stop_id,{','.join([f'`Stop_{n+1}`' for n in range(len(stop_ids))])}) VALUES ('{session['email']}','{session['route']}','{stop_ids.index(s)+1}','{s}','{','.join(row)}');")
+        conn.commit()
+
+    return render_template('only_table.html', rowheader=rowheader, stop_ids=stop_ids, stops_list=stops_list, rows=rows, selected_table=table)
 
 # new
 @app.route('/retrieve-data', methods=['GET', 'POST'])
@@ -451,34 +463,73 @@ def retrieve_data():
     # Retrieve from Database
     db_table = request.form['selected_table']
     c = conn.cursor()
-    c.execute(f"SELECT s.Stop_Name FROM T_ROUTE_INFO AS r INNER JOIN T_STOPS_INFO AS s ON (s.id = r.Stop_id) WHERE r.Operator = '{session['email']}' and r.Route='{session['route']}' ORDER BY r.Stop_Num")
-    stops_list= c.fetchall()
-    stops_list = tuple(sum(stops_list, ()))
-    c.execute(f"SELECT {','.join([f'`Stop {n+1}`' for n in range(len(stops_list))])} FROM {db_table} WHERE Operator = '{session['email']}' and Route='{session['route']}' ORDER BY Rows")
-    db_data= c.fetchall()
-    if len(db_data) != session['periods']:
-        return "The specified number of periods don't match the data from the database. Please check and try again."
-    if len(db_data[0]) != len(stops_list):
-        return "The specified number of stops don't match the data from the database. Please check and try again."
-    return render_template('only_table.html', stops_list=stops_list, rows=list(range(1,session['periods']+1)), db_data=db_data,selected_table=request.form.get('selected_table'))
+    c.execute(f"SELECT s.id,s.Stop_Name FROM T_ROUTE_INFO AS r INNER JOIN T_STOPS_INFO AS s ON (s.id = r.Stop_id) WHERE r.Operator = '{session['email']}' and r.Route='{session['route']}' ORDER BY r.Stop_Num")
+    stops= c.fetchall()
+    stop_ids = [n[0] for n in stops]
+    stops_list = [n[1] for n in stops]
+    if db_table in ["T_Passenger_Arrival_UP", "T_Passenger_Arrival_DN", "T_Alighting_Rate_UP", "T_Alighting_Rate_DN","T_TravelTimeDN_ANN","T_TraveTimeUP_ANN"]:
+        rows=list(range(session['p_start'],session['p_end']))
+        rowheader = rows
+        c = conn.cursor()
+        c.execute(f"SELECT {','.join([f'`{n}`' for n in rows])} FROM {db_table} WHERE Operator = '{session['email']}' and Route='{session['route']}' ORDER BY Stop_num")
+        db_data= c.fetchall()
+
+    elif db_table in ["T_Fare_DN","T_Fare_UP"]:
+        rows=stop_ids
+        rowheader=stops_list
+        c = conn.cursor()
+        c.execute(f"SELECT{','.join([f'`Stop_{n+1}`' for n in range(len(stop_ids))])} FROM {db_table} WHERE Operator = '{session['email']}' and Route='{session['route']}' ORDER BY Stop_num")
+        db_data= c.fetchall()
+    
+    # if len(db_data[0]) != len(range(session['p_start'],session['p_end'])):
+    #     return "The specified number of periods don't match the data from the database. Please check and try again."
+    # if len(db_data) != len(stops_list):
+    #     return "The specified number of stops don't match the data from the database. Please check and try again."
+    return render_template('only_table.html', rowheader=rowheader, stop_ids=stop_ids, stops_list=stops_list, rows=rows, db_data=db_data,selected_table=db_table)
+
+# new
+@app.route('/clear-table', methods=['GET', 'POST'])
+def clear_table():
+    c = conn.cursor()
+    c.execute(f"SELECT s.id,s.Stop_Name FROM T_ROUTE_INFO AS r INNER JOIN T_STOPS_INFO AS s ON (s.id = r.Stop_id) WHERE r.Operator = '{session['email']}' and r.Route='{session['route']}' ORDER BY r.Stop_Num")
+    stops= c.fetchall()
+    stop_ids = [n[0] for n in stops]
+    stops_list = [n[1] for n in stops]
+    db_table = request.form['selected_table']
+    if db_table in ["T_Passenger_Arrival_UP", "T_Passenger_Arrival_DN", "T_Alighting_Rate_UP", "T_Alighting_Rate_DN","T_TravelTimeDN_ANN","T_TraveTimeUP_ANN"]:
+        rows=list(range(session['p_start'],session['p_end']))
+        rowheader = rows
+    elif db_table in ["T_Fare_DN","T_Fare_UP"]:
+        rows=stop_ids
+        rowheader=stops_list
+    return render_template('only_table.html', rowheader=rowheader, stop_ids=stop_ids, stops_list=stops_list, rows=rows, selected_table=db_table)
 
 # new
 @app.route('/upload-csv-data', methods=['GET', 'POST'])
 def upload_csv_data():
     # Get stops list
     c = conn.cursor()
-    c.execute(f"SELECT s.Stop_Name FROM T_ROUTE_INFO AS r INNER JOIN T_STOPS_INFO AS s ON (s.id = r.Stop_id) WHERE r.Operator = '{session['email']}' and r.Route='{session['route']}' ORDER BY r.Stop_Num")
-    stops_list= c.fetchall()
-    stops_list = tuple(sum(stops_list, ()))
+    c.execute(f"SELECT s.id,s.Stop_Name FROM T_ROUTE_INFO AS r INNER JOIN T_STOPS_INFO AS s ON (s.id = r.Stop_id) WHERE r.Operator = '{session['email']}' and r.Route='{session['route']}' ORDER BY r.Stop_Num")
+    stops= c.fetchall()
+    stop_ids = [n[0] for n in stops]
+    stops_list = [n[1] for n in stops]
+    db_table = request.form['selected_table']
+    if db_table in ["T_Passenger_Arrival_UP", "T_Passenger_Arrival_DN", "T_Alighting_Rate_UP", "T_Alighting_Rate_DN","T_TravelTimeDN_ANN","T_TraveTimeUP_ANN"]:
+        rows=list(range(session['p_start'],session['p_end']))
+        rowheader = rows
+    elif db_table in ["T_Fare_DN","T_Fare_UP"]:
+        rows=stop_ids
+        rowheader=stops_list
 
     csvdata = request.files['csvfile'].read()
     csvdata = pd.read_csv(BytesIO(csvdata))
+    csvdata = csvdata.transpose()
     csvdata = list(csvdata.itertuples(index=False, name=None))
-    if len(csvdata) != session['periods']:
-        return "The specified number of periods don't match the csv data uploaded. Please check and try again."
-    if len(csvdata[0]) != len(stops_list):
-        return "The specified number of stops don't match the csv data uploaded. Please check and try again."
-    return render_template('only_table.html', stops_list=stops_list, rows=list(range(1,session['periods']+1)), db_data=csvdata,selected_table=request.form.get('selected_table'))
+    # if len(csvdata) != session['periods']:
+    #     return "The specified number of periods don't match the csv data uploaded. Please check and try again."
+    # if len(csvdata[0]) != len(stops_list):
+    #     return "The specified number of stops don't match the csv data uploaded. Please check and try again."
+    return render_template('only_table.html', rowheader=rowheader, stop_ids=stop_ids, stops_list=stops_list, rows=rows, selected_table=db_table,db_data=csvdata)
 
 # new
 @app.route('/download-csv-data', methods=['GET', 'POST'])
@@ -488,17 +539,23 @@ def download_csv_data():
 
     # Get stops list
     c = conn.cursor()
-    c.execute(f"SELECT s.Stop_Name FROM T_ROUTE_INFO AS r INNER JOIN T_STOPS_INFO AS s ON (s.id = r.Stop_id) WHERE r.Operator = '{session['email']}' and r.Route='{session['route']}' ORDER BY r.Stop_Num")
-    stops_list= c.fetchall()
-    stops_list = tuple(sum(stops_list, ()))
+    c.execute(f"SELECT s.id,s.Stop_Name FROM T_ROUTE_INFO AS r INNER JOIN T_STOPS_INFO AS s ON (s.id = r.Stop_id) WHERE r.Operator = '{session['email']}' and r.Route='{session['route']}' ORDER BY r.Stop_Num")
+    stops= c.fetchall()
+    stop_ids = [n[0] for n in stops]
+    stops_list = [n[1] for n in stops]
+    db_table = request.form['selected_table']
+    if db_table in ["T_Passenger_Arrival_UP", "T_Passenger_Arrival_DN", "T_Alighting_Rate_UP", "T_Alighting_Rate_DN","T_TravelTimeDN_ANN","T_TraveTimeUP_ANN"]:
+        rows=list(range(session['p_start'],session['p_end']))
+    elif db_table in ["T_Fare_DN","T_Fare_UP"]:
+        rows=stop_ids
 
     # Write csv
     csv = ""
     csv += ','.join(stops_list) + '\n'
-    for p in range(session['periods']):
+    for r in rows:
         row = []
-        for s in stops_list:
-            row.append(float(data[f"{s}_{p+1}"]))
+        for s in stop_ids:
+            row.append(float(data[f"{s}_{r}"]))
         row = ','.join([str(n) for n in row])
         csv += row + '\n'
 
