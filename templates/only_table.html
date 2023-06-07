@@ -9,10 +9,12 @@
           <option>T_Passenger_Arrival_DN</option>
           <option>T_Fare_UP</option>
           <option>T_Fare_DN</option>
-          <option>T_Alighting_Rate_UP</option>
-          <option>T_Alighting_Rate_DN</option>
           <option>T_TraveTimeUP_ANN</option>
           <option>T_TravelTimeDN_ANN</option>
+          {% for n in periods %}
+          <option>OD_UP_{{n}}</option>
+          <option>OD_DN_{{n}}</option>
+          {% endfor %}
         </select>
         <button type="submit" value="submit">Submit</button>
       </div>
@@ -34,10 +36,10 @@
               <td>{{rowheader[i]}}</td>
               {%for n in range(stop_ids|length) %}
                 {% if db_data %}
-                <td><input type="number" name="{{stop_ids[n]}}{{'_'}}{{rows[i]}}" value="{{db_data[n][i]}}"/></td>
+                <td><input type="number" name="{{stop_ids[n]}}{{'_'}}{{rows[i]}}" value="{{db_data[n][i]}}" {% if i >= n and rowheader[0] is not number %} hidden {% endif %} /></td>
                 {% endif %}
                 {% if not db_data %}
-                <td><input type="number" name="{{stop_ids[n]}}{{'_'}}{{rows[i]}}" value="0"/></td>
+                <td><input type="number" name="{{stop_ids[n]}}{{'_'}}{{rows[i]}}" value="0" {% if i >= n and rowheader[0] is not number %} hidden {% endif %} /></td>
                 {% endif %}
               {% endfor %}
               <td><button id="copy" type="button">=</button></td>

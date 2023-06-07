@@ -418,7 +418,7 @@ def save_route():
     c = conn.cursor()
     c.execute(f"DELETE FROM T_ROUTE_INFO WHERE Route = '{session['route']}' and Operator = '{session['email']}' and uid != '{uid}';")
     conn.commit()
-    return render_template('only_table.html', stops_list=session['stops_list'], rows=list(range(session['p_start'],session['p_end'])))
+    return render_template('only_table.html', stops_list=session['stops_list'], rows=list(range(session['p_start'],session['p_end'])),periods=list(range(session['p_start'],session['p_end'])))
 
 @app.route('/table-selected', methods=['GET', 'POST'])
 def table_selected():
@@ -429,13 +429,19 @@ def table_selected():
     stops_list = [n[1] for n in stops]
     table = request.form.get("db_table")
     rows = []
-    if table in ["T_Passenger_Arrival_UP", "T_Passenger_Arrival_DN", "T_Alighting_Rate_UP", "T_Alighting_Rate_DN","T_TravelTimeDN_ANN","T_TraveTimeUP_ANN"]:
+    if "DN" in table:
+        stop_ids.reverse()
+        stops_list.reverse()
+    if "OD" in table:
+        rows=stop_ids
+        rowheader=stops_list
+    elif table in ["T_Passenger_Arrival_UP", "T_Passenger_Arrival_DN", "T_Alighting_Rate_UP", "T_Alighting_Rate_DN","T_TravelTimeDN_ANN","T_TraveTimeUP_ANN"]:
         rows=list(range(session['p_start'],session['p_end']))
         rowheader = rows
     elif table in ["T_Fare_DN","T_Fare_UP"]:
         rows=stop_ids
         rowheader=stops_list
-    return render_template('only_table.html', rowheader=rowheader, stop_ids=stop_ids, stops_list=stops_list, rows=rows, selected_table=table)
+    return render_template('only_table.html', rowheader=rowheader, stop_ids=stop_ids, stops_list=stops_list, rows=rows, selected_table=table,periods=list(range(session['p_start'],session['p_end'])))
 
 
 @app.route('/table-filled', methods=['GET', 'POST'])
@@ -454,7 +460,24 @@ def table_filled():
     # query = f"CREATE TABLE IF NOT EXISTS {db_table} (Operator TEXT,Route TEXT,Rows TEXT,{','.join([f'`Stop {n+1}` FLOAT' for n in range(30)])});"
     table = request.form.get("selected_table")
 
-    if db_table in ["T_Passenger_Arrival_UP", "T_Passenger_Arrival_DN", "T_Alighting_Rate_UP", "T_Alighting_Rate_DN","T_TravelTimeDN_ANN","T_TraveTimeUP_ANN"]:
+    if "DN" in table:
+        stop_ids.reverse()
+        stops_list.reverse()
+
+    if "OD" in table:
+        rows=stop_ids
+        rowheader=stops_list
+        query = f"CREATE TABLE IF NOT EXISTS T_OD (Operator TEXT,Route TEXT,Stop_num INT,Stop_id INT,Direction TEXT,Period INT,{','.join([f'`Stop_{n+1}` FLOAT' for n in range(30)])});"
+        c.execute(query)
+        c.execute(f"DELETE FROM T_OD WHERE Route = '{session['route']}' and Operator = '{session['email']}';")
+        for s in stop_ids:
+            row = [data[f"{s}_{r}"] for r in stop_ids]
+            query = f"INSERT INTO T_OD (Operator,Route,Stop_num,Stop_id,Direction,Period,{','.join([f'`Stop_{n+1}`' for n in range(len(stop_ids))])}) VALUES ('{session['email']}','{session['route']}','{stop_ids.index(s)+1}','{s}','{db_table[3:5]}','{db_table[6:8]}',{','.join(['%s' for n in range(len(rows))])});"
+            c.execute(query, tuple(row))
+            # c.execute(f"INSERT INTO {db_table} (Operator,Route,Stop_num,Stop_id,{','.join([f'`Stop_{n+1}`' for n in range(len(stop_ids))])}) VALUES ('{session['email']}','{session['route']}','{stop_ids.index(s)+1}','{s}','{','.join(row)}');")
+        conn.commit()
+
+    elif db_table in ["T_Passenger_Arrival_UP", "T_Passenger_Arrival_DN", "T_Alighting_Rate_UP", "T_Alighting_Rate_DN","T_TravelTimeDN_ANN","T_TraveTimeUP_ANN"]:
         rows=list(range(session['p_start'],session['p_end']))
         rowheader = rows
         query = f"CREATE TABLE IF NOT EXISTS {db_table} (Operator TEXT,Route TEXT,Stop_num INT,Stop_id INT,{','.join([f'`{n}` FLOAT' for n in range(24)])});"
@@ -485,7 +508,7 @@ def table_filled():
             # c.execute(f"INSERT INTO {db_table} (Operator,Route,Stop_num,Stop_id,{','.join([f'`Stop_{n+1}`' for n in range(len(stop_ids))])}) VALUES ('{session['email']}','{session['route']}','{stop_ids.index(s)+1}','{s}','{','.join(row)}');")
         conn.commit()
 
-    return render_template('only_table.html', rowheader=rowheader, stop_ids=stop_ids, stops_list=stops_list, rows=rows, selected_table=table)
+    return render_template('only_table.html', rowheader=rowheader, stop_ids=stop_ids, stops_list=stops_list, rows=rows, selected_table=table,periods=list(range(session['p_start'],session['p_end'])))
 
 # new
 @app.route('/retrieve-data', methods=['GET', 'POST'])
@@ -497,7 +520,19 @@ def retrieve_data():
     stops= c.fetchall()
     stop_ids = [n[0] for n in stops]
     stops_list = [n[1] for n in stops]
-    if db_table in ["T_Passenger_Arrival_UP", "T_Passenger_Arrival_DN", "T_Alighting_Rate_UP", "T_Alighting_Rate_DN","T_TravelTimeDN_ANN","T_TraveTimeUP_ANN"]:
+
+    if "DN" in db_table:
+        stop_ids.reverse()
+        stops_list.reverse()
+
+    if "OD" in db_table:
+        rows=stop_ids
+        rowheader=stops_list
+        c = conn.cursor()
+        c.execute(f"SELECT{','.join([f'`Stop_{n+1}`' for n in range(len(stop_ids))])} FROM T_OD WHERE Operator = '{session['email']}' and Route='{session['route']}' and Direction='{db_table[3:5]}' and Period='{db_table[6:8]}' ORDER BY Stop_num")
+        db_data= c.fetchall()
+
+    elif db_table in ["T_Passenger_Arrival_UP", "T_Passenger_Arrival_DN", "T_Alighting_Rate_UP", "T_Alighting_Rate_DN","T_TravelTimeDN_ANN","T_TraveTimeUP_ANN"]:
         rows=list(range(session['p_start'],session['p_end']))
         rowheader = rows
         c = conn.cursor()
@@ -515,7 +550,7 @@ def retrieve_data():
     #     return "The specified number of periods don't match the data from the database. Please check and try again."
     # if len(db_data) != len(stops_list):
     #     return "The specified number of stops don't match the data from the database. Please check and try again."
-    return render_template('only_table.html', rowheader=rowheader, stop_ids=stop_ids, stops_list=stops_list, rows=rows, db_data=db_data,selected_table=db_table)
+    return render_template('only_table.html', rowheader=rowheader, stop_ids=stop_ids, stops_list=stops_list, rows=rows, db_data=db_data,selected_table=db_table,periods=list(range(session['p_start'],session['p_end'])))
 
 # new
 @app.route('/clear-table', methods=['GET', 'POST'])
@@ -526,13 +561,21 @@ def clear_table():
     stop_ids = [n[0] for n in stops]
     stops_list = [n[1] for n in stops]
     db_table = request.form['selected_table']
-    if db_table in ["T_Passenger_Arrival_UP", "T_Passenger_Arrival_DN", "T_Alighting_Rate_UP", "T_Alighting_Rate_DN","T_TravelTimeDN_ANN","T_TraveTimeUP_ANN"]:
+
+    if "DN" in db_table:
+        stop_ids.reverse()
+        stops_list.reverse()
+
+    if "OD" in db_table:
+        rows=stop_ids
+        rowheader=stops_list
+    elif db_table in ["T_Passenger_Arrival_UP", "T_Passenger_Arrival_DN", "T_Alighting_Rate_UP", "T_Alighting_Rate_DN","T_TravelTimeDN_ANN","T_TraveTimeUP_ANN"]:
         rows=list(range(session['p_start'],session['p_end']))
         rowheader = rows
     elif db_table in ["T_Fare_DN","T_Fare_UP"]:
         rows=stop_ids
         rowheader=stops_list
-    return render_template('only_table.html', rowheader=rowheader, stop_ids=stop_ids, stops_list=stops_list, rows=rows, selected_table=db_table)
+    return render_template('only_table.html', rowheader=rowheader, stop_ids=stop_ids, stops_list=stops_list, rows=rows, selected_table=db_table,periods=list(range(session['p_start'],session['p_end'])))
 
 # new
 @app.route('/upload-csv-data', methods=['GET', 'POST'])
@@ -544,7 +587,15 @@ def upload_csv_data():
     stop_ids = [n[0] for n in stops]
     stops_list = [n[1] for n in stops]
     db_table = request.form['selected_table']
-    if db_table in ["T_Passenger_Arrival_UP", "T_Passenger_Arrival_DN", "T_Alighting_Rate_UP", "T_Alighting_Rate_DN","T_TravelTimeDN_ANN","T_TraveTimeUP_ANN"]:
+
+    if "DN" in db_table:
+        stop_ids.reverse()
+        stops_list.reverse()
+
+    if "OD" in db_table:
+        rows=stop_ids
+        rowheader=stops_list
+    elif db_table in ["T_Passenger_Arrival_UP", "T_Passenger_Arrival_DN", "T_Alighting_Rate_UP", "T_Alighting_Rate_DN","T_TravelTimeDN_ANN","T_TraveTimeUP_ANN"]:
         rows=list(range(session['p_start'],session['p_end']))
         rowheader = rows
     elif db_table in ["T_Fare_DN","T_Fare_UP"]:
@@ -559,7 +610,7 @@ def upload_csv_data():
     #     return "The specified number of periods don't match the csv data uploaded. Please check and try again."
     # if len(csvdata[0]) != len(stops_list):
     #     return "The specified number of stops don't match the csv data uploaded. Please check and try again."
-    return render_template('only_table.html', rowheader=rowheader, stop_ids=stop_ids, stops_list=stops_list, rows=rows, selected_table=db_table,db_data=csvdata)
+    return render_template('only_table.html', rowheader=rowheader, stop_ids=stop_ids, stops_list=stops_list, rows=rows, selected_table=db_table,db_data=csvdata,periods=list(range(session['p_start'],session['p_end'])))
 
 # new
 @app.route('/download-csv-data', methods=['GET', 'POST'])
@@ -574,7 +625,14 @@ def download_csv_data():
     stop_ids = [n[0] for n in stops]
     stops_list = [n[1] for n in stops]
     db_table = request.form['selected_table']
-    if db_table in ["T_Passenger_Arrival_UP", "T_Passenger_Arrival_DN", "T_Alighting_Rate_UP", "T_Alighting_Rate_DN","T_TravelTimeDN_ANN","T_TraveTimeUP_ANN"]:
+
+    if "DN" in db_table:
+        stop_ids.reverse()
+        stops_list.reverse()
+        
+    if "OD" in db_table:
+        rows=stop_ids
+    elif db_table in ["T_Passenger_Arrival_UP", "T_Passenger_Arrival_DN", "T_Alighting_Rate_UP", "T_Alighting_Rate_DN","T_TravelTimeDN_ANN","T_TraveTimeUP_ANN"]:
         rows=list(range(session['p_start'],session['p_end']))
     elif db_table in ["T_Fare_DN","T_Fare_UP"]:
         rows=stop_ids
@@ -594,6 +652,11 @@ def download_csv_data():
         mimetype="text/csv",
         headers={"Content-disposition":
                  "attachment; filename=myplot.csv"})
+
+@app.route('/frequency', methods=['GET', 'POST'])
+def frequency():
+    x = 5
+    return x
 
 if __name__ == '__main__':
     app.run(debug=True)
