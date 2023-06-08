@@ -9,9 +9,11 @@ from io import BytesIO
 import pymysql
 import secrets
 import pandas as pd
+import numpy as np
 from flask import Flask, render_template, make_response,request, Response, session, redirect, jsonify,url_for,send_file
 import os
 import re
+import zipfile
 
 app = Flask(__name__)
 
@@ -24,6 +26,50 @@ conn = pymysql.connect(host="103.21.58.10",
                        database="pubbsm8z_uba",
                        port = 3306
                        )
+
+def odalight(files):
+    od1 = files[1]
+
+    boarding = pd.DataFrame(index=np.arange(0), columns=od1.columns)
+    alighting = pd.DataFrame(index=np.arange(0), columns=od1.columns)
+    od_rate= pd.DataFrame(index=od1.index, columns=od1.columns)
+    for filename in files:
+        df = filename
+        list_1 = df.sum(axis=0)  # alighting
+        list_2 = df.sum(axis=1)  # boarding
+        boarding.loc[len(boarding.index)] = list_2
+        alighting.loc[len(alighting.index)] = list_1
+        for i in range (0,len(od1.index)):
+            for j in range (0,len(od1.columns)):
+                #alighting rate w.r.t boarding
+                od_rate.iloc[i,j]= df.iloc[i,j]/list_2[i]
+
+    boarding.index = boarding.index + 1
+    alighting.index = alighting.index + 1
+
+    alighting_rate = pd.DataFrame(index=alighting.index, columns=alighting.columns)
+
+    for i in range(0, len((alighting.index))):
+        for j in range(0, len(alighting.columns)):
+            if j == 0:
+                alighting_rate.iloc[i, j] = 0
+            else:
+                # sum of boarding till stop j-1
+                x = boarding.iloc[[i], 0:j].sum(axis=1, skipna=True).values
+                # sum of alighting till stop j-1
+                y = alighting.iloc[[i], 0:j].sum(axis=1, skipna=True).values
+                x = x[0]
+                y = y[0]
+                # on_board passengers
+                link_load = x - y
+                if link_load == 0:
+                    alighting_rate.iloc[i, j] = 0
+                else:
+                    alighting_rate.iloc[i, j] = (alighting.iloc[i, j] / link_load).round(2)
+
+    alighting_rate.index.name='Alighting Rate'
+
+    return(boarding,alighting,alighting_rate)
 
 # LOGGING IN ======================================================================================================================================
 
@@ -181,7 +227,7 @@ def route_details():
 @app.route('/stop-char', methods=['GET', 'POST'])
 def stop_char():
     c = conn.cursor()
-    c.execute(f"SELECT s.id,s.Stop_Name FROM T_ROUTE_INFO AS r INNER JOIN T_STOPS_INFO AS s ON (s.id = r.Stop_id) WHERE r.Operator = '{session['email']}' and r.Route='{session['route']}' ORDER BY r.Stop_Num")
+    c.execute(f"SELECT s.id,s.Stop_Name FROM T_ROUTE_INFO AS r INNER JOIN T_STOPS_INFO AS s ON (s.id = r.Stop_id) WHERE r.Operator = '{session['email']}' and r.Route='{session['route']}' ORDER BY r.Stop_num")
     data= c.fetchall()
     stop_ids = [n[0] for n in data]
     stops = [n[1] for n in data]
@@ -214,7 +260,7 @@ def stop_char():
             return render_template('only_stopchar.html',stops=stops, stop_ids=stop_ids, message="Data was Saved")
         elif 'getfromdb' in request.form:
             c = conn.cursor()
-            c.execute(f"SELECT s.Before_Int,s.Far_From_Int,s.Commercial,s.Transport_Hub,s.Bus_bay,s.Stop_rad FROM T_STOPS_INFO AS s INNER JOIN T_ROUTE_INFO AS r ON (s.id = r.Stop_id) WHERE s.id IN {tuple(stop_ids)} ORDER BY r.Stop_Num")
+            c.execute(f"SELECT s.Before_Int,s.Far_From_Int,s.Commercial,s.Transport_Hub,s.Bus_bay,s.Stop_rad FROM T_STOPS_INFO AS s INNER JOIN T_ROUTE_INFO AS r ON (s.id = r.Stop_id) WHERE s.id IN {tuple(stop_ids)} ORDER BY r.Stop_num")
             data= c.fetchall()
             # return str(data)
             return render_template('only_stopchar.html',stops=stops, stop_ids=stop_ids, message="Data was updated from DB", data=data)
@@ -225,8 +271,8 @@ def stop_char():
 @app.route('/table', methods=['GET', 'POST'])
 def table_details():
     c = conn.cursor()
-    c.execute(f"CREATE TABLE IF NOT EXISTS T_ROUTE_INFO (uid VARCHAR(50),Operator TEXT,Route TEXT,Stop_Num INT,Stop_Name TEXT,Stop_Lat FLOAT,Stop_Long FLOAT, UP_Dist FLOAT, DN_Dist FLOAT, Dummy BOOLEAN, Cong_Int BOOLEAN);")
-    c.execute(f"SELECT s.Stop_Name FROM T_ROUTE_INFO AS r INNER JOIN T_STOPS_INFO AS s ON (s.id = r.Stop_id) WHERE r.Operator = '{session['email']}' and r.Route='{session['route']}' ORDER BY r.Stop_Num")
+    c.execute(f"CREATE TABLE IF NOT EXISTS T_ROUTE_INFO (id INT NOT NULL AUTO_INCREMENT,uid VARCHAR(50),Operator TEXT,Route TEXT,Stop_num INT,Stop_id INT,UP_Dist FLOAT, DN_Dist FLOAT,PRIMARY KEY (id),FOREIGN KEY (Stop_id) REFERENCES T_STOPS_INFO(id) );")
+    c.execute(f"SELECT s.Stop_Name FROM T_ROUTE_INFO AS r INNER JOIN T_STOPS_INFO AS s ON (s.id = r.Stop_id) WHERE r.Operator = '{session['email']}' and r.Route='{session['route']}' ORDER BY r.Stop_num")
     stops_list= c.fetchall()
     stops_list = tuple(sum(stops_list, ()))
     if stops_list and 'periods' in session:
@@ -406,13 +452,13 @@ def save_route():
 
     # Upload to Database
     c = conn.cursor()
-    query = f"CREATE TABLE IF NOT EXISTS T_ROUTE_INFO (id INT NOT NULL AUTO_INCREMENT,uid VARCHAR(50),Operator TEXT,Route TEXT,Stop_Num INT,Stop_id INT,UP_Dist FLOAT, DN_Dist FLOAT,PRIMARY KEY (id),FOREIGN KEY (Stop_id) REFERENCES T_STOPS_INFO(id) );"
+    query = f"CREATE TABLE IF NOT EXISTS T_ROUTE_INFO (id INT NOT NULL AUTO_INCREMENT,uid VARCHAR(50),Operator TEXT,Route TEXT,Stop_num INT,Stop_id INT,UP_Dist FLOAT, DN_Dist FLOAT,PRIMARY KEY (id),FOREIGN KEY (Stop_id) REFERENCES T_STOPS_INFO(id) );"
     c.execute(query)
     conn.commit()
 
     c = conn.cursor()
     for n in range(len(stops_list)):
-        c.execute(f"INSERT INTO T_ROUTE_INFO (uid,Operator,Route,Stop_Num,Stop_id,UP_Dist,DN_Dist) VALUES ('{uid}','{session['email']}','{session['route']}','{n+1}','{stop_ids[n]}','{up_distances[n]}','{dn_distances[n]}');")
+        c.execute(f"INSERT INTO T_ROUTE_INFO (uid,Operator,Route,Stop_num,Stop_id,UP_Dist,DN_Dist) VALUES ('{uid}','{session['email']}','{session['route']}','{n+1}','{stop_ids[n]}','{up_distances[n]}','{dn_distances[n]}');")
         conn.commit()
 
     c = conn.cursor()
@@ -423,7 +469,7 @@ def save_route():
 @app.route('/table-selected', methods=['GET', 'POST'])
 def table_selected():
     c = conn.cursor()
-    c.execute(f"SELECT s.id,s.Stop_Name FROM T_ROUTE_INFO AS r INNER JOIN T_STOPS_INFO AS s ON (s.id = r.Stop_id) WHERE r.Operator = '{session['email']}' and r.Route='{session['route']}' ORDER BY r.Stop_Num")
+    c.execute(f"SELECT s.id,s.Stop_Name FROM T_ROUTE_INFO AS r INNER JOIN T_STOPS_INFO AS s ON (s.id = r.Stop_id) WHERE r.Operator = '{session['email']}' and r.Route='{session['route']}' ORDER BY r.Stop_num")
     stops= c.fetchall()
     stop_ids = [n[0] for n in stops]
     stops_list = [n[1] for n in stops]
@@ -435,7 +481,7 @@ def table_selected():
     if "OD" in table:
         rows=stop_ids
         rowheader=stops_list
-    elif table in ["T_Passenger_Arrival_UP", "T_Passenger_Arrival_DN", "T_Alighting_Rate_UP", "T_Alighting_Rate_DN","T_TravelTimeDN_ANN","T_TraveTimeUP_ANN"]:
+    elif table in ["T_Passenger_Arrival_UP", "T_Passenger_Arrival_DN","T_TravelTimeDN_ANN","T_TraveTimeUP_ANN"]:
         rows=list(range(session['p_start'],session['p_end']))
         rowheader = rows
     elif table in ["T_Fare_DN","T_Fare_UP"]:
@@ -449,7 +495,7 @@ def table_filled():
     # Get filled data
     data = request.form.to_dict()
     c = conn.cursor()
-    c.execute(f"SELECT s.id,s.Stop_Name FROM T_ROUTE_INFO AS r INNER JOIN T_STOPS_INFO AS s ON (s.id = r.Stop_id) WHERE r.Operator = '{session['email']}' and r.Route='{session['route']}' ORDER BY r.Stop_Num")
+    c.execute(f"SELECT s.id,s.Stop_Name FROM T_ROUTE_INFO AS r INNER JOIN T_STOPS_INFO AS s ON (s.id = r.Stop_id) WHERE r.Operator = '{session['email']}' and r.Route='{session['route']}' ORDER BY r.Stop_num")
     stops= c.fetchall()
     stop_ids = [n[0] for n in stops]
     stops_list = [n[1] for n in stops]
@@ -469,7 +515,7 @@ def table_filled():
         rowheader=stops_list
         query = f"CREATE TABLE IF NOT EXISTS T_OD (Operator TEXT,Route TEXT,Stop_num INT,Stop_id INT,Direction TEXT,Period INT,{','.join([f'`Stop_{n+1}` FLOAT' for n in range(30)])});"
         c.execute(query)
-        c.execute(f"DELETE FROM T_OD WHERE Route = '{session['route']}' and Operator = '{session['email']}';")
+        c.execute(f"DELETE FROM T_OD WHERE Route = '{session['route']}' and Operator = '{session['email']}' and Direction = '{db_table[3:5]}' and Period = '{db_table[6:8]}';")
         for s in stop_ids:
             row = [data[f"{s}_{r}"] for r in stop_ids]
             query = f"INSERT INTO T_OD (Operator,Route,Stop_num,Stop_id,Direction,Period,{','.join([f'`Stop_{n+1}`' for n in range(len(stop_ids))])}) VALUES ('{session['email']}','{session['route']}','{stop_ids.index(s)+1}','{s}','{db_table[3:5]}','{db_table[6:8]}',{','.join(['%s' for n in range(len(rows))])});"
@@ -477,7 +523,7 @@ def table_filled():
             # c.execute(f"INSERT INTO {db_table} (Operator,Route,Stop_num,Stop_id,{','.join([f'`Stop_{n+1}`' for n in range(len(stop_ids))])}) VALUES ('{session['email']}','{session['route']}','{stop_ids.index(s)+1}','{s}','{','.join(row)}');")
         conn.commit()
 
-    elif db_table in ["T_Passenger_Arrival_UP", "T_Passenger_Arrival_DN", "T_Alighting_Rate_UP", "T_Alighting_Rate_DN","T_TravelTimeDN_ANN","T_TraveTimeUP_ANN"]:
+    elif db_table in ["T_Passenger_Arrival_UP", "T_Passenger_Arrival_DN","T_TravelTimeDN_ANN","T_TraveTimeUP_ANN"]:
         rows=list(range(session['p_start'],session['p_end']))
         rowheader = rows
         query = f"CREATE TABLE IF NOT EXISTS {db_table} (Operator TEXT,Route TEXT,Stop_num INT,Stop_id INT,{','.join([f'`{n}` FLOAT' for n in range(24)])});"
@@ -516,7 +562,7 @@ def retrieve_data():
     # Retrieve from Database
     db_table = request.form['selected_table']
     c = conn.cursor()
-    c.execute(f"SELECT s.id,s.Stop_Name FROM T_ROUTE_INFO AS r INNER JOIN T_STOPS_INFO AS s ON (s.id = r.Stop_id) WHERE r.Operator = '{session['email']}' and r.Route='{session['route']}' ORDER BY r.Stop_Num")
+    c.execute(f"SELECT s.id,s.Stop_Name FROM T_ROUTE_INFO AS r INNER JOIN T_STOPS_INFO AS s ON (s.id = r.Stop_id) WHERE r.Operator = '{session['email']}' and r.Route='{session['route']}' ORDER BY r.Stop_num")
     stops= c.fetchall()
     stop_ids = [n[0] for n in stops]
     stops_list = [n[1] for n in stops]
@@ -532,7 +578,7 @@ def retrieve_data():
         c.execute(f"SELECT{','.join([f'`Stop_{n+1}`' for n in range(len(stop_ids))])} FROM T_OD WHERE Operator = '{session['email']}' and Route='{session['route']}' and Direction='{db_table[3:5]}' and Period='{db_table[6:8]}' ORDER BY Stop_num")
         db_data= c.fetchall()
 
-    elif db_table in ["T_Passenger_Arrival_UP", "T_Passenger_Arrival_DN", "T_Alighting_Rate_UP", "T_Alighting_Rate_DN","T_TravelTimeDN_ANN","T_TraveTimeUP_ANN"]:
+    elif db_table in ["T_Passenger_Arrival_UP", "T_Passenger_Arrival_DN","T_TravelTimeDN_ANN","T_TraveTimeUP_ANN"]:
         rows=list(range(session['p_start'],session['p_end']))
         rowheader = rows
         c = conn.cursor()
@@ -556,7 +602,7 @@ def retrieve_data():
 @app.route('/clear-table', methods=['GET', 'POST'])
 def clear_table():
     c = conn.cursor()
-    c.execute(f"SELECT s.id,s.Stop_Name FROM T_ROUTE_INFO AS r INNER JOIN T_STOPS_INFO AS s ON (s.id = r.Stop_id) WHERE r.Operator = '{session['email']}' and r.Route='{session['route']}' ORDER BY r.Stop_Num")
+    c.execute(f"SELECT s.id,s.Stop_Name FROM T_ROUTE_INFO AS r INNER JOIN T_STOPS_INFO AS s ON (s.id = r.Stop_id) WHERE r.Operator = '{session['email']}' and r.Route='{session['route']}' ORDER BY r.Stop_num")
     stops= c.fetchall()
     stop_ids = [n[0] for n in stops]
     stops_list = [n[1] for n in stops]
@@ -569,7 +615,7 @@ def clear_table():
     if "OD" in db_table:
         rows=stop_ids
         rowheader=stops_list
-    elif db_table in ["T_Passenger_Arrival_UP", "T_Passenger_Arrival_DN", "T_Alighting_Rate_UP", "T_Alighting_Rate_DN","T_TravelTimeDN_ANN","T_TraveTimeUP_ANN"]:
+    elif db_table in ["T_Passenger_Arrival_UP", "T_Passenger_Arrival_DN","T_TravelTimeDN_ANN","T_TraveTimeUP_ANN"]:
         rows=list(range(session['p_start'],session['p_end']))
         rowheader = rows
     elif db_table in ["T_Fare_DN","T_Fare_UP"]:
@@ -582,7 +628,7 @@ def clear_table():
 def upload_csv_data():
     # Get stops list
     c = conn.cursor()
-    c.execute(f"SELECT s.id,s.Stop_Name FROM T_ROUTE_INFO AS r INNER JOIN T_STOPS_INFO AS s ON (s.id = r.Stop_id) WHERE r.Operator = '{session['email']}' and r.Route='{session['route']}' ORDER BY r.Stop_Num")
+    c.execute(f"SELECT s.id,s.Stop_Name FROM T_ROUTE_INFO AS r INNER JOIN T_STOPS_INFO AS s ON (s.id = r.Stop_id) WHERE r.Operator = '{session['email']}' and r.Route='{session['route']}' ORDER BY r.Stop_num")
     stops= c.fetchall()
     stop_ids = [n[0] for n in stops]
     stops_list = [n[1] for n in stops]
@@ -595,7 +641,7 @@ def upload_csv_data():
     if "OD" in db_table:
         rows=stop_ids
         rowheader=stops_list
-    elif db_table in ["T_Passenger_Arrival_UP", "T_Passenger_Arrival_DN", "T_Alighting_Rate_UP", "T_Alighting_Rate_DN","T_TravelTimeDN_ANN","T_TraveTimeUP_ANN"]:
+    elif db_table in ["T_Passenger_Arrival_UP", "T_Passenger_Arrival_DN","T_TravelTimeDN_ANN","T_TraveTimeUP_ANN"]:
         rows=list(range(session['p_start'],session['p_end']))
         rowheader = rows
     elif db_table in ["T_Fare_DN","T_Fare_UP"]:
@@ -620,7 +666,7 @@ def download_csv_data():
 
     # Get stops list
     c = conn.cursor()
-    c.execute(f"SELECT s.id,s.Stop_Name FROM T_ROUTE_INFO AS r INNER JOIN T_STOPS_INFO AS s ON (s.id = r.Stop_id) WHERE r.Operator = '{session['email']}' and r.Route='{session['route']}' ORDER BY r.Stop_Num")
+    c.execute(f"SELECT s.id,s.Stop_Name FROM T_ROUTE_INFO AS r INNER JOIN T_STOPS_INFO AS s ON (s.id = r.Stop_id) WHERE r.Operator = '{session['email']}' and r.Route='{session['route']}' ORDER BY r.Stop_num")
     stops= c.fetchall()
     stop_ids = [n[0] for n in stops]
     stops_list = [n[1] for n in stops]
@@ -629,10 +675,10 @@ def download_csv_data():
     if "DN" in db_table:
         stop_ids.reverse()
         stops_list.reverse()
-        
+
     if "OD" in db_table:
         rows=stop_ids
-    elif db_table in ["T_Passenger_Arrival_UP", "T_Passenger_Arrival_DN", "T_Alighting_Rate_UP", "T_Alighting_Rate_DN","T_TravelTimeDN_ANN","T_TraveTimeUP_ANN"]:
+    elif db_table in ["T_Passenger_Arrival_UP", "T_Passenger_Arrival_DN","T_TravelTimeDN_ANN","T_TraveTimeUP_ANN"]:
         rows=list(range(session['p_start'],session['p_end']))
     elif db_table in ["T_Fare_DN","T_Fare_UP"]:
         rows=stop_ids
@@ -655,8 +701,117 @@ def download_csv_data():
 
 @app.route('/frequency', methods=['GET', 'POST'])
 def frequency():
-    x = 5
-    return x
+    # Get stops list
+    c = conn.cursor()
+    c.execute(f"SELECT s.id,s.Stop_Name FROM T_ROUTE_INFO AS r INNER JOIN T_STOPS_INFO AS s ON (s.id = r.Stop_id) WHERE r.Operator = '{session['email']}' and r.Route='{session['route']}' ORDER BY r.Stop_num")
+    stops= c.fetchall()
+    stop_ids = [n[0] for n in stops]
+    stops_list = [n[1] for n in stops]
+    stop_dict = {n:stops_list[stop_ids.index(n)] for n in stop_ids}
+
+    tables = ["T_OLS_COEFF","T_ROUTE_INFO","T_OD","T_Fare_DN","T_Fare_UP","T_Passenger_Arrival_UP", "T_Passenger_Arrival_DN","T_TravelTimeDN_ANN","T_TraveTimeUP_ANN"]
+    memory_file = BytesIO()
+    with zipfile.ZipFile(memory_file, 'w') as zipf:
+        for n in tables:
+            query = f"SELECT * FROM {n} WHERE Operator = '{session['email']}' and Route='{session['route']}'"
+            df = pd.read_sql(query, conn)
+            df.dropna(axis=1,inplace=True)
+            if not df.empty:
+                if n == "T_OD":
+                    df.drop(columns=['Operator','Route','Stop_num'],inplace=True)
+                    df.Stop_id = df.Stop_id.replace(to_replace=stop_dict)            
+                    all_od = df.groupby(['Direction','Period'])
+                    up_od_list=[]
+                    dn_od_list=[]
+                    for id,od in all_od:
+                        od.drop(columns=['Direction','Period'],inplace=True)
+                        od.columns = ['Stops'] + list(od.Stop_id)
+                        name = f"OD {id[1]}"
+                        print(name)
+                        print("================================start========================================")
+                        print(od)
+                        print("==================================end======================================")
+                        dirn = 'up' if id[0] == "UP" else "down"
+                        zipf.writestr(f"OD_{dirn}/{name}.csv",od.to_csv(index=False))
+                        od.set_index('Stops')
+                        if dirn == 'up':
+                            up_od_list.append(od)
+                        elif dirn == 'dn':
+                            dn_od_list.append(od)
+                    boardingUP,alightingUP,alighting_rateUP= odalight(up_od_list)
+                    boardingDN,alightingDN,alighting_rateDN= odalight(dn_od_list)
+                    zipf.writestr(f"alighting_rateUP.csv",alighting_rateUP.to_csv(index=False))
+                    zipf.writestr(f"alighting_rateDN.csv",alighting_rateDN.to_csv(index=False))          
+                elif n in ["T_Fare_DN","T_Fare_UP"]:
+                    df.drop(columns=['Operator','Route','Stop_num'],inplace=True)
+                    df.Stop_id = df.Stop_id.replace(to_replace=stop_dict)   
+                    df.columns = ['Stops'] + list(df.Stop_id)
+                    print(n)
+                    print("================================start========================================")
+                    print(df)
+                    print("==================================end======================================")
+                    zipf.writestr(f"{n}.csv",df.to_csv(index=False))
+                elif n in ["T_Passenger_Arrival_UP", "T_Passenger_Arrival_DN","T_TravelTimeDN_ANN","T_TraveTimeUP_ANN"]:
+                    df.drop(columns=['Operator','Route','Stop_num'],inplace=True)
+                    df.Stop_id = df.Stop_id.replace(to_replace=stop_dict)   
+                    df = df.set_index(['Stop_id'])
+                    df = df.transpose()
+                    df = df.reset_index()
+                    name = 'Passenger arrival' if 'Arrival' in n else 'Travel Time'
+                    df = df.rename({'index':name}, axis='columns') 
+                    print(n)
+                    print("================================start========================================")
+                    print(df)
+                    print("==================================end======================================")
+                    zipf.writestr(f"{n}.csv",df.to_csv(index=False))
+                elif n == "T_ROUTE_INFO":
+                    df.drop(columns=['Operator','Route','Stop_num'],inplace=True)
+                    df.Stop_id = df.Stop_id.replace(to_replace=stop_dict)   
+                    df.drop(columns=['id','uid'],inplace=True)
+                    up_df = df.drop(columns=['UP_Dist'])
+                    dn_df = df.drop(columns=['DN_Dist'])
+                    up_df.columns = ['Distance','Distance (Km)']
+                    dn_df.columns = ['Distance','Distance (Km)']
+                    up_df = up_df.transpose()
+                    dn_df = dn_df.transpose()
+                    zipf.writestr(f"distanceUP.csv",up_df.to_csv(header=False))
+                    zipf.writestr(f"distanceDN.csv",dn_df.to_csv(header=False))
+                    print(n)
+                    print("================================start========================================")
+                    print(up_df)
+                    print("==================================end======================================")
+                elif n == "T_OLS_COEFF":
+                    df.drop(columns=['Operator','Route'],inplace=True)
+                    df.index = ['Coef']
+                    df = df.rename_axis('Attributes')
+                    print(n)
+                    print("================================start========================================")
+                    print(df)
+                    print("==================================end======================================")
+                    zipf.writestr(f"{n}.csv",df.to_csv())
+        query = f"SELECT s.Stop_Name,s.Before_Int,s.Far_From_Int,s.Commercial,s.Transport_Hub,s.Bus_bay FROM T_ROUTE_INFO AS r INNER JOIN T_STOPS_INFO AS s ON (s.id = r.Stop_id) WHERE r.Operator = '{session['email']}' and r.Route='{session['route']}' ORDER BY r.Stop_num"
+        df = pd.read_sql(query, conn)
+        df = df.rename({'Stop_Name':"Stops"}, axis='columns') 
+        print("T_ROUTE_INFO")
+        print("================================start========================================")
+        print(df)
+        print("==================================end======================================")
+        zipf.writestr(f"stop wise data.csv",df.to_csv(index=False))
+
+        query = f"SELECT Bus_service_timings_From,Bus_service_timings_To FROM T_ONLY_ROUTES WHERE Operator = '{session['email']}' and Bus_route_name='{session['route']}'"
+        df = pd.read_sql(query, conn)
+        start_time = int(df.iloc[0,0][:2])
+        end_time = int(df.iloc[0,1][:2])
+        time_period = "Time\n" + "\n".join([f"{n}00" for n in range(start_time,end_time)])
+        zipf.writestr(f"tmeperiodUP.csv",time_period)
+        zipf.writestr(f"tmeperiodDN.csv",time_period)
+        
+    memory_file.seek(0)
+    return send_file(memory_file, download_name='Freq_Input.zip', as_attachment=True)    
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    # app.run(debug=True)
+    from waitress import serve
+    serve(app, host="0.0.0.0", port=8080) # http://localhost:8080/
+
+
