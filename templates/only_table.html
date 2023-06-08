@@ -4,7 +4,8 @@
     <form action="{{url_for('table_selected')}}" method="POST">
       <div>
         <label for="db_table"><b>Select the data you're entering:</b></label>
-        <select id="db_table" name="db_table">
+        <select id="db_table" name="db_table" onchange="this.form.submit();">
+          <option value="" selected="selected" hidden="hidden">Choose here</option>
           <option>T_Passenger_Arrival_UP</option>
           <option>T_Passenger_Arrival_DN</option>
           <option>T_Fare_UP</option>
@@ -16,7 +17,6 @@
           <option>OD_DN_{{n}}</option>
           {% endfor %}
         </select>
-        <button type="submit" value="submit">Submit</button>
       </div>
     </form>
     {% if selected_table %}
