@@ -187,7 +187,7 @@ def busroute():
             c.execute(f"INSERT INTO T_PARAMETERS (Operator,Route) VALUES ('{session['email']}','{session['route']}')")
             conn.commit()
 
-        return render_template('only_busroute.html', message="Bus Route info was saved")
+        return render_template('only_busroute.html', message="Bus Route info was saved", data=request.form.to_dict())
     
     c = conn.cursor()
     c.execute("CREATE TABLE IF NOT EXISTS T_ONLY_ROUTES (Operator TEXT,Bus_route_name TEXT,Terminal_1_origin TEXT,Terminal_2_destination TEXT,Bus_service_timings_From TEXT,Bus_service_timings_To TEXT,Number_of_service_periods TEXT)")
@@ -214,7 +214,7 @@ def import_route():
     session['p_start'] = int(data['Bus_service_timings_From'][:2])
     session['p_end'] = int(data['Bus_service_timings_To'][:2])
 
-    return render_template('only_busroute.html', message="Route was imported", routes=routes)
+    return render_template('only_busroute.html', message="Route was imported", routes=routes, data=data)
 
 @app.route('/stops', methods=['GET', 'POST'])
 def stop_details():
@@ -222,7 +222,15 @@ def stop_details():
 
 @app.route('/build-route', methods=['GET', 'POST'])
 def route_details():
-    return render_template('only_route.html', message="")
+    if request.method=='POST':
+        return render_template('only_route.html')
+    c = conn.cursor()
+    c.execute(f"SELECT s.id,s.Stop_Name FROM T_ROUTE_INFO AS r INNER JOIN T_STOPS_INFO AS s ON (s.id = r.Stop_id) WHERE r.Operator = '{session['email']}' and r.Route='{session['route']}' ORDER BY r.Stop_num")
+    data= c.fetchall()
+    stops = [n[1] for n in data]
+    if stops:
+        return render_template('only_route.html', message="Your existing route is shown below. Click 'Rebuild' if you want to build the route again.", stops=stops)
+    return render_template('only_route.html')
 
 @app.route('/stop-char', methods=['GET', 'POST'])
 def stop_char():
@@ -257,15 +265,20 @@ def stop_char():
                         '{commercial[n]}' , Transport_Hub = '{transport_hub[n]}' , Bus_bay = {bus_bay[n]} , Stop_rad = '{stop_rad[n]}'\
                          WHERE id = '{stop_ids[n]}';")
                 conn.commit()
-            return render_template('only_stopchar.html',stops=stops, stop_ids=stop_ids, message="Data was Saved")
+            c = conn.cursor()
+            c.execute(f"SELECT s.Before_Int,s.Far_From_Int,s.Commercial,s.Transport_Hub,s.Bus_bay,s.Stop_rad FROM T_STOPS_INFO AS s INNER JOIN T_ROUTE_INFO AS r ON (s.id = r.Stop_id) WHERE s.id IN {tuple(stop_ids)} and r.Operator='{session['email']}' and r.Route='{session['route']}' ORDER BY r.Stop_num")
+            data= c.fetchall()
+            return render_template('only_stopchar.html',stops=stops, stop_ids=stop_ids, message="Data was Saved", data=data)
         elif 'getfromdb' in request.form:
             c = conn.cursor()
-            c.execute(f"SELECT s.Before_Int,s.Far_From_Int,s.Commercial,s.Transport_Hub,s.Bus_bay,s.Stop_rad FROM T_STOPS_INFO AS s INNER JOIN T_ROUTE_INFO AS r ON (s.id = r.Stop_id) WHERE s.id IN {tuple(stop_ids)} ORDER BY r.Stop_num")
+            c.execute(f"SELECT s.Before_Int,s.Far_From_Int,s.Commercial,s.Transport_Hub,s.Bus_bay,s.Stop_rad FROM T_STOPS_INFO AS s INNER JOIN T_ROUTE_INFO AS r ON (s.id = r.Stop_id) WHERE s.id IN {tuple(stop_ids)} and r.Operator='{session['email']}' and r.Route='{session['route']}' ORDER BY r.Stop_num")
             data= c.fetchall()
             # return str(data)
             return render_template('only_stopchar.html',stops=stops, stop_ids=stop_ids, message="Data was updated from DB", data=data)
-
-    return render_template('only_stopchar.html',stops=stops,stop_ids=stop_ids, message="")
+    c = conn.cursor()
+    c.execute(f"SELECT s.Before_Int,s.Far_From_Int,s.Commercial,s.Transport_Hub,s.Bus_bay,s.Stop_rad FROM T_STOPS_INFO AS s INNER JOIN T_ROUTE_INFO AS r ON (s.id = r.Stop_id) WHERE s.id IN {tuple(stop_ids)} and r.Operator='{session['email']}' and r.Route='{session['route']}' ORDER BY r.Stop_num")
+    data= c.fetchall()
+    return render_template('only_stopchar.html',stops=stops,stop_ids=stop_ids, message="Fill or Update Details", data=data)
 
 
 @app.route('/table', methods=['GET', 'POST'])
@@ -275,18 +288,19 @@ def table_details():
     c.execute(f"SELECT s.Stop_Name FROM T_ROUTE_INFO AS r INNER JOIN T_STOPS_INFO AS s ON (s.id = r.Stop_id) WHERE r.Operator = '{session['email']}' and r.Route='{session['route']}' ORDER BY r.Stop_num")
     stops_list= c.fetchall()
     stops_list = tuple(sum(stops_list, ()))
+    periods=list(range(session['p_start'],session['p_end']))
     if stops_list and 'periods' in session:
         message=None
-        return render_template('only_table.html', stops_list=stops_list, rows=list(range(session['p_start'],session['p_end'])), message=message)
+        return render_template('only_table.html', stops_list=stops_list, rows=list(range(session['p_start'],session['p_end'])), message=message,periods=periods)
     elif stops_list:
         message = "Enter Route Information First"
-        return render_template('only_table.html', stops_list=stops_list, rows=0, message=message)
+        return render_template('only_table.html', stops_list=stops_list, rows=0, message=message,periods=periods)
     elif 'periods' in session:
         message = "Enter Stops Information First"
-        return render_template('only_table.html', stops_list=stops_list, rows=list(range(session['p_start'],session['p_end'])), message=message)
+        return render_template('only_table.html', stops_list=stops_list, rows=list(range(session['p_start'],session['p_end'])), message=message,periods=periods)
     else:
         message = "Enter Route and Stops Information First"
-        return render_template('only_table.html', stops_list=[], rows=0, message=message)
+        return render_template('only_table.html', stops_list=[], rows=0, message=message,periods=periods)
 
 @app.route('/ols', methods=['GET', 'POST'])
 def ols_details():
@@ -308,21 +322,21 @@ def ols_details():
     else:
         return render_template('only_ols.html', message="")
 
-@app.route('/scheduling', methods=['GET', 'POST'])
+@app.route('/scheduling-details', methods=['GET', 'POST'])
 def scheduling_details():
     if request.method == "POST":
         if 'save' in request.form:
             c = conn.cursor()
             c.execute(f"UPDATE T_PARAMETERS SET dead_todepot_t1 = '{request.form['dead_todepot_t1']}', dead_todepot_t2 = '{request.form['dead_todepot_t2']}', layover_depot = '{request.form['layover_depot']}', start_ser = '{request.form['start_ser']}', end_ser = '{request.form['end_ser']}', shift = '{request.form['shift']}', max_ideal = '{request.form['max_ideal']}' WHERE Route = '{session['route']}' and Operator = '{session['email']}';")
             conn.commit()
-            return render_template('only_scheduling.html', message="Saved")
+            return render_template('only_scheduling_details.html', message="Saved")
         elif 'getfromdb' in request.form:
             c = conn.cursor(pymysql.cursors.DictCursor)
             c.execute(f"SELECT * FROM T_PARAMETERS WHERE Route = '{session['route']}' and Operator = '{session['email']}'")
             data = c.fetchall()
-            return render_template('only_scheduling.html', message="Saved",data=data[0])
+            return render_template('only_scheduling_details.html', message="Retrieved",data=data[0])
     else:
-        return render_template('only_scheduling.html', message="")
+        return render_template('only_scheduling_details.html', message="")
 
 @app.route('/constraints', methods=['GET', 'POST'])
 def constraints_details():
@@ -336,7 +350,7 @@ def constraints_details():
             c = conn.cursor(pymysql.cursors.DictCursor)
             c.execute(f"SELECT * FROM T_PARAMETERS WHERE Route = '{session['route']}' and Operator = '{session['email']}'")
             data = c.fetchall()
-            return render_template('only_constraints.html', message="Saved",data=data[0])
+            return render_template('only_constraints.html', message="Retrieved",data=data[0])
     else:
         return render_template('only_constraints.html', message="")
 
@@ -352,7 +366,7 @@ def service_details():
             c = conn.cursor(pymysql.cursors.DictCursor)
             c.execute(f"SELECT * FROM T_PARAMETERS WHERE Route = '{session['route']}' and Operator = '{session['email']}'")
             data = c.fetchall()
-            return render_template('only_service.html', message="Saved",data=data[0])
+            return render_template('only_service.html', message="Retrieved",data=data[0])
     else:
         return render_template('only_service.html', message="")
 
@@ -368,7 +382,7 @@ def ga_params():
             c = conn.cursor(pymysql.cursors.DictCursor)
             c.execute(f"SELECT * FROM T_PARAMETERS WHERE Route = '{session['route']}' and Operator = '{session['email']}'")
             data = c.fetchall()
-            return render_template('only_gaparams.html', message="Saved",data=data[0])
+            return render_template('only_gaparams.html', message="Retrieved",data=data[0])
     else:
         return render_template('only_gaparams.html', message="")
 
@@ -699,6 +713,17 @@ def download_csv_data():
         headers={"Content-disposition":
                  "attachment; filename=myplot.csv"})
 
+@app.route('/scheduling',methods=['GET','POST'])
+def scheduling():
+    if request.method == "POST":
+        c = conn.cursor()
+        c.execute(f"CREATE TABLE IF NOT EXISTS T_SCHEDULING_FILES (Operator TEXT, Route TEXT,{','.join([f'{n} TEXT' for n in request.files.keys()])})")
+        query = f"INSERT INTO T_SCHEDULING_FILES (Operator,Route,{','.join(list(request.files.keys()))}) VALUES ('{session['email']}','{session['route']}',{','.join(['%s' for n in request.files.keys()])})"
+        c.execute(query,tuple([request.files[n].read() for n in request.files.keys()]))
+        conn.commit()
+        return str(request.files.keys())
+    return render_template('only_scheduling.html')
+
 @app.route('/frequency', methods=['GET', 'POST'])
 def frequency():
     # Get stops list
@@ -733,15 +758,23 @@ def frequency():
                         print("==================================end======================================")
                         dirn = 'up' if id[0] == "UP" else "down"
                         zipf.writestr(f"OD_{dirn}/{name}.csv",od.to_csv(index=False))
-                        od.set_index('Stops')
+                        od.set_index('Stops',inplace=True)
                         if dirn == 'up':
                             up_od_list.append(od)
-                        elif dirn == 'dn':
+                        elif dirn == 'down':
                             dn_od_list.append(od)
                     boardingUP,alightingUP,alighting_rateUP= odalight(up_od_list)
                     boardingDN,alightingDN,alighting_rateDN= odalight(dn_od_list)
                     zipf.writestr(f"alighting_rateUP.csv",alighting_rateUP.to_csv(index=False))
-                    zipf.writestr(f"alighting_rateDN.csv",alighting_rateDN.to_csv(index=False))          
+                    print("alighting_rateUP")
+                    print("================================start========================================")
+                    print(alighting_rateUP)
+                    print("==================================end======================================")
+                    zipf.writestr(f"alighting_rateDN.csv",alighting_rateDN.to_csv(index=False))
+                    print("alighting_rateDN")
+                    print("================================start========================================")
+                    print(alighting_rateDN)
+                    print("==================================end======================================")          
                 elif n in ["T_Fare_DN","T_Fare_UP"]:
                     df.drop(columns=['Operator','Route','Stop_num'],inplace=True)
                     df.Stop_id = df.Stop_id.replace(to_replace=stop_dict)   

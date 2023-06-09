@@ -16,6 +16,16 @@
   </style>
 {% endblock %}
 {% block content %}
+{% if message %}
+{{ message }}
+<form action="{{url_for('route_details')}}" method="post">
+    {% for n in stops %}
+    <div>{{n}}</div>
+    {% endfor %}
+  <input type="submit" value="Rebuild">
+</form>
+{% endif %}
+{% if not message %}
   <div class="mapdata">
     <div id="map"></div>
     <div class="maptable">
@@ -36,6 +46,7 @@
       </form>
     </div>
   </div>
+{% endif %}
 {% endblock %}
 {% block foot %}
   <script src="https://cdn.jsdelivr.net/npm/leaflet@1.7.1/dist/leaflet.js"></script>
