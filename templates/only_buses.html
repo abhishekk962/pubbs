@@ -1,0 +1,21 @@
+{% extends "dashboard.html" %}
+{% block head %}
+{% endblock %}
+{% block content %}
+<h4>{{ message }}</h4>
+  <form action="{{url_for('buses')}}" method="post">
+    Enter Bus Names
+    <div class="buses">
+      {% for n in range(buses) %}
+        {% if busnames %}
+          <input type="text" placeholder="Bus {{n+1}}" id="bus{{n+1}}" name="bus{{n+1}}" value="{{busnames[n]}}">
+        {% else %}
+          <input type="text" placeholder="Bus {{n+1}}" id="bus{{n+1}}" name="bus{{n+1}}">
+        {% endif %}
+      {% endfor %}
+    </div>
+    <input type="submit" value="Save">
+  </form>
+{% endblock %}
+{% block foot %}
+{% endblock %}
