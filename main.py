@@ -441,7 +441,7 @@ def get_data():
 
 @app.route('/status-display')
 def get_status():
-    # conn.ping()
+    conn.ping()
     query = f"SELECT `Route Details`,`Build Route`,`Stop Characteristics`,`Passenger Arrival`,`Fare`,`Travel Time`,`OD Data`,`OLS Details`,`Constraints`,`Service Details`,`GA Parameters`,`Scheduling Details`,`Scheduling Files`,`Bus Details`,`Depot Details` FROM T_STATUS WHERE Route = '{session['route']}' and Operator = '{session['email']}';"
     df = pd.read_sql(query, conn)
     data = df.to_dict(orient='records')[0]
