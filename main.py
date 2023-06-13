@@ -255,6 +255,20 @@ def import_route():
 
     return render_template('only_busroute.html', message="Route was imported", routes=routes, data=data)
 
+@app.route('/clear-route', methods=['GET', 'POST'])
+def clear_route():
+    c = conn.cursor()
+    c.execute(f"SELECT DISTINCT Bus_route_name FROM T_ONLY_ROUTES WHERE Operator = '{session['email']}'")
+    data = c.fetchall()
+    routes = [n[0] for n in data]
+
+    session.pop('periods')
+    session.pop('route')
+    session.pop('p_start')
+    session.pop('p_end')
+
+    return render_template('only_busroute.html', message="You can fill new Route Information now",routes=routes)
+
 @app.route('/stops', methods=['GET', 'POST'])
 def stop_details():
     return render_template('only_stops.html', message="")
