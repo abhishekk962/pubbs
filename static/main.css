@@ -69,3 +69,12 @@ form > div{
     grid-template-columns: auto auto auto auto;
     grid-gap: 4px;
 }
+
+#status{
+    text-align: center;
+}
+
+#status > p{
+    background-color: darkgrey;
+    padding: 4px;
+}

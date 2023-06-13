@@ -6,6 +6,7 @@
 # from flask_session import Session
 import yaml
 from io import BytesIO
+import pymysqlpool
 import pymysql
 import secrets
 import pandas as pd
@@ -23,12 +24,17 @@ app.json.sort_keys = False
 app.secret_key = os.urandom(24)
 
 # Connect to phpMyAdmin Database
-conn = pymysql.connect(host="103.21.58.10",
+connpool = pymysqlpool.ConnectionPool(host="103.21.58.10",
                        user="pubbsm8z",
                        password="Matrix__111",
                        database="pubbsm8z_uba",
-                       port = 3306
+                       port = 3306,
+                       size=3
                        )
+conn = connpool.get_connection()
+conn1 = connpool.get_connection()
+conn2 = connpool.get_connection()
+
 
 def odalight(files):
     od1 = files[1]
@@ -74,6 +80,28 @@ def odalight(files):
 
     return(boarding,alighting,alighting_rate)
 
+@app.route('/data')
+def get_data():
+    conn1 = connpool.get_connection()
+    c = conn1.cursor()
+    c.execute(f"SELECT id,Stop_Name,Stop_Lat,Stop_Long FROM T_STOPS_INFO WHERE Operator = '{session['email']}'")
+    stops_list= c.fetchall()
+    data = []
+    for n in stops_list:
+        data.append({"id":n[0],"name": n[1], "lat": n[2], "lng": n[3]})
+    return jsonify(data)
+
+@app.route('/status-display')
+def get_status():
+    conn2 = connpool.get_connection()
+    query = f"SELECT `Route Details`,`Build Route`,`Stop Characteristics`,`Passenger Arrival`,`Fare`,`Travel Time`,`OD Data`,`OLS Details`,`Constraints`,`Service Details`,`GA Parameters`,`Scheduling Details`,`Scheduling Files`,`Bus Details`,`Depot Details` FROM T_STATUS WHERE Route = '{session['route']}' and Operator = '{session['email']}';"
+    df = pd.read_sql(query, conn2)
+    if df.empty:
+        data = {"Route Details":0,"Build Route":0,"Stop Characteristics":0,"Passenger Arrival":0,"Fare":0,"Travel Time":0,"OD Data":0,"OLS Details":0,"Constraints":0,"Service Details":0,"GA Parameters":0,"Scheduling Details":0,"Scheduling Files":0,"Bus Details":0,"Depot Details":0}
+        return jsonify(data)
+    data = df.to_dict(orient='records')[0]
+    return jsonify(data)
+
 # LOGGING IN ======================================================================================================================================
 
 # Create a User Login and Register Page
@@ -97,7 +125,6 @@ def home():
     
 @app.route('/loggedin', methods = ['GET', 'POST'])
 def loggedin():
-    conn.ping()
     if request.method == 'POST' and 'email' in request.form and 'password' in request.form:
         email = request.form['email']
         password = request.form['password']
@@ -132,7 +159,6 @@ def register():
 
 @app.route('/registered', methods =['GET', 'POST'])
 def registered():
-    conn.ping()
     message = ''
     if request.method == 'POST':
         name = request.form['name']
@@ -143,24 +169,20 @@ def registered():
         account = c.fetchone()
         if account:
             message = 'Account already exists !'
-            return render_template('register1.html', message = message)
         elif not re.match(r'[^@]+@[^@]+\.[^@]+', email):
             message = 'Invalid email address !'
-            return render_template('register1.html', message = message)
         elif not name or not password or not email:
             message = 'Please fill out the form !'
-            return render_template('register1.html', message = message)
         else:
             c.execute('INSERT INTO user (name, email, password) VALUES (% s, % s, % s)', (name, email, password, ))
             conn.commit()
             message = 'You have successfully registered ! Please Login'
-            return render_template('register1.html', message = message)
+        return render_template('register1.html', message = message)
 
 # DATA ENTRY================================================================================================================
 
 @app.route('/bus-route', methods=['GET', 'POST'])
 def busroute():
-    conn.ping()
     if request.method == "POST":
         session['periods'] = request.form['Number_of_service_periods']
         session['route'] = request.form['Bus_route_name']
@@ -215,7 +237,6 @@ def busroute():
 
 @app.route('/import-route', methods=['GET', 'POST'])
 def import_route():
-    conn.ping()
     c = conn.cursor()
     c.execute(f"SELECT DISTINCT Bus_route_name FROM T_ONLY_ROUTES WHERE Operator = '{session['email']}'")
     data = c.fetchall()
@@ -240,7 +261,6 @@ def stop_details():
 
 @app.route('/build-route', methods=['GET', 'POST'])
 def route_details():
-    # conn.ping()
     if request.method=='POST':
         return render_template('only_route.html')
     c = conn.cursor()
@@ -253,7 +273,6 @@ def route_details():
 
 @app.route('/stop-char', methods=['GET', 'POST'])
 def stop_char():
-    conn.ping()
     c = conn.cursor()
     c.execute(f"SELECT s.id,s.Stop_Name FROM T_ROUTE_INFO AS r INNER JOIN T_STOPS_INFO AS s ON (s.id = r.Stop_id) WHERE r.Operator = '{session['email']}' and r.Route='{session['route']}' ORDER BY r.Stop_num")
     data= c.fetchall()
@@ -305,7 +324,6 @@ def stop_char():
 
 @app.route('/table', methods=['GET', 'POST'])
 def table_details():
-    conn.ping()
     c = conn.cursor()
     c.execute(f"CREATE TABLE IF NOT EXISTS T_ROUTE_INFO (id INT NOT NULL AUTO_INCREMENT,uid VARCHAR(50),Operator TEXT,Route TEXT,Stop_num INT,Stop_id INT,UP_Dist FLOAT, DN_Dist FLOAT,PRIMARY KEY (id),FOREIGN KEY (Stop_id) REFERENCES T_STOPS_INFO(id) );")
     c.execute(f"SELECT s.Stop_Name FROM T_ROUTE_INFO AS r INNER JOIN T_STOPS_INFO AS s ON (s.id = r.Stop_id) WHERE r.Operator = '{session['email']}' and r.Route='{session['route']}' ORDER BY r.Stop_num")
@@ -327,7 +345,6 @@ def table_details():
 
 @app.route('/ols', methods=['GET', 'POST'])
 def ols_details():
-    conn.ping()
     if request.method == "POST":
         if 'save' in request.form:
             c = conn.cursor()
@@ -349,7 +366,6 @@ def ols_details():
 
 @app.route('/scheduling-details', methods=['GET', 'POST'])
 def scheduling_details():
-    conn.ping()
     if request.method == "POST":
         if 'save' in request.form:
             c = conn.cursor()
@@ -367,7 +383,6 @@ def scheduling_details():
 
 @app.route('/constraints', methods=['GET', 'POST'])
 def constraints_details():
-    conn.ping()
     if request.method == "POST":
         if 'save' in request.form:
             c = conn.cursor()
@@ -385,7 +400,6 @@ def constraints_details():
 
 @app.route('/service', methods=['GET', 'POST'])
 def service_details():
-    conn.ping()
     if request.method == "POST":
         if 'save' in request.form:
             c = conn.cursor()
@@ -403,7 +417,6 @@ def service_details():
 
 @app.route('/ga-params', methods=['GET', 'POST'])
 def ga_params():
-    conn.ping()
     if request.method == "POST":
         if 'save' in request.form:
             c = conn.cursor()
@@ -423,30 +436,6 @@ def ga_params():
 # def point_details():
 #     return render_template('only_points.html', message="")
 
-@app.route('/data')
-def get_data():
-    conn.ping()
-    c = conn.cursor()
-    c.execute(f"SELECT id,Stop_Name,Stop_Lat,Stop_Long FROM T_STOPS_INFO WHERE Operator = '{session['email']}'")
-    stops_list= c.fetchall()
-    data = []
-    for n in stops_list:
-        data.append({"id":n[0],"name": n[1], "lat": n[2], "lng": n[3]})
-    # data = [
-    #     {"name": "Point 1", "lat": 51.505, "lng": -0.09},
-    #     {"name": "Point 2", "lat": 51.51, "lng": -0.1},
-    #     {"name": "Point 3", "lat": 51.505, "lng": -0.11}
-    # ]
-    return jsonify(data)
-
-@app.route('/status-display')
-def get_status():
-    conn.ping()
-    query = f"SELECT `Route Details`,`Build Route`,`Stop Characteristics`,`Passenger Arrival`,`Fare`,`Travel Time`,`OD Data`,`OLS Details`,`Constraints`,`Service Details`,`GA Parameters`,`Scheduling Details`,`Scheduling Files`,`Bus Details`,`Depot Details` FROM T_STATUS WHERE Route = '{session['route']}' and Operator = '{session['email']}';"
-    df = pd.read_sql(query, conn)
-    data = df.to_dict(orient='records')[0]
-    return jsonify(data)
-
 # @app.route('/input-stops', methods=['GET', 'POST'])
 # def input_stops():
 #     if 'periods' not in session:
@@ -459,7 +448,6 @@ def get_status():
 
 @app.route('/save-stops', methods=['POST'])
 def save_stops():
-    conn.ping()
     # A unique id for the current user and the current route
     uid = secrets.token_hex(12)
     
@@ -496,7 +484,6 @@ def save_stops():
 
 @app.route('/save-route', methods=['POST'])
 def save_route():
-    conn.ping()
     # A unique id for the current user and the current route
     uid = secrets.token_hex(12)
     
@@ -529,7 +516,6 @@ def save_route():
 
 @app.route('/table-selected', methods=['GET', 'POST'])
 def table_selected():
-    conn.ping()
     c = conn.cursor()
     c.execute(f"SELECT s.id,s.Stop_Name FROM T_ROUTE_INFO AS r INNER JOIN T_STOPS_INFO AS s ON (s.id = r.Stop_id) WHERE r.Operator = '{session['email']}' and r.Route='{session['route']}' ORDER BY r.Stop_num")
     stops= c.fetchall()
@@ -554,7 +540,6 @@ def table_selected():
 
 @app.route('/table-filled', methods=['GET', 'POST'])
 def table_filled():
-    conn.ping()
     # Get filled data
     data = request.form.to_dict()
     c = conn.cursor()
@@ -652,7 +637,6 @@ def table_filled():
 # new
 @app.route('/retrieve-data', methods=['GET', 'POST'])
 def retrieve_data():
-    conn.ping()
     # Retrieve from Database
     db_table = request.form['selected_table']
     c = conn.cursor()
@@ -695,7 +679,6 @@ def retrieve_data():
 # new
 @app.route('/clear-table', methods=['GET', 'POST'])
 def clear_table():
-    conn.ping()
     c = conn.cursor()
     c.execute(f"SELECT s.id,s.Stop_Name FROM T_ROUTE_INFO AS r INNER JOIN T_STOPS_INFO AS s ON (s.id = r.Stop_id) WHERE r.Operator = '{session['email']}' and r.Route='{session['route']}' ORDER BY r.Stop_num")
     stops= c.fetchall()
@@ -721,7 +704,6 @@ def clear_table():
 # new
 @app.route('/upload-csv-data', methods=['GET', 'POST'])
 def upload_csv_data():
-    conn.ping()
     # Get stops list
     c = conn.cursor()
     c.execute(f"SELECT s.id,s.Stop_Name FROM T_ROUTE_INFO AS r INNER JOIN T_STOPS_INFO AS s ON (s.id = r.Stop_id) WHERE r.Operator = '{session['email']}' and r.Route='{session['route']}' ORDER BY r.Stop_num")
@@ -757,7 +739,6 @@ def upload_csv_data():
 # new
 @app.route('/download-csv-data', methods=['GET', 'POST'])
 def download_csv_data():
-    conn.ping()
     # Retrieve from Database
     data = request.form.to_dict()
 
@@ -798,7 +779,6 @@ def download_csv_data():
 
 @app.route('/scheduling',methods=['GET','POST'])
 def scheduling():
-    conn.ping()
     if request.method == "POST":
         c = conn.cursor()
         c.execute(f"CREATE TABLE IF NOT EXISTS T_SCHEDULING_FILES (Operator TEXT, Route TEXT,{','.join([f'{n} TEXT' for n in request.files.keys()])})")
@@ -811,10 +791,12 @@ def scheduling():
 
 @app.route('/buses',methods=['GET','POST'])
 def buses():
-    conn.ping()
     c = conn.cursor()
     c.execute(f"SELECT max_fleet from T_PARAMETERS WHERE Operator = '{session['email']}' and Route = '{session['route']}'")
     buses = c.fetchone()
+    if not buses:
+        message = "Enter Constraints Information First"
+        return render_template('only_buses.html',buses=0,message=message)
     if request.method == "POST":
         buslist = ','.join(request.form.values())
         c = conn.cursor()
@@ -831,7 +813,6 @@ def buses():
 
 @app.route('/frequency', methods=['GET', 'POST'])
 def frequency():
-    conn.ping()
     # Get stops list
     c = conn.cursor()
     c.execute(f"SELECT s.id,s.Stop_Name FROM T_ROUTE_INFO AS r INNER JOIN T_STOPS_INFO AS s ON (s.id = r.Stop_id) WHERE r.Operator = '{session['email']}' and r.Route='{session['route']}' ORDER BY r.Stop_num")

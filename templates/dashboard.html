@@ -37,51 +37,9 @@
     </nav>
     <div class="page-body">
       <div class="sidebar">
+        <a href="{{url_for('frequency')}}">Frequency Optimisation</a>
         <div id="status">
         </div>
-        <ul>
-          <li><a href="{{url_for('frequency')}}">Frequency Optimisation</a>
-            <ul>
-              <li>Route Details</li>
-              <li>Build Route</li>
-              <li>Stop Characteristics</li>
-              <li>Passenger Arrival - 2</li>
-              <li>Fare - 2</li>
-              <li>Travel Time - 2</li>
-              <li>OD - periods*2</li>
-              <li>OLS Details</li>
-              <li>Constraints</li>
-              <li>Service Details</li>
-              <li>GA Parameters</li>
-            </ul>
-          </li>
-          <li>Vehicle Scheduling
-            <ul>
-              <li>Vehicle Scheduling</li>
-              <li>Stop-wise Data</li>
-              <li>Distance</li>
-              <li>Alighting Rate</li>
-              <li>O-D Data</li>
-              <li>OLS Co-efficients</li>
-            </ul>
-          </li>
-    
-          <li>Holding Strategy
-            <ul>
-              <li>Holding Strategy</li>
-              <li>Departure Time</li>
-              <li>Stop Arrival Time</li>
-              <li>Travel Time</li>
-            </ul>
-          </li>
-
-          <li>SCHEDULING
-            <ul>
-              <li>Scheduling Details</li>
-              <li>Input Files</li>
-            </ul>
-          </li>
-        </ul>
       </div>
       <div class="content">
         {% block content %}
@@ -104,8 +62,11 @@
             p.textContent = key;
 
             // Set the color of the <p> element based on the value of the key
-            if (data[key]) {
+            if (data[key] == 1) {
               p.style.color = 'blue';
+            } else if (data[key] > 0){
+              p.style.color = 'red';
+              p.textContent = p.textContent + ' ' + Math.round(data[key]*100) + '%'
             } else {
               p.style.color = 'red';
             }

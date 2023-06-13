@@ -3,6 +3,7 @@
 {% endblock %}
 {% block content %}
 <h4>{{ message }}</h4>
+{% if buses != 0 %}
   <form action="{{url_for('buses')}}" method="post">
     Enter Bus Names
     <div class="buses">
@@ -16,6 +17,7 @@
     </div>
     <input type="submit" value="Save">
   </form>
+{% endif %}
 {% endblock %}
 {% block foot %}
 {% endblock %}
