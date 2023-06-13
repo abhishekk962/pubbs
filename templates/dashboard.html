@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Test Layout</title>
     <link rel="stylesheet" href="{{url_for('static',filename='main.css')}}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Sans&display=swap" rel="stylesheet">
     {% block head %}
     {% endblock %}
   </head>
@@ -37,15 +40,42 @@
     </nav>
     <div class="page-body">
       <div class="sidebar">
-        <a href="{{url_for('frequency')}}">Frequency Optimisation</a>
-        <div id="status">
-        </div>
+        <form method="get" action="{{url_for('frequency')}}">
+          <button id="freq" type="submit" disabled hidden>Frequency Optimisation</button>
+        </form>
+        <form method="get" action="{{url_for('scheduling_run')}}">
+          <button id="sched" type="submit" disabled hidden>Scheduling</button>
+        </form>
+        <div id="showfreq" class="s_section">Frequency Optimisation</div>
+        <div id="statusfreq" class="s_section_cont"></div>
+        <div id="showsched" class="s_section">Scheduling</div>
+        <div id="statussched" class="s_section_cont"></div>
       </div>
       <div class="content">
         {% block content %}
         {% endblock %}
       </div>
     </div>
+    <script>
+      const statusfreq = document.getElementById("statusfreq");
+      const showfreq = document.getElementById("showfreq");
+      showfreq.onclick = function () {
+        if (statusfreq.style.display !== "none") {
+          statusfreq.style.display = "none";
+        } else {
+          statusfreq.style.display = "block";
+        }
+      };
+      const statussched = document.getElementById("statussched");
+      const showsched = document.getElementById("showsched");
+      showsched.onclick = function () {
+        if (statussched.style.display !== "none") {
+          statussched.style.display = "none";
+        } else {
+          statussched.style.display = "block";
+        }
+      };
+    </script>
     {% block foot %}
     {% endblock %}
     <script>
@@ -54,25 +84,66 @@
         .then(response => response.json())
         .then(data => {
           // Iterate over the keys in the JSON data
+          let index = 1;
           for (let key in data) {
-            // Create a new <p> element for each key
-            let p = document.createElement('p');
+            if ((key != 'Frequency') && (index <= 11)){
+              // Create a new <p> element for each key
+              let p = document.createElement('p');
 
-            // Set the text content of the <p> element to the key
-            p.textContent = key;
+              // Set the text content of the <p> element to the key
+              p.textContent = key;
 
-            // Set the color of the <p> element based on the value of the key
-            if (data[key] == 1) {
-              p.style.color = 'blue';
-            } else if (data[key] > 0){
-              p.style.color = 'red';
-              p.textContent = p.textContent + ' ' + Math.round(data[key]*100) + '%'
-            } else {
-              p.style.color = 'red';
-            }
+              // Set the color of the <p> element based on the value of the key
+              if (data[key] == 1) {
+                p.style.color = 'black';
+              } else if (data[key] > 0){
+                p.style.color = '#999999';
+                p.textContent = p.textContent + ' ' + Math.round(data[key]*100) + '%'
+              } else {
+                p.style.color = '#999999';
+              }
 
-            // Append the <p> element to the document body
-            document.getElementById('status').appendChild(p);
+              // Append the <p> element to the document body
+              document.getElementById('statusfreq').appendChild(p);
+            } else if (key == 'Frequency'){
+              var freqbtn = document.getElementById('freq');
+              var freqbtnparent = freqbtn.parentElement;
+
+              freqbtn.removeAttribute('hidden');
+              document.getElementById('statusfreq').appendChild(freqbtnparent);
+              if (data[key] == 11){
+                freqbtn.removeAttribute('disabled');
+              }
+            } else if ((key != 'Scheduling') && (12 < index)){
+              // Create a new <p> element for each key
+              let p = document.createElement('p');
+
+              // Set the text content of the <p> element to the key
+              p.textContent = key;
+
+              // Set the color of the <p> element based on the value of the key
+              if (data[key] == 1) {
+                p.style.color = 'black';
+              } else if (data[key] > 0){
+                p.style.color = '#999999';
+                p.textContent = p.textContent + ' ' + Math.round(data[key]*100) + '%'
+              } else {
+                p.style.color = '#999999';
+              }
+
+              // Append the <p> element to the document body
+              document.getElementById('statussched').appendChild(p);
+            } else if (key == 'Scheduling'){
+              var schbtn = document.getElementById('sched');
+              var schbtnparent = schbtn.parentElement;
+
+              schbtn.removeAttribute('hidden');
+              document.getElementById('statussched').appendChild(schbtnparent);
+              if (data[key] == 4){
+                freqbtn.removeAttribute('disabled');
+              }
+            };
+            index++;
           }
         })
         .catch(error => {

@@ -96,8 +96,16 @@ def get_status():
     conn2 = connpool.get_connection()
     query = f"SELECT `Route Details`,`Build Route`,`Stop Characteristics`,`Passenger Arrival`,`Fare`,`Travel Time`,`OD Data`,`OLS Details`,`Constraints`,`Service Details`,`GA Parameters`,`Scheduling Details`,`Scheduling Files`,`Bus Details`,`Depot Details` FROM T_STATUS WHERE Route = '{session['route']}' and Operator = '{session['email']}';"
     df = pd.read_sql(query, conn2)
+    df = df.fillna(0)
+    freq_value = df.iloc[:,:11].sum(axis=1)
+    sched_value = df.iloc[:,11:].sum(axis=1)
+    df.insert(11,'Frequency',freq_value)
+    df.insert(16,'Scheduling',sched_value)
+    df = df.fillna(0)
+    print(df)
+    df.to_clipboard()
     if df.empty:
-        data = {"Route Details":0,"Build Route":0,"Stop Characteristics":0,"Passenger Arrival":0,"Fare":0,"Travel Time":0,"OD Data":0,"OLS Details":0,"Constraints":0,"Service Details":0,"GA Parameters":0,"Scheduling Details":0,"Scheduling Files":0,"Bus Details":0,"Depot Details":0}
+        data = {"Route Details":0,"Build Route":0,"Stop Characteristics":0,"Passenger Arrival":0,"Fare":0,"Travel Time":0,"OD Data":0,"OLS Details":0,"Constraints":0,"Service Details":0,"GA Parameters":0,"Frequency":0,"Scheduling Details":0,"Scheduling Files":0,"Bus Details":0,"Depot Details":0}
         return jsonify(data)
     data = df.to_dict(orient='records')[0]
     return jsonify(data)
@@ -445,20 +453,6 @@ def ga_params():
             return render_template('only_gaparams.html', message="Retrieved",data=data[0])
     else:
         return render_template('only_gaparams.html', message="")
-
-# @app.route('/points', methods=['GET', 'POST'])
-# def point_details():
-#     return render_template('only_points.html', message="")
-
-# @app.route('/input-stops', methods=['GET', 'POST'])
-# def input_stops():
-#     if 'periods' not in session:
-#         session['periods'] = int(request.form['Number_of_service_periods'])
-#     if 'route' not in session:
-#             session['route'] = request.form['Bus_route_name']
-#     from_time = request.form['Bus_service_timings_From']
-#     to_time = request.form['Bus_service_timings_To']
-#     return render_template('only_stops.html')
 
 @app.route('/save-stops', methods=['POST'])
 def save_stops():
@@ -951,6 +945,10 @@ def frequency():
         
     memory_file.seek(0)
     return send_file(memory_file, download_name='Freq_Input.zip', as_attachment=True)    
+
+@app.route('/scheduling-run', methods=['GET', 'POST'])
+def scheduling_run():
+    return "Scheduling"
 
 def open_browser():
     webbrowser.open_new("http://localhost:8080/")

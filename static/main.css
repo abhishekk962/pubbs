@@ -1,6 +1,7 @@
 body{
     margin: 0px;
     height: 100vh;
+    font-family: 'Fira Sans', sans-serif;
 }
 
 header{
@@ -37,10 +38,20 @@ nav > form{
 }
 
 .sidebar{
-    background-color: beige;
+    background-color: rgb(91, 91, 91);
     align-items: center;
     height: 100%;
     width: 20%;
+    overflow: scroll;
+}
+
+.sidebar::-webkit-scrollbar {
+    display: none;    /* Hide scrollbar for Chrome, Safari and Opera */
+}
+
+.sidebar {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
 }
 
 .content{
@@ -70,11 +81,20 @@ form > div{
     grid-gap: 4px;
 }
 
-#status{
-    text-align: center;
+.s_section_cont{
+    display: none;
 }
 
-#status > p{
-    background-color: darkgrey;
-    padding: 4px;
+.s_section_cont > p{
+    background-color: rgb(204, 204, 204);
+    padding: 4px 20px;
+    
+}
+
+.s_section{
+    cursor: pointer;
+    padding: 50px 20px;
+    background: #656565;
+    margin: 10px 0px;
+    color: white;
 }
