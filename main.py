@@ -102,8 +102,6 @@ def get_status():
     df.insert(11,'Frequency',freq_value)
     df.insert(16,'Scheduling',sched_value)
     df = df.fillna(0)
-    print(df)
-    df.to_clipboard()
     if df.empty:
         data = {"Route Details":0,"Build Route":0,"Stop Characteristics":0,"Passenger Arrival":0,"Fare":0,"Travel Time":0,"OD Data":0,"OLS Details":0,"Constraints":0,"Service Details":0,"GA Parameters":0,"Frequency":0,"Scheduling Details":0,"Scheduling Files":0,"Bus Details":0,"Depot Details":0}
         return jsonify(data)
