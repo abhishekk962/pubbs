@@ -1,11 +1,14 @@
 body{
     margin: 0px;
     height: 100vh;
+}
+
+*{
     font-family: 'Fira Sans', sans-serif;
 }
 
 header{
-    background: grey;
+    background: rgb(77, 77, 77);
     display: flex;
     height: 5%;
     align-items: center;
@@ -23,7 +26,7 @@ header{
 nav{
     display:flex;
     height: 5%;
-    background-color: lightslategray;
+    background-color: rgb(139, 139, 139);
     align-items: center;
 }
 
@@ -35,6 +38,7 @@ nav > form{
 .page-body{
     display: flex;
     height: 90%;
+    background: #dedede;
 }
 
 .sidebar{
@@ -56,6 +60,8 @@ nav > form{
 
 .content{
     margin: auto auto;
+    background: white;
+    padding: 20px;
 }
 
 .mapdata{
@@ -73,7 +79,7 @@ td > input{
 
 form > div{
     display: grid;
-    grid-template-columns: auto auto;
+    grid-template-columns: auto auto auto auto;
 }
 
 .buses{
@@ -97,4 +103,20 @@ form > div{
     background: #656565;
     margin: 10px 0px;
     color: white;
+}
+
+input{
+    margin: 5px;
+}
+
+button{
+    margin: 5px;
+}
+
+select{
+    margin: 5px;
+}
+
+label{
+    margin: 5px;
 }

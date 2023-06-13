@@ -802,6 +802,10 @@ def buses():
     c = conn.cursor()
     c.execute(f"SELECT max_fleet from T_PARAMETERS WHERE Operator = '{session['email']}' and Route = '{session['route']}'")
     buses = c.fetchone()
+    if buses[0] is None:
+        buses = 0
+    else:
+        buses = int(buses[0])
     if not buses:
         message = "Enter Constraints Information First"
         return render_template('only_buses.html',buses=0,message=message)
@@ -816,8 +820,8 @@ def buses():
         c.execute(f"SELECT BUSES FROM T_BUSES WHERE Operator = '{session['email']}'")
         busnames = c.fetchone()
         busnames = busnames[0].split(',')
-        return render_template('only_buses.html',buses=int(buses[0]),message="Saved",busnames=busnames)
-    return render_template('only_buses.html',buses=int(buses[0]))
+        return render_template('only_buses.html',buses=buses,message="Saved",busnames=busnames)
+    return render_template('only_buses.html',buses=buses)
 
 @app.route('/frequency', methods=['GET', 'POST'])
 def frequency():
