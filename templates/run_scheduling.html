@@ -1,0 +1,16 @@
+{% extends "dashboard.html" %}
+{% block head %}
+{% endblock %}
+{% block content %}
+<h4>{{ message }}</h4>
+  <form method="post">
+    <div>
+      <button type="submit" formaction="{{url_for('scheduling_run',method = 'FIFO')}}">FIFO</button>
+      <button type="submit" formaction="{{url_for('scheduling_run',method = 'LIFO')}}">LIFO</button>
+      <button type="submit" formaction="{{url_for('scheduling_run',method = 'Random')}}">Random</button>
+      <button type="submit" formaction="{{url_for('scheduling_run',method = 'LIFO')}}">LIFO</button>
+    </div>
+  </form>
+{% endblock %}
+{% block foot %}
+{% endblock %}

@@ -43,7 +43,7 @@
         <form method="get" action="{{url_for('frequency')}}">
           <button id="freq" type="submit" disabled hidden>Frequency Optimisation</button>
         </form>
-        <form method="get" action="{{url_for('scheduling_run')}}">
+        <form method="post" action="{{url_for('scheduling_run',method='Choose')}}">
           <button id="sched" type="submit" disabled hidden>Scheduling</button>
         </form>
         <div id="showfreq" class="s_section">Frequency Optimisation</div>
@@ -139,8 +139,8 @@
 
               schbtn.removeAttribute('hidden');
               document.getElementById('statussched').appendChild(schbtnparent);
-              if (data[key] == 4){
-                freqbtn.removeAttribute('disabled');
+              if (data[key] >= 2){
+                schbtn.removeAttribute('disabled');
               }
             };
             index++;

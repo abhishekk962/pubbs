@@ -34,3 +34,4 @@ csv_files/tmeperiodUP.csv
 templates/index.zip
 static/style.zip
 old pages.zip
+*.pyc
