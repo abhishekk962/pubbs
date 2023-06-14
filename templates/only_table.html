@@ -33,7 +33,7 @@
           </thead>
             {% for i in range(rows|length) %}
             <tr>
-              <td>{{rowheader[i]}}</td>
+              <th>{{rowheader[i]}}</th>
               {%for n in range(stop_ids|length) %}
                 {% if db_data %}
                 <td><input type="number" name="{{stop_ids[n]}}{{'_'}}{{rows[i]}}" value="{{db_data[n][i]}}" {% if i >= n and rowheader[0] is not number %} hidden {% endif %} /></td>

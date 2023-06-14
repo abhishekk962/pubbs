@@ -83,8 +83,10 @@ form > div{
 }
 
 .buses{
-    grid-template-columns: auto auto auto auto;
-    grid-gap: 4px;
+    grid-template-columns: auto auto auto auto auto;
+    gap: 1px;
+    overflow: scroll;
+    max-height: 50vh;
 }
 
 .s_section_cont{
