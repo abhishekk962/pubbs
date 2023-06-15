@@ -34,7 +34,17 @@ nav > form{
     display: flex;
     align-items: center;
     justify-content: space-around;
+    height: 100%;
 }
+
+header > div > button ,.nav-button{
+    background: none;
+    outline: none;
+    border: none;
+    height: 100%;
+    color: white;
+}
+
 .page-body{
     display: flex;
     height: 90%;
@@ -103,6 +113,13 @@ form > div{
     cursor: pointer;
     padding: 50px 20px;
     background: #656565;
+    margin: 10px 0px;
+    color: white;
+}
+
+.route{
+    padding: 10px 20px;
+    background: #353535;
     margin: 10px 0px;
     color: white;
 }

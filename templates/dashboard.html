@@ -24,22 +24,25 @@
     </header>
     <nav>
       <form>
-        <button type="submit" formaction="{{url_for('busroute')}}">Bus Route</button>
-        <button type="submit" formaction="{{url_for('stop_details')}}">Stop Details</button>
-        <button type="submit" formaction="{{url_for('route_details')}}">Build Route</button>
-        <button type="submit" formaction="{{url_for('stop_char')}}">Stop Characteristics</button>
-        <button type="submit" formaction="{{url_for('table_details')}}">Table Details</button>
-        <button type="submit" formaction="{{url_for('ols_details')}}">OLS Details</button>
-        <button type="submit" formaction="{{url_for('constraints_details')}}">Constraints</button>
-        <button type="submit" formaction="{{url_for('service_details')}}">Service Details</button>
-        <button type="submit" formaction="{{url_for('ga_params')}}">GA Params</button>
-        <button type="submit" formaction="{{url_for('scheduling_details')}}">Scheduling Details</button>
-        <button type="submit" formaction="{{url_for('buses')}}">Buses</button>
-        <button type="submit" formaction="{{url_for('scheduling')}}">Scheduling</button>
+        <button type="submit" class="nav-button" formaction="{{url_for('busroute')}}">Bus Route</button>
+        {% if 'route' in session %}
+        <button type="submit" class="nav-button" formaction="{{url_for('stop_details')}}">Stop Details</button>
+        <button type="submit" class="nav-button" formaction="{{url_for('route_details')}}">Build Route</button>
+        <button type="submit" class="nav-button" formaction="{{url_for('stop_char')}}">Stop Characteristics</button>
+        <button type="submit" class="nav-button" formaction="{{url_for('table_details')}}">Table Details</button>
+        <button type="submit" class="nav-button" formaction="{{url_for('ols_details')}}">OLS Details</button>
+        <button type="submit" class="nav-button" formaction="{{url_for('constraints_details')}}">Constraints</button>
+        <button type="submit" class="nav-button" formaction="{{url_for('service_details')}}">Service Details</button>
+        <button type="submit" class="nav-button" formaction="{{url_for('ga_params')}}">GA Params</button>
+        <button type="submit" class="nav-button" formaction="{{url_for('scheduling_details')}}">Scheduling Details</button>
+        <button type="submit" class="nav-button" formaction="{{url_for('buses')}}">Buses</button>
+        <button type="submit" class="nav-button" formaction="{{url_for('scheduling')}}">Scheduling Files</button>
+        {% endif %}
       </form>
     </nav>
     <div class="page-body">
       <div class="sidebar">
+        <div class="route">Route: {{ session['route'] }}</div>
         <form method="get" action="{{url_for('frequency')}}">
           <button id="freq" type="submit" disabled hidden>Frequency Optimisation</button>
         </form>

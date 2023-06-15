@@ -612,18 +612,9 @@ def main():
     for i in range(0,no):
         print(i)
 
-        r1_terminal1, r1_terminal2, r1_veh_sch1, r1_veh_sch2 = tt1(r1_ttDN, r1_ttUP, r1_dtimeDN, r1_dtimeUP, r1_tarrivalDN,
-                                                                r1_tarrivalUP, A1, B1)
-
-        r2_terminal1, r2_terminal2, r2_veh_sch1, r2_veh_sch2 = tt1(r2_ttDN, r2_ttUP, r2_dtimeDN, r2_dtimeUP, r2_tarrivalDN,
-                                                                r2_tarrivalUP, A2, B2)
-
-        (r1_timetable, r2_timetable, crew, b_lst, r_bus, veh_schedule, fig,fleet) = schedule(r1_terminal1, r1_terminal2,
-                                                                                            r1_veh_sch1, r1_veh_sch2,
-                                                                                            r2_terminal1,
-                                                                                            r2_terminal2, r2_veh_sch1,
-                                                                                            r2_veh_sch2, data,r1_ttDN, r1_ttUP,r2_ttDN, r2_ttUP)
-
+        r1_timetable, r2_timetable, crew, b_lst, r_bus, veh_schedule, fig,fleet = main_schedule(r1_ttDN, r1_ttUP, r1_dtimeDN, r1_dtimeUP, r1_tarrivalDN,r1_tarrivalUP,
+                                                                                                r2_ttDN, r2_ttUP, r2_dtimeDN, r2_dtimeUP, r2_tarrivalDN,r2_tarrivalUP,data)
+        
         # tot_ideal_time = b_lst['Ideal time'].sum() - r_bus['Idl_Duration'].sum() Use this if ideal time > max ideal needs to be subtracted
         tot_ideal_time = b_lst['Ideal time'].sum()
         r1_timetable = tt_det(r1_timetable)
