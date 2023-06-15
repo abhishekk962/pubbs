@@ -8,7 +8,17 @@
       <button type="submit" formaction="{{url_for('scheduling_run',method = 'FIFO')}}">FIFO</button>
       <button type="submit" formaction="{{url_for('scheduling_run',method = 'LIFO')}}">LIFO</button>
       <button type="submit" formaction="{{url_for('scheduling_run',method = 'Random')}}">Random</button>
-      <button type="submit" formaction="{{url_for('scheduling_run',method = 'LIFO')}}">LIFO</button>
+      <div>
+        {% if routes %}
+          <select id="second_route" name="second_route">
+            <option value="" selected="selected" hidden="hidden">Select Second Route</option>
+            {% for route in routes %}
+            <option>{{route}}</option>
+            {% endfor %}
+          </select>
+          <button type="submit" value="Submit" formaction="{{url_for('scheduling_run',method = 'Multiline')}}">Multiline</button>
+        {% endif %}
+      </div>
     </div>
   </form>
 {% endblock %}

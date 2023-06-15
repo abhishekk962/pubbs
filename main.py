@@ -146,7 +146,9 @@ def loggedin():
         else:
             message = 'Please enter correct email / password !'
         return render_template('login1.html', message = message)
-
+    else:
+        return redirect('/login')
+    
 @app.route('/logout')
 def logout():
     session.pop('email', None)
@@ -950,7 +952,12 @@ def frequency():
 @app.route('/scheduling-run/<method>', methods=['GET', 'POST'])
 def scheduling_run(method):
     if method == "Choose":
-        return render_template('run_scheduling.html')
+        c = conn.cursor()
+        c.execute("CREATE TABLE IF NOT EXISTS T_ONLY_ROUTES (Operator TEXT,Bus_route_name TEXT,Terminal_1_origin TEXT,Terminal_2_destination TEXT,Bus_service_timings_From TEXT,Bus_service_timings_To TEXT,Number_of_service_periods TEXT)")
+        c.execute(f"SELECT DISTINCT Bus_route_name FROM T_ONLY_ROUTES WHERE Operator = '{session['email']}'")
+        data = c.fetchall()
+        routes = [n[0] for n in data]
+        return render_template('run_scheduling.html',routes=routes)
     else:
         query = f"SELECT * FROM T_PARAMETERS WHERE Operator = '{session['email']}' and Route ='{session['route']}'"
         df = pd.read_sql(query, conn)
@@ -959,6 +966,8 @@ def scheduling_run(method):
 
         # with open(ymlfile,'r') as f:
         data = yaml.load(ymlfile, Loader=SafeLoader)
+
+        globals().update(data)
 
         c = conn.cursor()
         c.execute(f"SELECT * FROM T_SCHEDULING_FILES WHERE Route = '{session['route']}' and Operator = '{session['email']}';")
@@ -973,17 +982,66 @@ def scheduling_run(method):
         travel_time_totDN = pd.read_csv(StringIO(files[6]))
         travel_time_totUP = pd.read_csv(StringIO(files[7]))
 
+        if method == 'Multiline':
+            r1_dtimeDN = pd.read_csv(StringIO(files[2]))
+            r1_dtimeUP = pd.read_csv(StringIO(files[3]))
+            r1_tarrivalDN = pd.read_csv(StringIO(files[4]))
+            r1_tarrivalDN = r1_tarrivalDN.iloc[:, 0]
+            r1_tarrivalUP = pd.read_csv(StringIO(files[5]))
+            r1_tarrivalUP = r1_tarrivalUP.iloc[:, 0]
+            r1_ttDN = pd.read_csv(StringIO(files[6]))
+            r1_ttUP = pd.read_csv(StringIO(files[7]))
+
+            query = f"SELECT A,B,dead_todepot_t1,dead_todepot_t2 FROM T_PARAMETERS WHERE Operator = '{session['email']}' and Route = '{session['route']}'"
+            c.execute(query)
+            d1 = c.fetchone()
+            data.update(A1=d1[0],B1=d1[1],dead_todepot_r1t1=d1[2],dead_todepot_r1t2=d1[3])
+
+            query = f"SELECT A,B,dead_todepot_t1,dead_todepot_t2 FROM T_PARAMETERS WHERE Operator = '{session['email']}' and Route ='{request.form['second_route']}'"
+            c.execute(query)
+            d2 = c.fetchone()
+            data.update(A2=d2[0],B2=d2[1],dead_todepot_r2t1=d2[2],dead_todepot_r2t2=d2[3])
+
+            c.execute(f"SELECT * FROM T_SCHEDULING_FILES WHERE Route = '{request.form['second_route']}' and Operator = '{session['email']}';")
+            files = c.fetchone()
+
+            r2_dtimeDN = pd.read_csv(StringIO(files[2]))
+            r2_dtimeUP = pd.read_csv(StringIO(files[3]))
+            r2_tarrivalDN = pd.read_csv(StringIO(files[4]))
+            r2_tarrivalDN = r2_tarrivalDN.iloc[:, 0]
+            r2_tarrivalUP = pd.read_csv(StringIO(files[5]))
+            r2_tarrivalUP = r2_tarrivalUP.iloc[:, 0]
+            r2_ttDN = pd.read_csv(StringIO(files[6]))
+            r2_ttUP = pd.read_csv(StringIO(files[7]))
+
+            from multiline_scheduling_model2 import main_schedule
+
+            for i in range(0,10):
+                print(r1_ttDN)
+                r1_timetable, r2_timetable, crew, b_lst, r_bus, veh_schedule, fig,fleet = main_schedule(r1_ttDN, r1_ttUP, r1_dtimeDN, r1_dtimeUP, r1_tarrivalDN,r1_tarrivalUP,r2_ttDN, r2_ttUP, r2_dtimeDN, r2_dtimeUP, r2_tarrivalDN,r2_tarrivalUP,data)
+                tot_ideal_time = b_lst['Ideal time'].sum()
+                if i == 0:
+                    min_ideal = tot_ideal_time
+                    min_data = r1_timetable, r2_timetable, crew, b_lst, r_bus, veh_schedule, fig,fleet
+                else:
+                    if min_ideal > tot_ideal_time:
+                        min_ideal = tot_ideal_time
+                        min_data = r1_timetable, r2_timetable, crew, b_lst, r_bus, veh_schedule, fig,fleet
+            r1_timetable, r2_timetable, crew, bus_details, reuse_buses, veh_schedule, fig,fleet = min_data
+
         if method == 'FIFO':
             from Timetable_FIFO import schedule
             fleet,depot_tt,crew,timetable, busreq_at_Terminal1, busreq_at_Terminal2, poolsize_at_Terminal1, poolsize_at_Terminal2, veh_sch1, veh_sch2, veh_schedule, bus_details, fig, reuse_buses, tot_ideal_time, vehicleschedule = schedule(
             travel_time_totDN, departuretimeDN, departuretimeUP, travel_time_totUP,
             terminalarrivalDN, terminalarrivalUP, data)
+
         elif method == 'LIFO':
             from Timetable_LIFO import schedule
             purpose = 'ghghj'
             fleet,depot_tt,crew,timetable, busreq_at_Terminal1, busreq_at_Terminal2, poolsize_at_Terminal1, poolsize_at_Terminal2, veh_sch1, veh_sch2, veh_schedule, bus_details, fig, reuse_buses, tot_ideal_time, vehicleschedule = schedule(
             travel_time_totDN, departuretimeDN, departuretimeUP, travel_time_totUP, purpose,
             terminalarrivalDN, terminalarrivalUP, data)
+
         elif method == 'Random':
             from Timetable_Random import schedule
             purpose = 'ghghj'
@@ -1002,13 +1060,24 @@ def scheduling_run(method):
         
         sche_out = BytesIO()
         with zipfile.ZipFile(sche_out, 'w') as sche_zip:
-            sche_zip.writestr(f'Time_Table_{method}.csv', timetable.to_csv(index=False))
             sche_zip.writestr(f'vehicle_schedule_{method}.csv',veh_schedule.to_csv())
             sche_zip.writestr(f'crew_scheduling_{method}.csv', crew.to_csv(index=False))
             sche_zip.writestr(f'Bus_utility_details_{method}.csv', bus_details.to_csv(index=False))
             sche_zip.writestr(f'Reuse_{method}.csv', reuse_buses.to_csv(index=False))
             sche_zip.writestr(f'fleet_shift_details_{method}.csv', fleet.to_csv(index=False))
-            sche_zip.writestr(f'depot_shift_details_{method}.csv', depot_tt.to_csv(index=False))
+            if method == 'Multiline':
+                sche_zip.writestr(f'Time_Table_1_{method}.csv', r1_timetable.to_csv(index=False))
+                sche_zip.writestr(f'Time_Table_2_{method}.csv', r2_timetable.to_csv(index=False))
+                for i in range(0, len(b_lst.index)):
+                    df3 = veh_schedule[(veh_schedule['bus_name'] == b_lst.iloc[i, 0])].copy()
+                    df3.reset_index(drop=True, inplace=True)
+                    name = b_lst.iloc[i, 0]
+                    sche_zip.writestr(f'vehicleschedule/{name}.csv', df3.to_csv())
+            else:
+                sche_zip.writestr(f'Time_Table_{method}.csv', timetable.to_csv(index=False))
+                sche_zip.writestr(f'depot_shift_details_{method}.csv', depot_tt.to_csv(index=False))
+                for n in vehicleschedule:
+                    sche_zip.writestr(f'vehicleschedule/{n.title}.csv', n.to_csv())
             # if method != 'Random':
             #     buf = BytesIO()
             #     fig.savefig(buf,dpi=300)
@@ -1019,17 +1088,25 @@ def scheduling_run(method):
             #     buf = BytesIO()
             #     fig.savefig(buf,dpi=300)
             #     sche_zip.writestr(f'vehicle_schedule_visual_{method}.pdf',buf.getvalue())
-
-        print(timetable.to_string())
-        print(f'\nNo. of Bus required at Terminal1 Depot :', busreq_at_Terminal1,
-                '\nNo. of Bus required at Terminal2 Depot:', busreq_at_Terminal2,
-                '\n\nNo. of Bus reutilized from Pool at Terminal1 :', poolsize_at_Terminal1,
-                "\nNo. of Bus reutilized from Pool at Terminal2 :", poolsize_at_Terminal2)
-        print('\n Total ideal time in hours:', tot_ideal_time.round(0))
-        print('Crew Requirement hourly: \n', crew)
-        total_crew=crew ['Crew'].sum()
-        print('\n Total crew required:', total_crew)
-        print(veh_schedule.head(5))
+        if method != 'Multiline':
+            print(timetable.to_string())
+            print(f'\nNo. of Bus required at Terminal1 Depot :', busreq_at_Terminal1,
+                    '\nNo. of Bus required at Terminal2 Depot:', busreq_at_Terminal2,
+                    '\n\nNo. of Bus reutilized from Pool at Terminal1 :', poolsize_at_Terminal1,
+                    "\nNo. of Bus reutilized from Pool at Terminal2 :", poolsize_at_Terminal2)
+            print('\n Total ideal time in hours:', tot_ideal_time.round(0))
+            print('Crew Requirement hourly: \n', crew)
+            total_crew=crew ['Crew'].sum()
+            print('\n Total crew required:', total_crew)
+            print(veh_schedule.head(5))
+        else:
+            busreq_at_r1t1 = r1_timetable['Fleet T1'].sum()
+            busreq_at_r1t2 = r1_timetable['Fleet T2'].sum()
+            busreq_at_r2t1 = r2_timetable['Fleet T1'].sum()
+            busreq_at_r2t2 = r2_timetable['Fleet T2'].sum()
+            tot_ideal_time = b_lst['Ideal time'].sum() - r_bus['Idl_Duration'].sum()
+            print('fleet size:', busreq_at_r1t1 + busreq_at_r1t2 + busreq_at_r2t1 + busreq_at_r2t2)
+            print('\n Total ideal time in hours:', tot_ideal_time.round(0))
 
         sche_out.seek(0)
         return send_file(sche_out, download_name=f'{method} Output.zip', as_attachment=True)   

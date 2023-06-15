@@ -8,17 +8,6 @@ import os
 import matplotlib.pyplot as plt
 from matplotlib.patches import Patch
 from natsort import natsort_keygen
-pd.set_option('display.max_colwidth', None)
-pd.set_option('display.max_rows', None)
-pd.set_option('display.precision', 2)
-
-with open('parameters.yml') as f:
-    data = yaml.load(f, Loader=SafeLoader)
-
-globals().update(data)
-
-dob = seatcap * min_c_lvl
-cob = int(seatcap * max_c_lvl)
 
 #Joint optimisation of timetables for 2 routes
 
@@ -116,9 +105,9 @@ def tt1(traveltimeDN,traveltimeUP, departuretimeDN, departuretimeUP, terminalarr
 
 
 #function 2 to generate vehicle assignement for both timetables
-def schedule(r1_terminal1,r1_terminal2, r1_veh_sch1,r1_veh_sch2,r2_terminal1,r2_terminal2, r2_veh_sch1,r2_veh_sch2):
+def schedule(r1_terminal1,r1_terminal2, r1_veh_sch1,r1_veh_sch2,r2_terminal1,r2_terminal2, r2_veh_sch1,r2_veh_sch2,data,r1_ttDN, r1_ttUP,r2_ttDN, r2_ttUP):
 
-
+    globals().update(data)
 
 
     num_bus_T = 0
@@ -571,29 +560,43 @@ def tt_det(timetable):
 
     return(timetable)
 
-details_tt=pd.DataFrame(index=np.arange(0), columns=['Iteration no:', 'Ideal time'])
-no=10 #number of timetables to be generated for optimisation
+def main_schedule(r1_ttDN, r1_ttUP, r1_dtimeDN, r1_dtimeUP, r1_tarrivalDN,r1_tarrivalUP,r2_ttDN, r2_ttUP, r2_dtimeDN, r2_dtimeUP, r2_tarrivalDN,r2_tarrivalUP,data):
 
-for i in range(0,no):
-    print(i)
+    globals().update(data)
+
+    r1_terminal1, r1_terminal2, r1_veh_sch1, r1_veh_sch2 = tt1(r1_ttDN, r1_ttUP, r1_dtimeDN, r1_dtimeUP, r1_tarrivalDN,r1_tarrivalUP, A1, B1)
+
+    r2_terminal1, r2_terminal2, r2_veh_sch1, r2_veh_sch2 = tt1(r2_ttDN, r2_ttUP, r2_dtimeDN, r2_dtimeUP, r2_tarrivalDN,r2_tarrivalUP, A2, B2)
+
+    (r1_timetable, r2_timetable, crew, b_lst, r_bus, veh_schedule, fig,fleet) = schedule(r1_terminal1, r1_terminal2,
+                                                                                        r1_veh_sch1, r1_veh_sch2,
+                                                                                        r2_terminal1,
+                                                                                        r2_terminal2, r2_veh_sch1,
+                                                                                        r2_veh_sch2, data,r1_ttDN, r1_ttUP,r2_ttDN, r2_ttUP)
+    r1_timetable = tt_det(r1_timetable)
+    r2_timetable = tt_det(r2_timetable)
+    
+    return r1_timetable, r2_timetable, crew, b_lst, r_bus, veh_schedule, fig,fleet
+
+def main():
+    pd.set_option('display.max_colwidth', None)
+    pd.set_option('display.max_rows', None)
+    pd.set_option('display.precision', 2)
+
+    with open('parameters.yml') as f:
+        data = yaml.load(f, Loader=SafeLoader)
+
     # ROUTE 1
-
     r1_ttDN = pd.read_csv(r'timetable\timetable1\Input_files_holding\travel_time_totDN.csv')
     r1_ttUP = pd.read_csv(r'timetable\timetable1\Input_files_holding\travel_time_totUP.csv')
     r1_dtimeDN = pd.read_csv(r'timetable\timetable1\Input_files_holding\departuretimeDN.csv')
     r1_dtimeUP = pd.read_csv(r'timetable\timetable1\Input_files_holding\departuretimeUP.csv')
-
     r1_tarrivalDN = pd.read_csv(r'timetable\timetable1\Input_files_holding\stoparrivalDN.csv')
     r1_tarrivalDN = r1_tarrivalDN.iloc[:, 0]
     r1_tarrivalUP = pd.read_csv(r'timetable\timetable1\Input_files_holding\stoparrivalUP.csv')
     r1_tarrivalUP = r1_tarrivalUP.iloc[:, 0]
 
-
-    r1_terminal1, r1_terminal2, r1_veh_sch1, r1_veh_sch2 = tt1(r1_ttDN, r1_ttUP, r1_dtimeDN, r1_dtimeUP, r1_tarrivalDN,
-                                                               r1_tarrivalUP, A1, B1)
-
     # ROUTE 2
-
     r2_ttDN = pd.read_csv(r'timetable\timetable2\Input_files_holding\travel_time_totDN.csv')
     r2_ttUP = pd.read_csv(r'timetable\timetable2\Input_files_holding\travel_time_totUP.csv')
     r2_dtimeUP = pd.read_csv(r'timetable\timetable2\Input_files_holding\departuretimeUP.csv')
@@ -602,71 +605,54 @@ for i in range(0,no):
     r2_tarrivalDN = r2_tarrivalDN.iloc[:, 0]
     r2_tarrivalUP = pd.read_csv(r'timetable\timetable2\Input_files_holding\stoparrivalUP.csv')
     r2_tarrivalUP = r2_tarrivalUP.iloc[:, 0]
-    purpose = 'hjgj'
 
-    r2_terminal1, r2_terminal2, r2_veh_sch1, r2_veh_sch2 = tt1(r2_ttDN, r2_ttUP, r2_dtimeDN, r2_dtimeUP, r2_tarrivalDN,
-                                                               r2_tarrivalUP, A2, B2)
+    details_tt=pd.DataFrame(index=np.arange(0), columns=['Iteration no:', 'Ideal time'])
+    no=10 #number of timetables to be generated for optimisation
 
-    (r1_timetable, r2_timetable, crew, b_lst, r_bus, veh_schedule, fig,fleet) = schedule(r1_terminal1, r1_terminal2,
-                                                                                         r1_veh_sch1, r1_veh_sch2,
-                                                                                         r2_terminal1,
-                                                                                         r2_terminal2, r2_veh_sch1,
-                                                                                         r2_veh_sch2)
+    for i in range(0,no):
+        print(i)
 
-    # tot_ideal_time = b_lst['Ideal time'].sum() - r_bus['Idl_Duration'].sum() Use this if ideal time > max ideal needs to be subtracted
-    tot_ideal_time = b_lst['Ideal time'].sum()
-    r1_timetable = tt_det(r1_timetable)
-    r2_timetable = tt_det(r2_timetable)
-    # FILE EXPORT
-    name = "Time_Table " + str(i)
-    path = r'timetable\multiline_meth2\Random{}'.format(name)
-    isExist = os.path.exists(path)
+        r1_terminal1, r1_terminal2, r1_veh_sch1, r1_veh_sch2 = tt1(r1_ttDN, r1_ttUP, r1_dtimeDN, r1_dtimeUP, r1_tarrivalDN,
+                                                                r1_tarrivalUP, A1, B1)
 
-    if not isExist:
-        # Create a new directory because it does not exist
-        os.makedirs(path)
+        r2_terminal1, r2_terminal2, r2_veh_sch1, r2_veh_sch2 = tt1(r2_ttDN, r2_ttUP, r2_dtimeDN, r2_dtimeUP, r2_tarrivalDN,
+                                                                r2_tarrivalUP, A2, B2)
 
-    r1_timetable.to_csv(r'timetable\multiline_meth2\Random{}\R1_tt.csv'.format(name))
-    r2_timetable.to_csv(r'timetable\multiline_meth2\Random{}\R2_tt.csv'.format(name))
-    details_tt.loc[len(details_tt)] = [i, tot_ideal_time.round(0)]
-    
-    if i ==0:
-        min_ideal= tot_ideal_time
-        path =r'timetable\multiline_meth2\Results\vehicleschedule'
+        (r1_timetable, r2_timetable, crew, b_lst, r_bus, veh_schedule, fig,fleet) = schedule(r1_terminal1, r1_terminal2,
+                                                                                            r1_veh_sch1, r1_veh_sch2,
+                                                                                            r2_terminal1,
+                                                                                            r2_terminal2, r2_veh_sch1,
+                                                                                            r2_veh_sch2, data,r1_ttDN, r1_ttUP,r2_ttDN, r2_ttUP)
+
+        # tot_ideal_time = b_lst['Ideal time'].sum() - r_bus['Idl_Duration'].sum() Use this if ideal time > max ideal needs to be subtracted
+        tot_ideal_time = b_lst['Ideal time'].sum()
+        r1_timetable = tt_det(r1_timetable)
+        r2_timetable = tt_det(r2_timetable)
+        # FILE EXPORT
+        name = "Time_Table " + str(i)
+        path = r'timetable\multiline_meth2\Random{}'.format(name)
         isExist = os.path.exists(path)
+
         if not isExist:
             # Create a new directory because it does not exist
             os.makedirs(path)
-        r1_timetable.to_csv(r'timetable\multiline_meth2\Results\Time_Table.csv', index=False)
-        r2_timetable.to_csv(r'timetable\multiline_meth2\Results\Time_Table.csv', index=False)
-        veh_schedule.to_csv(r'timetable\multiline_meth2\Results\vehicle_schedule.csv', index=False)
-        crew.to_csv(r'timetable\multiline_meth2\Results\crew_scheduling.csv', index=False)
-        b_lst.to_csv(r'timetable\multiline_meth2\Results\Bus_utility_details.csv', index=False)
-        fig.savefig(r'timetable\multiline_meth2\Results\vehicle_schedule_visual.pdf', dpi=300)
-        r_bus.to_csv(r'timetable\multiline_meth2\Results\Reuse.csv', index=False)
-        fleet.to_csv(r'timetable\multiline_meth2\Results\fleet_shift_details.csv', index=False)
-        for i in range(0, len(b_lst.index)):
-            df3 = veh_schedule[(veh_schedule['bus_name'] == b_lst.iloc[i, 0])].copy()
-            df3.reset_index(drop=True, inplace=True)
-            name = b_lst.iloc[i, 0]
-            df3.to_csv(r'timetable\multiline_meth2\Results\vehicleschedule\{}.csv'.format(name))
-        busreq_at_r1t1 = r1_timetable['Fleet T1'].sum()
-        busreq_at_r1t2 = r1_timetable['Fleet T2'].sum()
-        busreq_at_r2t1 = r2_timetable['Fleet T1'].sum()
-        busreq_at_r2t2 = r2_timetable['Fleet T2'].sum()
 
-        print('fleet size:', busreq_at_r1t1+busreq_at_r1t2+busreq_at_r2t1+busreq_at_r2t2)
-        print('\n Total ideal time in hours:', tot_ideal_time.round(0))
-    else:
-        if min_ideal> tot_ideal_time:
-            min_ideal = tot_ideal_time
+        r1_timetable.to_csv(r'timetable\multiline_meth2\Random{}\R1_tt.csv'.format(name))
+        r2_timetable.to_csv(r'timetable\multiline_meth2\Random{}\R2_tt.csv'.format(name))
+        details_tt.loc[len(details_tt)] = [i, tot_ideal_time.round(0)]
+        
+        if i ==0:
+            min_ideal= tot_ideal_time
+            path =r'timetable\multiline_meth2\Results\vehicleschedule'
+            isExist = os.path.exists(path)
+            if not isExist:
+                # Create a new directory because it does not exist
+                os.makedirs(path)
             r1_timetable.to_csv(r'timetable\multiline_meth2\Results\Time_Table.csv', index=False)
             r2_timetable.to_csv(r'timetable\multiline_meth2\Results\Time_Table.csv', index=False)
-            veh_schedule.to_csv(r'timetable\multiline_meth2\Results\vehicle_schedule.csv',
-                                index=False)
+            veh_schedule.to_csv(r'timetable\multiline_meth2\Results\vehicle_schedule.csv', index=False)
             crew.to_csv(r'timetable\multiline_meth2\Results\crew_scheduling.csv', index=False)
-            b_lst.to_csv(r'timetable\multiline_meth2\Results\Bus_utility_details.csv',
-                               index=False)
+            b_lst.to_csv(r'timetable\multiline_meth2\Results\Bus_utility_details.csv', index=False)
             fig.savefig(r'timetable\multiline_meth2\Results\vehicle_schedule_visual.pdf', dpi=300)
             r_bus.to_csv(r'timetable\multiline_meth2\Results\Reuse.csv', index=False)
             fleet.to_csv(r'timetable\multiline_meth2\Results\fleet_shift_details.csv', index=False)
@@ -675,24 +661,50 @@ for i in range(0,no):
                 df3.reset_index(drop=True, inplace=True)
                 name = b_lst.iloc[i, 0]
                 df3.to_csv(r'timetable\multiline_meth2\Results\vehicleschedule\{}.csv'.format(name))
-
             busreq_at_r1t1 = r1_timetable['Fleet T1'].sum()
             busreq_at_r1t2 = r1_timetable['Fleet T2'].sum()
             busreq_at_r2t1 = r2_timetable['Fleet T1'].sum()
             busreq_at_r2t2 = r2_timetable['Fleet T2'].sum()
-            tot_ideal_time = b_lst['Ideal time'].sum() - r_bus['Idl_Duration'].sum()
-            print('fleet size:', busreq_at_r1t1 + busreq_at_r1t2 + busreq_at_r2t1 + busreq_at_r2t2)
+
+            print('fleet size:', busreq_at_r1t1+busreq_at_r1t2+busreq_at_r2t1+busreq_at_r2t2)
             print('\n Total ideal time in hours:', tot_ideal_time.round(0))
-
         else:
-            pass
+            if min_ideal> tot_ideal_time:
+                min_ideal = tot_ideal_time
+                r1_timetable.to_csv(r'timetable\multiline_meth2\Results\Time_Table.csv', index=False)
+                r2_timetable.to_csv(r'timetable\multiline_meth2\Results\Time_Table.csv', index=False)
+                veh_schedule.to_csv(r'timetable\multiline_meth2\Results\vehicle_schedule.csv',
+                                    index=False)
+                crew.to_csv(r'timetable\multiline_meth2\Results\crew_scheduling.csv', index=False)
+                b_lst.to_csv(r'timetable\multiline_meth2\Results\Bus_utility_details.csv',
+                                index=False)
+                fig.savefig(r'timetable\multiline_meth2\Results\vehicle_schedule_visual.pdf', dpi=300)
+                r_bus.to_csv(r'timetable\multiline_meth2\Results\Reuse.csv', index=False)
+                fleet.to_csv(r'timetable\multiline_meth2\Results\fleet_shift_details.csv', index=False)
+                for i in range(0, len(b_lst.index)):
+                    df3 = veh_schedule[(veh_schedule['bus_name'] == b_lst.iloc[i, 0])].copy()
+                    df3.reset_index(drop=True, inplace=True)
+                    name = b_lst.iloc[i, 0]
+                    df3.to_csv(r'timetable\multiline_meth2\Results\vehicleschedule\{}.csv'.format(name))
 
-details_tt.to_csv(r'timetable\multiline_meth2\AA_details_tt.csv')
-details_tt.sort_values(by=['Ideal time'], ascending=True, inplace=True)
-details_tt.reset_index(drop=True, inplace=True)
-min_idealtt=details_tt.loc[0,'Ideal time']
-print(min_idealtt)
-print('end')
+                busreq_at_r1t1 = r1_timetable['Fleet T1'].sum()
+                busreq_at_r1t2 = r1_timetable['Fleet T2'].sum()
+                busreq_at_r2t1 = r2_timetable['Fleet T1'].sum()
+                busreq_at_r2t2 = r2_timetable['Fleet T2'].sum()
+                tot_ideal_time = b_lst['Ideal time'].sum() - r_bus['Idl_Duration'].sum()
+                print('fleet size:', busreq_at_r1t1 + busreq_at_r1t2 + busreq_at_r2t1 + busreq_at_r2t2)
+                print('\n Total ideal time in hours:', tot_ideal_time.round(0))
 
+            else:
+                pass
 
+    details_tt.to_csv(r'timetable\multiline_meth2\AA_details_tt.csv')
+    details_tt.sort_values(by=['Ideal time'], ascending=True, inplace=True)
+    details_tt.reset_index(drop=True, inplace=True)
+    min_idealtt=details_tt.loc[0,'Ideal time']
+    print(min_idealtt)
+    print('end')
+
+if __name__ == '__main__':
+    main()
 
