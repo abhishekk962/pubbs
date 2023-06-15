@@ -1,5 +1,7 @@
 {% extends "dashboard.html" %}
 {% block content %}
+<script>var tab = $( "button:contains('Bus Route')" ).attr('disabled','');</script>
+<div class="content">
 <h4>{{ message }}</h4>
 {% if routes %}
 <form method="POST" action="{{url_for('import_route')}}">
@@ -34,4 +36,5 @@
   <button value="Submit" class="nextBtn" type="submit">Submit</button>
   <input type="submit" formaction="{{url_for('clear_route')}}" value="Clear" name="clear_route" >
 </form>
+</div>
 {% endblock %}

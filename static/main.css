@@ -1,6 +1,12 @@
 body{
     margin: 0px;
     height: 100vh;
+    background-image: url('/static/images/background.png'),linear-gradient(to bottom right, #1E0431, #45177D);
+    background-position-x: right;
+    background-position-y: bottom;
+    background-size: 80%,100%;
+    background-repeat: no-repeat, repeat;
+
 }
 
 *{
@@ -8,15 +14,30 @@ body{
 }
 
 header{
-    background: rgb(77, 77, 77);
+    background: none;
     display: flex;
-    height: 5%;
+    height: 6%;
     align-items: center;
     justify-content: space-between;
 }
 
 .header-brand{
     padding-left: 10px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+}
+
+.header-brand > div{
+    padding: 0 20px;
+}
+
+.header-brand> div >a, .header-buttons> a{
+    text-transform: uppercase;
+    color: white;
+    text-decoration: none;
+    margin: auto;
+    padding: 0 10px;
 }
 
 .header-buttons{
@@ -25,9 +46,10 @@ header{
 
 nav{
     display:flex;
-    height: 5%;
-    background-color: rgb(139, 139, 139);
+    height: 4%;
+    background-color: #68507A;
     align-items: center;
+    text-transform: uppercase;
 }
 
 nav > form{
@@ -43,16 +65,33 @@ header > div > button ,.nav-button{
     border: none;
     height: 100%;
     color: white;
+    text-transform: uppercase;
+    font-weight: bold;
+}
+
+.nav-button:disabled{
+    color: #68507A;
+    background: white;
+}
+
+.nav-button:active{
+    color: #68507A;
+    background: white;
+}
+
+.nav-button:hover{
+    color: #68507A;
+    background: white;
 }
 
 .page-body{
     display: flex;
     height: 90%;
-    background: #dedede;
+    background: none;
 }
 
 .sidebar{
-    background-color: rgb(91, 91, 91);
+    background-color: #1E0431;
     align-items: center;
     height: 100%;
     width: 20%;
@@ -70,21 +109,48 @@ header > div > button ,.nav-button{
 
 .content{
     margin: auto auto;
-    background: white;
     padding: 20px;
+    background: white;
 }
 
 .mapdata{
     display: flex;
+    flex-direction: row;
+    height: 100%;
+    width: 100%;
 }
 
+#map {
+    height: 100%;
+    width: 80%;
+    align-self: top;
+    align-items: center;
+    z-index: 0;
+  }
+
 .maptable{
-    width: 50%;
     display: flex;
+    width: auto;
+    width: 20%;
+    overflow: scroll;
+    background: rgb(255, 255, 255);
+}
+
+.maptable::-webkit-scrollbar {
+    display: none;    /* Hide scrollbar for Chrome, Safari and Opera */
+}
+
+.maptable {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
 }
 
 td > input{
     width: 50px;
+}
+
+td{
+    background: none;
 }
 
 form > div{

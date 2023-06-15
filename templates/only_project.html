@@ -1,5 +1,6 @@
 {% extends "dashboard.html" %}
 {% block content %}
+<div class="content"> 
 {% if message%}
 <div>{{message}}</div>
 <br>
@@ -11,4 +12,5 @@
   </div>
   <button id="myBtn" value="Submit" class="nextBtn" type="submit">Save</button>
 </form>
+</div>
 {% endblock %}

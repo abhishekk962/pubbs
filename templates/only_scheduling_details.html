@@ -1,5 +1,7 @@
 {% extends "dashboard.html" %}
 {% block content %}
+<script>var tab = $( "button:contains('Scheduling Details')" ).attr('disabled','');</script>
+<div class="content"> 
 {% if not data %}
 <h4>{{ message }}</h4>
 <form id="myform" action="{{url_for('scheduling_details')}}" method="post">
@@ -62,4 +64,5 @@
   <input type="submit" formaction="{{url_for('scheduling_details')}}" value="Get From DB" name="getfromdb" >
 </form>
 {% endif %}
+</div>
 {% endblock %}

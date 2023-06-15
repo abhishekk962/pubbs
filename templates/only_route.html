@@ -2,28 +2,19 @@
 {% block head %}
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" />
-  <style>
-    #map {
-      height: 500px;
-      width: 500px;
-      align-self: top;
-      align-items: center;
-      z-index: 0;
-      margin: 0 15px;
-      margin-top: 38px;
-      border-radius: 7px;
-    }
-  </style>
 {% endblock %}
 {% block content %}
+<script>var tab = $( "button:contains('Build Route')" ).attr('disabled','');</script>
 {% if message %}
-{{ message }}
-<form action="{{url_for('route_details')}}" method="post">
-    {% for n in stops %}
-    <div>{{n}}</div>
-    {% endfor %}
-  <input type="submit" value="Rebuild">
-</form>
+<div class="content">
+  {{ message }}
+  <form action="{{url_for('route_details')}}" method="post">
+      {% for n in stops %}
+      <div>{{n}}</div>
+      {% endfor %}
+    <input type="submit" value="Rebuild">
+  </form>
+</div>
 {% endif %}
 {% if not message %}
   <div class="mapdata">
@@ -34,10 +25,8 @@
           <thead>
             <tr>
               <th>Bus Stops</th>
-              <th>Remove</th>
               <th>UP Dist</th>
               <th>DN Dist</th>
-              <th>ID</th>
             </tr>
           </thead>
           <tbody></tbody>
@@ -54,8 +43,10 @@
   <script>
     var map = L.map('map').setView([51.505, -0.09], 13);
 
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+      subdomains: 'abcd',
+      maxZoom: 20
     }).addTo(map);
 
     var markersLayer = L.layerGroup().addTo(map);
@@ -74,6 +65,7 @@
         // Loop through the data and add markers
         data.forEach(point => {
           var marker = L.marker([point.lat, point.lng]).addTo(markersLayer);
+          marker.bindTooltip(point.name, {permanent: true, className: "my-label", offset: [0, 0] });
           marker.bindPopup(point.name);
           marker.key = point.id;
 
@@ -124,17 +116,6 @@
       markerNameCell.appendChild(markerInputBox);
       markerRow.appendChild(markerNameCell);
 
-      var actionsCell = document.createElement('td');
-      actionsCell.style.border = "None";
-      actionsCell.style.background = "White";
-      var deleteButton = document.createElement('button');
-      deleteButton.type = 'button';
-      deleteButton.style.width = "50%"
-      deleteButton.style.height = "50%"
-      deleteButton.textContent = 'X';
-      actionsCell.appendChild(deleteButton);
-      markerRow.appendChild(actionsCell);
-
       var distUPCell = document.createElement('td');
       distUPCell.style.border = "None";
       distUPCell.style.background = "White";
@@ -157,6 +138,15 @@
       distDNCell.appendChild(distDNInputBox);
       markerRow.appendChild(distDNCell);
 
+      var actionsCell = document.createElement('td');
+      actionsCell.style.border = "None";
+      actionsCell.style.background = "White";
+      var deleteButton = document.createElement('button');
+      deleteButton.type = 'button';
+      deleteButton.textContent = 'X';
+      actionsCell.appendChild(deleteButton);
+      markerRow.appendChild(actionsCell);
+
       var stopIDCell = document.createElement('td');
       stopIDCell.style.border = "None";
       stopIDCell.style.background = "White";
@@ -166,6 +156,7 @@
       stopIDInputBox.name = stopIDname;
       stopIDInputBox.value = marker.key;
       stopIDCell.appendChild(stopIDInputBox);
+      stopIDCell.style.display = 'none';
       markerRow.appendChild(stopIDCell);
 
       // var marker = L.marker(e.latlng, { draggable: true }).addTo(markersLayer);

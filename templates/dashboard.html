@@ -1,25 +1,32 @@
 <!doctype html>
 <html lang="en">
   <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Test Layout</title>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PUBBS Transit</title>
     <link rel="stylesheet" href="{{url_for('static',filename='main.css')}}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fira+Sans&display=swap" rel="stylesheet">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
     {% block head %}
     {% endblock %}
   </head>
   <body>
     <header>
       <div class="header-brand">
-        <b>MOHUA</b>
-        <b>PUBBS</b>
+        <div>
+          <img src="{{url_for('static',filename='images/gov_logo_wt.png')}}" height="35">
+          <a href="https://mohua.gov.in/" target="_blank">MOHUA</a>
+        </div>
+        <div>
+          <img src="{{url_for('static',filename='images/Pubbs_transit_logo_transparent.png')}}" height="35">
+          <a href="https://pubbs.co.in/" target="_blank">PUBBS</a>
+        </div>
       </div>
       <div class="header-buttons">
-        <button type="button">Login</button>
-        <button type="button">Sign Up</button>
+        <a href="/logout">Logout</a>
       </div>
     </header>
     <nav>
@@ -54,10 +61,8 @@
         <div id="showsched" class="s_section">Scheduling</div>
         <div id="statussched" class="s_section_cont"></div>
       </div>
-      <div class="content">
         {% block content %}
         {% endblock %}
-      </div>
     </div>
     <script>
       const statusfreq = document.getElementById("statusfreq");

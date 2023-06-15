@@ -2,36 +2,22 @@
 {% block head %}
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" />
-  <style>
-    #map {
-      height: 500px;
-      width: 500px;
-      align-self: top;
-      align-items: center;
-      z-index: 0;
-      margin: 0 15px;
-      margin-top: 38px;
-      border-radius: 7px;
-    }
-  </style>
 {% endblock %}
 {% block content %}
-  {% if message %}
-  <h4>{{message}}</h4>
-  {% endif %}
+<script>var tab = $( "button:contains('Stop Details')" ).attr('disabled','');</script>
   <div class="mapdata">
     <div id="map"></div>
     <div class="maptable">
+      {% if message %}
+      <h4>{{message}}</h4>
+      {% endif %}
       <form action="{{url_for('save_stops')}}" method="post">
         <table id="markerTable">
           <thead>
             <tr>
               <th>Bus Stops</th>
-              <th>Remove</th>
               <th>Dummy</th>
               <th>Cong./Int.</th>
-              <th>Latitude</th>
-              <th>Longitude</th>
             </tr>
           </thead>
           <tbody></tbody>
@@ -47,8 +33,10 @@
   <script>
     var map = L.map('map').setView([51.505, -0.09], 13);
 
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+      subdomains: 'abcd',
+      maxZoom: 20
     }).addTo(map);
 
     var markersLayer = L.layerGroup().addTo(map);
@@ -99,17 +87,6 @@
       markerNameCell.appendChild(markerInputBox);
       markerRow.appendChild(markerNameCell);
 
-      var actionsCell = document.createElement('td');
-      actionsCell.style.border = "None";
-      actionsCell.style.background = "White";
-      var deleteButton = document.createElement('button');
-      deleteButton.type = 'button';
-      deleteButton.style.width = "50%"
-      deleteButton.style.height = "50%"
-      deleteButton.textContent = 'X';
-      actionsCell.appendChild(deleteButton);
-      markerRow.appendChild(actionsCell);
-
       var dummyCell = document.createElement('td');
       dummyCell.style.border = "None";
       dummyCell.style.background = "White";
@@ -132,6 +109,15 @@
       cong_int_Cell.appendChild(cong_int_InputBox);
       markerRow.appendChild(cong_int_Cell);
 
+      var actionsCell = document.createElement('td');
+      actionsCell.style.border = "None";
+      actionsCell.style.background = "White";
+      var deleteButton = document.createElement('button');
+      deleteButton.type = 'button';
+      deleteButton.textContent = 'X';
+      actionsCell.appendChild(deleteButton);
+      markerRow.appendChild(actionsCell);
+
       var latCell = document.createElement('td');
       latCell.style.border = "None";
       latCell.style.background = "White";
@@ -142,6 +128,7 @@
       latInputBox.value = e.latlng.lat;
       latInputBox.readonly = true;
       latCell.appendChild(latInputBox);
+      latCell.style.display = 'none'
       markerRow.appendChild(latCell);
 
       var lngCell = document.createElement('td');
@@ -154,6 +141,7 @@
       lngInputBox.value = e.latlng.lng;
       lngInputBox.readonly = true;
       lngCell.appendChild(lngInputBox);
+      lngCell.style.display = 'none'
       markerRow.appendChild(lngCell);
 
       var marker = L.marker(e.latlng, { draggable: true }).addTo(markersLayer);

@@ -1,11 +1,13 @@
 {% extends "dashboard.html" %}
 {% block content %}
+<script>var tab = $( "button:contains('Table Details')" ).attr('disabled','');</script>
+<div class="content"> 
 {% if not message %}
     <form action="{{url_for('table_selected')}}" method="POST">
       <div>
-        <label for="db_table"><b>Select the data you're entering:</b></label>
+        <label for="db_table"><b>Select table:</b></label>
         <select id="db_table" name="db_table" onchange="this.form.submit();">
-          <option value="" selected="selected" hidden="hidden">Choose here</option>
+          <option value="" selected="selected" hidden="hidden">Select here</option>
           <option>T_Passenger_Arrival_UP</option>
           <option>T_Passenger_Arrival_DN</option>
           <option>T_Fare_UP</option>
@@ -61,6 +63,7 @@
 {% if message %}
 {{message}}
 {% endif%}
+</div>
 {% endblock %}
 
 {% block foot %}
