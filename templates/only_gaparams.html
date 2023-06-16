@@ -13,8 +13,6 @@
     <input value="5" type="number" id="num_generations" name="num_generations" required>
   </div>
   <input type="submit" formaction="{{url_for('ga_params')}}" value="Submit" name="save" >
-</form>
-<form method="POST">
   <input type="submit" formaction="{{url_for('ga_params')}}" value="Get From DB" name="getfromdb" >
 </form>
 {% endif %}
@@ -29,8 +27,6 @@
     <input value="{{data['num_generations']}}" type="number" id="num_generations" name="num_generations" required>
   </div>
   <input type="submit" formaction="{{url_for('ga_params')}}" value="Submit" name="save" >
-</form>
-<form method="POST">
   <input type="submit" formaction="{{url_for('ga_params')}}" value="Get From DB" name="getfromdb" >
 </form>
 {% endif %}

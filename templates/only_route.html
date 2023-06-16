@@ -9,8 +9,8 @@
 <div class="content">
   {{ message }}
   <form action="{{url_for('route_details')}}" method="post">
-      {% for n in stops %}
-      <div>{{n}}</div>
+    {% for n in stops %}
+      <b>{{n}} | </b>
       {% endfor %}
     <input type="submit" value="Rebuild">
   </form>

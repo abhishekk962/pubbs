@@ -37,8 +37,6 @@
     <input value="-0.97" type="text" id="Bus_Bay" name="Bus_Bay" required>
   </div>
   <input type="submit" formaction="{{url_for('ols_details')}}" value="Submit" name="save" >
-</form>
-<form method="POST">
   <input type="submit" formaction="{{url_for('ols_details')}}" value="Get From DB" name="getfromdb" >
 </form>
 {% endif %}
@@ -77,8 +75,6 @@
     <input value="{{data['Bus_Bay']}}" type="text" id="Bus_Bay" name="Bus_Bay" required>
   </div>
   <input type="submit" formaction="{{url_for('ols_details')}}" value="Submit" name="save" >
-</form>
-<form method="POST">
   <input type="submit" formaction="{{url_for('ols_details')}}" value="Get From DB" name="getfromdb" >
 </form>
 {% endif %}

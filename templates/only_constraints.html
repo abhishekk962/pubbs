@@ -5,8 +5,10 @@
 {% if not data %}
 <h4>{{ message }}</h4>
 <form id="myform" action="{{url_for('constraints_details')}}" method="post">
-  <span>CONSTRAINTS FULL DAY SERVICES</span>
   <div>
+    <span>CONSTRAINTS FULL DAY SERVICES</span>
+    <span> </span>  <span> </span>  <span> </span>
+
     <label for="max_oppp">Maximum operation cost/person: </label>
     <input value="10000" type="number" id="max_oppp" name="max_oppp" required>
 
@@ -27,10 +29,12 @@
 
     <label for="min_crr"> Min cost recovery ratio: </label>
     <input value="0" type="number" id="min_crr" name="min_crr" required>
-  </div>
-  <br>
+
+    <span></span>    <span></span>    <span></span>    <span></span>
+    <span></span>    <span></span> 
   <span class="title">CONSTRAINTS TRIP WISE</span>
-  <div>
+    <span></span>    <span></span>    <span></span>
+
     <label for="min_ppp">Minimum Passenger per trip: </label>
     <input value="0" type="number" id="min_ppp" name="min_ppp" required>
 
@@ -44,8 +48,6 @@
     <input value="15000" type="number" id="max_opc" name="max_opc" required>
   </div>
   <input type="submit" formaction="{{url_for('constraints_details')}}" value="Submit" name="save" >
-</form>
-<form method="POST">
   <input type="submit" formaction="{{url_for('constraints_details')}}" value="Get From DB" name="getfromdb" >
 </form>
 {% endif %}
@@ -54,7 +56,7 @@
 <form id="myform" action="{{url_for('constraints_details')}}" method="post">
   <div>
     <span>CONSTRAINTS FULL DAY SERVICES</span>
-    <span> </span>
+    <span> </span>  <span> </span>  <span> </span>
 
     <label for="max_oppp">Maximum operation cost/person: </label>
     <input value="{{data['max_oppp']}}" type="number" id="max_oppp" name="max_oppp" required>
@@ -77,8 +79,10 @@
     <label for="min_crr"> Min cost recovery ratio: </label>
     <input value="{{data['min_crr']}}" type="number" id="min_crr" name="min_crr" required>
 
-    <span class="title">CONSTRAINTS TRIP WISE</span>
-    <span class="title"></span>
+    <span></span>    <span></span>    <span></span>    <span></span>
+    <span></span>    <span></span> 
+  <span class="title">CONSTRAINTS TRIP WISE</span>
+    <span></span>    <span></span>    <span></span>
 
     <label for="min_ppp">Minimum Passenger per trip: </label>
     <input value="{{data['min_ppp']}}" type="number" id="min_ppp" name="min_ppp" required>
@@ -93,8 +97,6 @@
     <input value="{{data['max_opc']}}" type="number" id="max_opc" name="max_opc" required>
   </div>
   <input type="submit" formaction="{{url_for('constraints_details')}}" value="Submit" name="save" >
-</form>
-<form method="POST">
   <input type="submit" formaction="{{url_for('constraints_details')}}" value="Get From DB" name="getfromdb" >
 </form>
 {% endif %}

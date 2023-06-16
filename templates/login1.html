@@ -36,91 +36,19 @@
       </header>
     <nav>
     </nav>
-
-<centre><h1 class="heading"> Bus Dispatch and <span>control system</span></h1></centre>
-
-<style>
-    .container{
-        display: flex;
-        flex-direction: column row;
-        align-items: center;
-    }
-
-    .login-container {
-        max-width: 400px;
-        margin: 0 auto;
-        padding: 20px;
-        border: 1px solid #ccc;
-        border-radius: 5px;
-        background-color: #f9f9f9;
-        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    }
-    
-    .login-title {
-        text-align: center;
-        margin-bottom: 20px;
-    }
-    
-    .forgot-password {
-        text-align: right;
-        margin-bottom: 10px;
-    }
-    
-    .social-buttons {
-        display: flex;
-        justify-content: center;
-        margin-bottom: 20px;
-    }
-    
-    .social-buttons a {
-        display: inline-block;
-        margin-right: 10px;
-        padding: 10px 20px;
-        border-radius: 5px;
-        color: #fff;
-        font-weight: bold;
-        text-decoration: none;
-    }
-    
-    .social-buttons a.google {
-        background-color: #dd4b39;
-    }
-    
-    .social-buttons a.twitter {
-        background-color: #1da1f2;
-    }
-    
-    .social-buttons a.facebook {
-        background-color: #3b5998;
-    }
-    
-    .register-link {
-        text-align: center;
-    }
-    
-    .register-link a {
-        color: #555;
-        text-decoration: none;
-    }
-    .social-buttons img {
-    width: 30px;
-    height: 30px;
-    margin-right: 5px;
-    }
-</style>
-    <div class="login-container">
-        <h2 class="login-title">Login</h2>
-        <form method="POST" action="{{url_for('loggedin')}}">
-            <input type="email" name="email" id="email" placeholder="Enter Username" required>
+<div class="page-body">
+    <div class="content">
+        <h1 class="heading" style="margin-bottom: 0%;"> Bus Dispatch and <span>control system</span></h1>        
+        <form method="POST" action="{{url_for('loggedin')}}" style="display: flex;flex-direction: column;text-align: center;padding: 30px;">
+            <h2 style="text-align: left;margin: 0;">Login</h2>
+            <p style="text-align: left; color: dimgrey; margin-top: 0; font-size: 12px;">Enter your details to continue</p>
+            <input type="email" name="email" id="email" placeholder="Enter Your Email Id" required>
             <input type="password" name="password" id="password" placeholder="Enter Password" required>
-            <button type="submit" style="cursor: pointer;">Sign In</button>
+            <p style="font-size: 11px;margin-top: 0;text-align: right;"><a href="#" style="text-decoration: none;color:#1E0431;">Forgot Password?</a></p>
+            <button class="label-button" type="submit" style="width: 90%;align-self: center;">Log In</button>
+            <p style="font-size: 11px;color: #8C025D;margin-top: 0;">Don't have an account? <a href="/register" style="text-decoration: none;color: #1E0431;">Sign up</a></p>
         </form>
-        <br>
-        <p class="forgot-password" style="font-size: 12px;">
-            <a href="#">Forgot Password?</a>
-        </p>
-        <p class="register-link" style="font-size: 13px;">Don't have an account? <a href="/register">Register Here</a></p>
     </div>
-</section>
+</div>
 </body>
 </html>

@@ -50,9 +50,7 @@
             {% endfor %}
         </table>
         <input type="submit" formaction="{{url_for('stop_char')}}" value="Save" name="save" >
-    </form>
-    <form action="{{url_for('stop_char')}}" method="POST">
-      <input type="submit" formaction="{{url_for('stop_char')}}" value="Get From DB" name="getfromdb" >
+        <input type="submit" formaction="{{url_for('stop_char')}}" value="Get From DB" name="getfromdb" >
     </form>
 </div>
 {% endblock %}

@@ -2,62 +2,68 @@
 {% block content %}
 <script>var tab = $( "button:contains('Table Details')" ).attr('disabled','');</script>
 <div class="content"> 
+<b>{{selected_table}}</b>
 {% if not message %}
-    <form action="{{url_for('table_selected')}}" method="POST">
-      <div>
-        <label for="db_table"><b>Select table:</b></label>
-        <select id="db_table" name="db_table" onchange="this.form.submit();">
-          <option value="" selected="selected" hidden="hidden">Select here</option>
-          <option>T_Passenger_Arrival_UP</option>
-          <option>T_Passenger_Arrival_DN</option>
-          <option>T_Fare_UP</option>
-          <option>T_Fare_DN</option>
-          <option>T_TraveTimeUP_ANN</option>
-          <option>T_TravelTimeDN_ANN</option>
-          {% for n in periods %}
-          <option>OD_UP_{{n}}</option>
-          <option>OD_DN_{{n}}</option>
-          {% endfor %}
-        </select>
-      </div>
-    </form>
-    {% if selected_table %}
-    <h4>{{selected_table}}</h4>
-    <form action="{{url_for('table_filled')}}" method="POST" enctype="multipart/form-data">
-        <table>
-          <thead>
-            <tr>
-              <th> </th>
-              {%for n in stops_list%}
-              <th>{{n}}</th>
-              {%endfor%}
-            </tr>
-          </thead>
-            {% for i in range(rows|length) %}
-            <tr>
-              <th>{{rowheader[i]}}</th>
-              {%for n in range(stop_ids|length) %}
-                {% if db_data %}
-                <td><input type="number" name="{{stop_ids[n]}}{{'_'}}{{rows[i]}}" value="{{db_data[n][i]}}" {% if i >= n and rowheader[0] is not number %} hidden {% endif %} /></td>
-                {% endif %}
-                {% if not db_data %}
-                <td><input type="number" name="{{stop_ids[n]}}{{'_'}}{{rows[i]}}" value="0" {% if i >= n and rowheader[0] is not number %} hidden {% endif %} /></td>
-                {% endif %}
-              {% endfor %}
-              <td><button id="copy" type="button">=</button></td>
-            </tr>
+      <form action="{{url_for('table_selected')}}" method="POST" style="margin: 0;padding: 0;">
+        <div style="display: flex; flex-direction: column;">
+          <select id="db_table" name="db_table" onchange="this.form.submit();">
+            <option value="" selected="selected" hidden="hidden">Select table</option>
+            <option>T_Passenger_Arrival_UP</option>
+            <option>T_Passenger_Arrival_DN</option>
+            <option>T_Fare_UP</option>
+            <option>T_Fare_DN</option>
+            <option>T_TraveTimeUP_ANN</option>
+            <option>T_TravelTimeDN_ANN</option>
+            {% for n in periods %}
+            <option>OD_UP_{{n}}</option>
+            <option>OD_DN_{{n}}</option>
             {% endfor %}
-        </table>
-      <div>
-          <input id="selected_table" name="selected_table" value="{{selected_table}}" hidden>
-          <button type="submit" value="Submit">Save</button>
-          <button type="submit" formaction="{{url_for('clear_table')}}" value="Clear">Clear</button>
-          <button type="submit" formaction="{{url_for('retrieve_data')}}" value="Retrieve">Retrieve</button>
-          <button type="submit" formaction="{{url_for('download_csv_data')}}" value="Download" >Download CSV</button>
-          <input type="file" id="csvfile" name="csvfile">
-          <button type="submit" formaction="{{url_for('upload_csv_data')}}" value="Upload">Upload CSV</button>
-      </div>
-    </form>
+          </select>
+        </div>
+      </form>
+      {% if selected_table %}
+      <form action="{{url_for('table_filled')}}" method="POST" enctype="multipart/form-data">
+        <div class="scroll-table">
+          <table>
+            <thead>
+              <tr>
+                <th> </th>
+                {%for n in stops_list%}
+                <th>{{n}}</th>
+                {%endfor%}
+              </tr>
+            </thead>
+              {% for i in range(rows|length) %}
+              <tr>
+                <th>{{rowheader[i]}}</th>
+                {%for n in range(stop_ids|length) %}
+                  {% if db_data %}
+                  <td><input type="number" name="{{stop_ids[n]}}{{'_'}}{{rows[i]}}" value="{{db_data[n][i]}}" {% if i >= n and rowheader[0] is not number %} hidden {% endif %} /></td>
+                  {% endif %}
+                  {% if not db_data %}
+                  <td><input type="number" name="{{stop_ids[n]}}{{'_'}}{{rows[i]}}" value="0" {% if i >= n and rowheader[0] is not number %} hidden {% endif %} /></td>
+                  {% endif %}
+                {% endfor %}
+                {% if 'Travel' in selected_table or 'Passenger' in selected_table %}
+                  {% if i > 0 %}
+                  <td><button id="copy" type="button">=</button></td>
+                  {% endif %}
+                {% endif %}
+              </tr>
+              {% endfor %}
+          </table>
+        </div>
+        <section class="button-sec">
+            <input id="selected_table" name="selected_table" value="{{selected_table}}" hidden>
+            <button type="submit" value="Submit">Save</button>
+            <button type="submit" formaction="{{url_for('clear_table')}}" value="Clear">Clear</button>
+            <button type="submit" formaction="{{url_for('retrieve_data')}}" value="Retrieve">Retrieve</button>
+            <button type="submit" formaction="{{url_for('download_csv_data')}}" value="Download" >Download CSV</button>
+            <label class='label-button' for="csvchoose">Upload CSV</label>
+            <input id='csvchoose' type="file" id="csvfile" name="csvfile" onchange="document.getElementById('csvsubmit').click()" hidden>
+            <button id='csvsubmit' type="submit" formaction="{{url_for('upload_csv_data')}}" value="Upload" hidden>Submit CSV</button>
+          </section>
+      </form>
     {% endif %}
 {% endif%}
 {% if message %}
