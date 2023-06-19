@@ -115,6 +115,8 @@ def get_status():
 @app.route('/')
 @app.route('/login', methods =['GET', 'POST'])
 def login():
+    c = conn.cursor()
+    c.execute('CREATE TABLE IF NOT EXISTS T_USER (name TEXT,email VARCHAR(50), password VARCHAR(50))')
     message = ''
     if 'email' in session:
         return redirect(url_for('busroute'))
@@ -136,7 +138,7 @@ def loggedin():
         email = request.form['email']
         password = request.form['password']
         c = conn.cursor()
-        c.execute('SELECT * FROM user WHERE email = % s AND password = % s', (email, password, ))
+        c.execute('SELECT * FROM T_USER WHERE email = % s AND password = % s', (email, password, ))
         user = c.fetchone()
         if user:
             session['email'] = user[1]
@@ -174,7 +176,7 @@ def registered():
         password = request.form['password']
         email = request.form['email']
         c = conn.cursor()
-        c.execute('SELECT * FROM user WHERE email = % s', (email, ))
+        c.execute('SELECT * FROM T_USER WHERE email = % s', (email, ))
         account = c.fetchone()
         if account:
             message = 'Account already exists !'
@@ -183,9 +185,9 @@ def registered():
         elif not name or not password or not email:
             message = 'Please fill out the form !'
         else:
-            c.execute('INSERT INTO user (name, email, password) VALUES (% s, % s, % s)', (name, email, password, ))
+            c.execute('INSERT INTO T_USER (name, email, password) VALUES (% s, % s, % s)', (name, email, password, ))
             conn.commit()
-            message = 'You have successfully registered ! Please Login'
+            message = 'Registered Successfully! Please Login'
         return render_template('register1.html', message = message)
 
 # DATA ENTRY================================================================================================================
@@ -348,7 +350,7 @@ def stop_char():
 @app.route('/table', methods=['GET', 'POST'])
 def table_details():
     c = conn.cursor()
-    c.execute(f"CREATE TABLE IF NOT EXISTS T_ROUTE_INFO (id INT NOT NULL AUTO_INCREMENT,uid VARCHAR(50),Operator TEXT,Route TEXT,Stop_num INT,Stop_id INT,UP_Dist FLOAT, DN_Dist FLOAT,PRIMARY KEY (id),FOREIGN KEY (Stop_id) REFERENCES T_STOPS_INFO(id) );")
+    c.execute(f"CREATE TABLE IF NOT EXISTS T_ROUTE_INFO (id INT NOT NULL AUTO_INCREMENT,uid VARCHAR(50),Operator TEXT,Route TEXT,Stop_num INT,Stop_id INT,UP_Dist FLOAT, DN_Dist FLOAT;") #,PRIMARY KEY (id),FOREIGN KEY (Stop_id) REFERENCES T_STOPS_INFO(id) )
     c.execute(f"SELECT s.Stop_Name FROM T_ROUTE_INFO AS r INNER JOIN T_STOPS_INFO AS s ON (s.id = r.Stop_id) WHERE r.Operator = '{session['email']}' and r.Route='{session['route']}' ORDER BY r.Stop_num")
     stops_list= c.fetchall()
     stops_list = tuple(sum(stops_list, ()))
@@ -814,7 +816,7 @@ def buses():
     if request.method == "POST":
         buslist = ','.join(request.form.values())
         c = conn.cursor()
-        c.execute(f"CREATE TABLE IF NOT EXISTS T_BUSES (Operator TEXT, BUSES TEXT);")
+        c.execute(f"CREATE TABLE IF NOT EXISTS T_BUSES (Operator TEXT, Buses TEXT);")
         c.execute(f"DELETE FROM T_BUSES WHERE Operator = '{session['email']}'")
         c.execute(f"INSERT INTO T_BUSES (Operator, Buses) VALUES ('{session['email']}','{buslist}')")
         c.execute(f"UPDATE T_STATUS SET `Bus Details` = '1' WHERE Route = '{session['route']}' and Operator = '{session['email']}';")

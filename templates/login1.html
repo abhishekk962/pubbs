@@ -30,7 +30,6 @@
             </div>
           </div>
         <div class="header-buttons">
-          <a href="/login">Login</a>
           <a href="/register">Sign Up</a>
         </div>
       </header>
@@ -42,11 +41,12 @@
         <form method="POST" action="{{url_for('loggedin')}}" style="display: flex;flex-direction: column;text-align: center;padding: 30px;">
             <h2 style="text-align: left;margin: 0;">Login</h2>
             <p style="text-align: left; color: dimgrey; margin-top: 0; font-size: 12px;">Enter your details to continue</p>
-            <input type="email" name="email" id="email" placeholder="Enter Your Email Id" required>
+            <p style="text-align: left; color: rgb(38, 38, 38); margin-top: 0; font-size: 12px;">{{message}}</p>
+            <input type="email" name="email" id="email" placeholder="Enter Your Email" required>
             <input type="password" name="password" id="password" placeholder="Enter Password" required>
             <p style="font-size: 11px;margin-top: 0;text-align: right;"><a href="#" style="text-decoration: none;color:#1E0431;">Forgot Password?</a></p>
             <button class="label-button" type="submit" style="width: 90%;align-self: center;">Log In</button>
-            <p style="font-size: 11px;color: #8C025D;margin-top: 0;">Don't have an account? <a href="/register" style="text-decoration: none;color: #1E0431;">Sign up</a></p>
+            <p style="font-size: 11px;color: #1E0431;margin-top: 0;">Don't have an account? <a href="/register" style="text-decoration: none;color: #8C025D;">Sign up</a></p>
         </form>
     </div>
 </div>
