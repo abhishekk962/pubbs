@@ -11,13 +11,14 @@
       {% if message %}
       <h4>{{message}}</h4>
       {% endif %}
-      <form action="{{url_for('save_stops')}}" method="post">
+      <form class="center-form" action="{{url_for('save_stops')}}" method="post">
         <table id="markerTable">
           <thead>
             <tr>
-              <th>Bus Stops</th>
+              <th>Stops</th>
               <th>Dummy</th>
               <th>Cong./Int.</th>
+              <th> </th>
             </tr>
           </thead>
           <tbody></tbody>
@@ -114,7 +115,8 @@
       actionsCell.style.background = "White";
       var deleteButton = document.createElement('button');
       deleteButton.type = 'button';
-      deleteButton.textContent = 'X';
+      deleteButton.classList.add('icon-button')
+      deleteButton.innerHTML = '<i class="fa fa-trash"></i>';
       actionsCell.appendChild(deleteButton);
       markerRow.appendChild(actionsCell);
 

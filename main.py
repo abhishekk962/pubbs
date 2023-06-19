@@ -286,9 +286,11 @@ def stop_details():
 
 @app.route('/build-route', methods=['GET', 'POST'])
 def route_details():
+    c = conn.cursor()
+    # c.execute(f"CREATE TABLE IF NOT EXISTS T_ROUTE_INFO (id INT NOT NULL AUTO_INCREMENT,uid VARCHAR(50),Operator TEXT,Route TEXT,Stop_num INT,Stop_id INT,UP_Dist FLOAT, DN_Dist FLOAT,PRIMARY KEY (id));") #,FOREIGN KEY (Stop_id) REFERENCES T_STOPS_INFO(id) )
     if request.method=='POST':
         return render_template('only_route.html')
-    c = conn.cursor()
+    # c.execute(f"CREATE TABLE IF NOT EXISTS T_ROUTE_INFO (id INT NOT NULL AUTO_INCREMENT,uid VARCHAR(50),Operator TEXT,Route TEXT,Stop_num INT,Stop_id INT,UP_Dist FLOAT, DN_Dist FLOAT,PRIMARY KEY (id));") #,FOREIGN KEY (Stop_id) REFERENCES T_STOPS_INFO(id) )
     c.execute(f"SELECT s.id,s.Stop_Name FROM T_ROUTE_INFO AS r INNER JOIN T_STOPS_INFO AS s ON (s.id = r.Stop_id) WHERE r.Operator = '{session['email']}' and r.Route='{session['route']}' ORDER BY r.Stop_num")
     data= c.fetchall()
     stops = [n[1] for n in data]
@@ -350,7 +352,7 @@ def stop_char():
 @app.route('/table', methods=['GET', 'POST'])
 def table_details():
     c = conn.cursor()
-    c.execute(f"CREATE TABLE IF NOT EXISTS T_ROUTE_INFO (id INT NOT NULL AUTO_INCREMENT,uid VARCHAR(50),Operator TEXT,Route TEXT,Stop_num INT,Stop_id INT,UP_Dist FLOAT, DN_Dist FLOAT;") #,PRIMARY KEY (id),FOREIGN KEY (Stop_id) REFERENCES T_STOPS_INFO(id) )
+    # c.execute(f"CREATE TABLE IF NOT EXISTS T_ROUTE_INFO (id INT NOT NULL AUTO_INCREMENT,uid VARCHAR(50),Operator TEXT,Route TEXT,Stop_num INT,Stop_id INT,UP_Dist FLOAT, DN_Dist FLOAT,PRIMARY KEY (id));") #,PRIMARY KEY (id),FOREIGN KEY (Stop_id) REFERENCES T_STOPS_INFO(id) )
     c.execute(f"SELECT s.Stop_Name FROM T_ROUTE_INFO AS r INNER JOIN T_STOPS_INFO AS s ON (s.id = r.Stop_id) WHERE r.Operator = '{session['email']}' and r.Route='{session['route']}' ORDER BY r.Stop_num")
     stops_list= c.fetchall()
     stops_list = tuple(sum(stops_list, ()))
@@ -508,7 +510,7 @@ def save_route():
 
     # Upload to Database
     c = conn.cursor()
-    query = f"CREATE TABLE IF NOT EXISTS T_ROUTE_INFO (id INT NOT NULL AUTO_INCREMENT,uid VARCHAR(50),Operator TEXT,Route TEXT,Stop_num INT,Stop_id INT,UP_Dist FLOAT, DN_Dist FLOAT,PRIMARY KEY (id),FOREIGN KEY (Stop_id) REFERENCES T_STOPS_INFO(id) );"
+    query = f"CREATE TABLE IF NOT EXISTS T_ROUTE_INFO (id INT NOT NULL AUTO_INCREMENT,uid VARCHAR(50),Operator TEXT,Route TEXT,Stop_num INT,Stop_id INT,UP_Dist FLOAT, DN_Dist FLOAT,PRIMARY KEY (id));" # ,FOREIGN KEY (Stop_id) REFERENCES T_STOPS_INFO(id) )
     c.execute(query)
     conn.commit()
 
@@ -611,6 +613,7 @@ def table_filled():
         arrival = 0
         travel = 0
         for n in ["T_Passenger_Arrival_UP", "T_Passenger_Arrival_DN","T_TravelTimeDN_ANN","T_TraveTimeUP_ANN"]:
+            c.execute(f"CREATE TABLE IF NOT EXISTS {n} (Operator TEXT,Route TEXT,Stop_num INT,Stop_id INT,{','.join([f'`{n}` FLOAT' for n in range(24)])});")
             c.execute(f"SELECT * FROM {n} WHERE Operator = '{session['email']}' AND Route = '{session['route']}'")
             data = c.fetchall()
             if data and "Arrival" in n:
@@ -636,6 +639,7 @@ def table_filled():
 
         fare = 0
         for n in ["T_Fare_DN","T_Fare_UP"]:
+            c.execute(f"CREATE TABLE IF NOT EXISTS {n} (Operator TEXT,Route TEXT,Stop_num INT,Stop_id INT,{','.join([f'`Stop_{n+1}` FLOAT' for n in range(30)])});")
             c.execute(f"SELECT * FROM {n} WHERE Operator = '{session['email']}' AND Route = '{session['route']}'")
             data = c.fetchall()
             if data:

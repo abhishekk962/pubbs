@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PUBBS Transit</title>
     <link rel="stylesheet" href="{{url_for('static',filename='main.css')}}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fira+Sans&display=swap" rel="stylesheet">
@@ -42,23 +43,23 @@
         <button type="submit" class="nav-button" formaction="{{url_for('service_details')}}">Service Details</button>
         <button type="submit" class="nav-button" formaction="{{url_for('ga_params')}}">GA Params</button>
         <button type="submit" class="nav-button" formaction="{{url_for('scheduling_details')}}">Scheduling Details</button>
-        <button type="submit" class="nav-button" formaction="{{url_for('buses')}}">Buses</button>
         <button type="submit" class="nav-button" formaction="{{url_for('scheduling')}}">Scheduling Files</button>
+        <button type="submit" class="nav-button" formaction="{{url_for('buses')}}">Buses</button>
         {% endif %}
       </form>
     </nav>
     <div class="page-body">
       <div class="sidebar">
         <div class="route">Route: {{ session['route'] }}</div>
-        <form method="get" action="{{url_for('frequency')}}">
-          <button id="freq" type="submit" disabled hidden>Frequency Optimisation</button>
+        <form method="get" action="{{url_for('frequency')}}" style="display: flex;flex-direction: column;align-items: center;">
+          <button id="freq" class ="label-button" type="submit" disabled hidden>Frequency Optimisation</button>
         </form>
-        <form method="post" action="{{url_for('scheduling_run',method='Choose')}}">
-          <button id="sched" type="submit" disabled hidden>Scheduling</button>
+        <form method="post" action="{{url_for('scheduling_run',method='Choose')}}" style="display: flex;flex-direction: column;align-items: center;">
+          <button id="sched" class ="label-button" type="submit" disabled hidden>Scheduling</button>
         </form>
-        <div id="showfreq" class="s_section">Frequency Optimisation</div>
+        <div id="showfreq" class="s_section">Frequency Optimisation<i class="fa-solid fa-caret-down"></i></div>
         <div id="statusfreq" class="s_section_cont"></div>
-        <div id="showsched" class="s_section">Scheduling</div>
+        <div id="showsched" class="s_section">Scheduling<i class="fa-solid fa-caret-down"></i></div>
         <div id="statussched" class="s_section_cont"></div>
       </div>
         {% block content %}
@@ -70,8 +71,10 @@
       showfreq.onclick = function () {
         if (statusfreq.style.display !== "none") {
           statusfreq.style.display = "none";
+          showfreq.childNodes[1].classList.remove('fa-rotate-180')
         } else {
-          statusfreq.style.display = "block";
+          statusfreq.style.display = "flex";
+          showfreq.childNodes[1].classList.add('fa-rotate-180')
         }
       };
       const statussched = document.getElementById("statussched");
@@ -79,8 +82,10 @@
       showsched.onclick = function () {
         if (statussched.style.display !== "none") {
           statussched.style.display = "none";
+          showsched.childNodes[1].classList.remove('fa-rotate-180')
         } else {
-          statussched.style.display = "block";
+          statussched.style.display = "flex";
+          showsched.childNodes[1].classList.add('fa-rotate-180')
         }
       };
     </script>
@@ -93,26 +98,39 @@
         .then(data => {
           // Iterate over the keys in the JSON data
           let index = 1;
+          const links = [
+          "{{url_for('busroute')}}"                          
+          ,"{{url_for('route_details')}}"                         
+          ,"{{url_for('stop_char')}}"                             
+          ,"{{url_for('table_details')}}"
+          ,"{{url_for('table_details')}}"
+          ,"{{url_for('table_details')}}"
+          ,"{{url_for('table_details')}}"                         
+          ,"{{url_for('ols_details')}}"                           
+          ,"{{url_for('constraints_details')}}"                   
+          ,"{{url_for('service_details')}}"                       
+          ,"{{url_for('ga_params')}}"                             
+          ,"{{url_for('scheduling_details')}}"                    
+          ,"{{url_for('scheduling')}}"                            
+          ,"{{url_for('buses')}}"  
+          ]
           for (let key in data) {
             if ((key != 'Frequency') && (index <= 11)){
-              // Create a new <p> element for each key
-              let p = document.createElement('p');
+              // Create a new <span> element for each key
+              let span = document.createElement('span');
 
-              // Set the text content of the <p> element to the key
-              p.textContent = key;
+              // Set the text content of the <span> element to the key
+              span.innerHTML = '<i class="fa-solid fa-circle-check transparent"></i>' + '<a href=' + links[index-1] + '>' + key + '<i class="fa-solid fa-chevron-right"></i></a>';
 
-              // Set the color of the <p> element based on the value of the key
+              // Set the color of the <span> element based on the value of the key
               if (data[key] == 1) {
-                p.style.color = 'black';
+                span.childNodes[0].classList.remove('transparent');
               } else if (data[key] > 0){
-                p.style.color = '#999999';
-                p.textContent = p.textContent + ' ' + Math.round(data[key]*100) + '%'
-              } else {
-                p.style.color = '#999999';
+                span.childNodes[1].textContent = span.childNodes[1].textContent + ' ' + Math.round(data[key]*100) + '%'
               }
 
-              // Append the <p> element to the document body
-              document.getElementById('statusfreq').appendChild(p);
+              // Append the <span> element to the document body
+              document.getElementById('statusfreq').appendChild(span);
             } else if (key == 'Frequency'){
               var freqbtn = document.getElementById('freq');
               var freqbtnparent = freqbtn.parentElement;
@@ -123,24 +141,21 @@
                 freqbtn.removeAttribute('disabled');
               }
             } else if ((key != 'Scheduling') && (12 < index)){
-              // Create a new <p> element for each key
-              let p = document.createElement('p');
+              // Create a new <span> element for each key
+              let span = document.createElement('span');
 
-              // Set the text content of the <p> element to the key
-              p.textContent = key;
+              // Set the text content of the <span> element to the key
+              span.innerHTML = '<i class="fa-solid fa-circle-check transparent"></i>' + '<a href=' + links[index-2] + '>' + key + '<i class="fa-solid fa-chevron-right"></i></a>';
 
-              // Set the color of the <p> element based on the value of the key
+              // Set the color of the <span> element based on the value of the key
               if (data[key] == 1) {
-                p.style.color = 'black';
+                span.childNodes[0].classList.remove('transparent');
               } else if (data[key] > 0){
-                p.style.color = '#999999';
-                p.textContent = p.textContent + ' ' + Math.round(data[key]*100) + '%'
-              } else {
-                p.style.color = '#999999';
+                span.childNodes[1].textContent = span.childNodes[1].textContent + ' ' + Math.round(data[key]*100) + '%'
               }
 
-              // Append the <p> element to the document body
-              document.getElementById('statussched').appendChild(p);
+              // Append the <span> element to the document body
+              document.getElementById('statussched').appendChild(span);
             } else if (key == 'Scheduling'){
               var schbtn = document.getElementById('sched');
               var schbtnparent = schbtn.parentElement;

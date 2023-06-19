@@ -44,22 +44,29 @@
                   <td><input type="number" name="{{stop_ids[n]}}{{'_'}}{{rows[i]}}" value="0" {% if i >= n and rowheader[0] is not number %} hidden {% endif %} /></td>
                   {% endif %}
                 {% endfor %}
-                {% if 'Travel' in selected_table or 'Passenger' in selected_table %}
+                {% if 'Trave' in selected_table or 'Passenger' in selected_table %}
                   {% if i > 0 %}
-                  <td><button id="copy" type="button">=</button></td>
+                  <td><button id="copy" type="button" class="icon-button"><i class="fa-solid fa-angles-down"></i></button></td>
                   {% endif %}
                 {% endif %}
               </tr>
               {% endfor %}
           </table>
         </div>
+        {% if 'Trave' in selected_table or 'Passenger' in selected_table %}
+        <div style="font-size: 15px;text-align: center;justify-content: center;">Click <i style="color:#8C025D" class="fa-solid fa-angles-down"></i> to Fill From Previous Row</div>
+        {% endif %}
         <section class="button-sec">
             <input id="selected_table" name="selected_table" value="{{selected_table}}" hidden>
+            <div style="display: flex;flex-direction: row;">
             <button type="submit" value="Submit">Save</button>
             <button type="submit" formaction="{{url_for('clear_table')}}" value="Clear">Clear</button>
             <button type="submit" formaction="{{url_for('retrieve_data')}}" value="Retrieve">Retrieve</button>
+            </div>
+            <div style="display: flex;flex-direction: row;">
             <button type="submit" formaction="{{url_for('download_csv_data')}}" value="Download" >Download CSV</button>
             <label class='label-button' for="csvchoose">Upload CSV</label>
+            </div>
             <input id='csvchoose' type="file" id="csvfile" name="csvfile" onchange="document.getElementById('csvsubmit').click()" hidden>
             <button id='csvsubmit' type="submit" formaction="{{url_for('upload_csv_data')}}" value="Upload" hidden>Submit CSV</button>
           </section>

@@ -3,8 +3,8 @@
 <script>var tab = $( "button:contains('Stop Characteristics')" ).attr('disabled','');</script>
 <div class="content"> 
 <h4>{{ message }}</h4>
-    <form action="{{url_for('stop_char')}}" method="POST">
-        <table>
+    <form style="max-width: 70%;"action="{{url_for('stop_char')}}" method="POST">
+        <table style="table-layout: fixed;text-align: center;height: auto;">
           <thead>
             <tr>
               <th>Stop Name</th>
