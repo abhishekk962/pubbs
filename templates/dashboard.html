@@ -181,18 +181,18 @@
   </body>
 </html>
 <!-- 
-{% if not session['route'] %}
+{% if session['route'] %}
 <script src="https://cdn.jsdelivr.net/npm/leaflet@1.7.1/dist/leaflet.js"></script>
 <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
 <script>
-  var clickedMarkersarray = [];
-  var polyline = null;
+  var _clickedMarkersarray = [];
+  var _polyline = null;
 
-  var latitudes = []
-  var longitudes = []
+  var _latitudes = []
+  var _longitudes = []
 
-  var markersLayer = L.layerGroup();
-  var linesLayer = L.layerGroup();
+  var _markersLayer = L.layerGroup();
+  var _linesLayer = L.layerGroup();
 
   // Fetch data from Flask endpoint
   fetch('/route-data')
@@ -200,28 +200,28 @@
     .then(data => {
       // Loop through the data and add markers
       data.forEach(point => {
-        var marker = L.marker([point.lat, point.lng]).addTo(markersLayer);
+        var marker = L.marker([point.lat, point.lng]).addTo(_markersLayer);
         marker.bindTooltip(point.name, {permanent: true, className: "my-label", offset: [0, 0] });
         marker.bindPopup(point.name);
         marker.key = point.id;
-        latitudes.push(point.lat);
-        longitudes.push(point.lng);
-        clickedMarkersarray.push(marker);
+        _latitudes.push(point.lat);
+        _longitudes.push(point.lng);
+        _clickedMarkersarray.push(marker);
       });
-      if (clickedMarkersarray.length > 1) {
-        var latlngs = clickedMarkersarray.map(function(marker) {
+      if (_clickedMarkersarray.length > 1) {
+        var _latlngs = _clickedMarkersarray.map(function(marker) {
           return marker.getLatLng();
         });
         // Remove the previous polyline if it exists
-        if (polyline) {
-          linesLayer.removeLayer(polyline);
+        if (_polyline) {
+          _linesLayer.removeLayer(_polyline);
         }
-        var polyline = L.polyline(latlngs, { color: '#3388ff' }).addTo(linesLayer);
+        var _polyline = L.polyline(_latlngs, { color: '#3388ff' }).addTo(_linesLayer);
       }
-      var north = Math.max(...latitudes)
-      var south = Math.min(...latitudes)
-      var east = Math.max(...longitudes)
-      var west = Math.min(...longitudes)
+      var north = Math.max(..._latitudes)
+      var south = Math.min(..._latitudes)
+      var east = Math.max(..._longitudes)
+      var west = Math.min(..._longitudes)
 
       var southWest = L.latLng(south, west),
           northEast = L.latLng(north, east),
@@ -237,8 +237,8 @@
 
       routemap.attributionControl.setPrefix(false)
       routemap.removeControl(routemap.zoomControl);
-      markersLayer.addTo(routemap);
-      linesLayer.addTo(routemap);
+      _markersLayer.addTo(routemap);
+      _linesLayer.addTo(routemap);
 
       routemap.setView([(north+south)/2, (east+west)/2],15);
     })

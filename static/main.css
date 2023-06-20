@@ -303,20 +303,21 @@ td{
 
 
 .s_section_cont>span {
-    margin: 2px 0;
+    margin: 2px -13px;
     width: 100%;
-    background: white;
-    padding: 5px 0;
+    background: #ffffff1c;
+    padding: 5px;
+    border-radius: 5px;
 }
 
 .s_section_cont>span>a {
-    background: #D0C9D6;
+    background: #ffffff00;
     border-radius: 5px;
     padding: 4px;
     display: inline-block;
     width: 70%;
     text-decoration: none;
-    color:#494949;
+    color:#ffffff;
     align-items: stretch;
 }
 
