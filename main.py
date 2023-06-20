@@ -30,7 +30,7 @@ connpool = pymysqlpool.ConnectionPool(host="103.21.58.10",
                        password="Matrix__111",
                        database="pubbsm8z_uba",
                        port = 3306,
-                       size=3
+                       size=4
                        )
 conn = connpool.get_connection()
 conn1 = connpool.get_connection()
@@ -364,9 +364,9 @@ def stop_char():
 def table_details():
     c = conn.cursor()
     # c.execute(f"CREATE TABLE IF NOT EXISTS T_ROUTE_INFO (id INT NOT NULL AUTO_INCREMENT,uid VARCHAR(50),Operator TEXT,Route TEXT,Stop_num INT,Stop_id INT,UP_Dist FLOAT, DN_Dist FLOAT,PRIMARY KEY (id));") #,PRIMARY KEY (id),FOREIGN KEY (Stop_id) REFERENCES T_STOPS_INFO(id) )
-    c.execute(f"SELECT s.Stop_Name FROM T_ROUTE_INFO AS r INNER JOIN T_STOPS_INFO AS s ON (s.id = r.Stop_id) WHERE r.Operator = '{session['email']}' and r.Route='{session['route']}' ORDER BY r.Stop_num")
-    stops_list= c.fetchall()
-    stops_list = tuple(sum(stops_list, ()))
+    c.execute(f"SELECT s.id,s.Stop_Name FROM T_ROUTE_INFO AS r INNER JOIN T_STOPS_INFO AS s ON (s.id = r.Stop_id) WHERE r.Operator = '{session['email']}' and r.Route='{session['route']}' ORDER BY r.Stop_num")
+    stops= c.fetchall()
+    stops_list = [n[1] for n in stops]
     periods=list(range(session['p_start'],session['p_end']))
     if stops_list and 'periods' in session:
         message=None
