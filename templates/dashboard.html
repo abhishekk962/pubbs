@@ -11,6 +11,8 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fira+Sans&display=swap" rel="stylesheet">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" />
     {% block head %}
     {% endblock %}
   </head>
@@ -61,6 +63,9 @@
         <div id="statusfreq" class="s_section_cont"></div>
         <div id="showsched" class="s_section">Scheduling<i class="fa-solid fa-caret-down"></i></div>
         <div id="statussched" class="s_section_cont"></div>
+        {% if session['route'] %}
+        <div id="routemap"></div>
+        {% endif %}
       </div>
         {% block content %}
         {% endblock %}
@@ -175,3 +180,70 @@
     </script>
   </body>
 </html>
+<!-- 
+{% if not session['route'] %}
+<script src="https://cdn.jsdelivr.net/npm/leaflet@1.7.1/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
+<script>
+  var clickedMarkersarray = [];
+  var polyline = null;
+
+  var latitudes = []
+  var longitudes = []
+
+  var markersLayer = L.layerGroup();
+  var linesLayer = L.layerGroup();
+
+  // Fetch data from Flask endpoint
+  fetch('/route-data')
+    .then(response => response.json())
+    .then(data => {
+      // Loop through the data and add markers
+      data.forEach(point => {
+        var marker = L.marker([point.lat, point.lng]).addTo(markersLayer);
+        marker.bindTooltip(point.name, {permanent: true, className: "my-label", offset: [0, 0] });
+        marker.bindPopup(point.name);
+        marker.key = point.id;
+        latitudes.push(point.lat);
+        longitudes.push(point.lng);
+        clickedMarkersarray.push(marker);
+      });
+      if (clickedMarkersarray.length > 1) {
+        var latlngs = clickedMarkersarray.map(function(marker) {
+          return marker.getLatLng();
+        });
+        // Remove the previous polyline if it exists
+        if (polyline) {
+          linesLayer.removeLayer(polyline);
+        }
+        var polyline = L.polyline(latlngs, { color: '#3388ff' }).addTo(linesLayer);
+      }
+      var north = Math.max(...latitudes)
+      var south = Math.min(...latitudes)
+      var east = Math.max(...longitudes)
+      var west = Math.min(...longitudes)
+
+      var southWest = L.latLng(south, west),
+          northEast = L.latLng(north, east),
+          bounds = L.latLngBounds(southWest, northEast);
+
+      var routemap = L.map('routemap', {
+          maxBounds: bounds,
+          maxZoom: 19,
+          minZoom: 10
+      });
+
+      // var map = L.map('routemap');
+
+      routemap.attributionControl.setPrefix(false)
+      routemap.removeControl(routemap.zoomControl);
+      markersLayer.addTo(routemap);
+      linesLayer.addTo(routemap);
+
+      routemap.setView([(north+south)/2, (east+west)/2],15);
+    })
+    .catch(error => {
+      console.error('Error:', error);
+    });
+</script>
+{% endif %} -->

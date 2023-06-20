@@ -33,6 +33,7 @@ connpool = pymysqlpool.ConnectionPool(host="103.21.58.10",
                        size=4
                        )
 conn = connpool.get_connection()
+connx = connpool.get_connection()
 conn1 = connpool.get_connection()
 conn2 = connpool.get_connection()
 
@@ -311,7 +312,7 @@ def route_details():
 
 @app.route('/stop-char', methods=['GET', 'POST'])
 def stop_char():
-    c = conn.cursor()
+    c = connx.cursor()
     c.execute(f"SELECT s.id,s.Stop_Name FROM T_ROUTE_INFO AS r INNER JOIN T_STOPS_INFO AS s ON (s.id = r.Stop_id) WHERE r.Operator = '{session['email']}' and r.Route='{session['route']}' ORDER BY r.Stop_num")
     data= c.fetchall()
     stop_ids = [n[0] for n in data]
@@ -354,10 +355,13 @@ def stop_char():
             data= c.fetchall()
             # return str(data)
             return render_template('only_stopchar.html',stops=stops, stop_ids=stop_ids, message="Data was updated from DB", data=data)
-    c = conn.cursor()
-    c.execute(f"SELECT s.Before_Int,s.Far_From_Int,s.Commercial,s.Transport_Hub,s.Bus_bay,s.Stop_rad FROM T_STOPS_INFO AS s INNER JOIN T_ROUTE_INFO AS r ON (s.id = r.Stop_id) WHERE s.id IN {tuple(stop_ids)} and r.Operator='{session['email']}' and r.Route='{session['route']}' ORDER BY r.Stop_num")
-    data= c.fetchall()
-    return render_template('only_stopchar.html',stops=stops,stop_ids=stop_ids, message="Fill or Update Details", data=data)
+    if stop_ids:
+        c = conn.cursor()
+        c.execute(f"SELECT s.Before_Int,s.Far_From_Int,s.Commercial,s.Transport_Hub,s.Bus_bay,s.Stop_rad FROM T_STOPS_INFO AS s INNER JOIN T_ROUTE_INFO AS r ON (s.id = r.Stop_id) WHERE s.id IN {tuple(stop_ids)} and r.Operator='{session['email']}' and r.Route='{session['route']}' ORDER BY r.Stop_num")
+        data= c.fetchall()
+        return render_template('only_stopchar.html',stops=stops,stop_ids=stop_ids, message="Fill or Update Details", data=data)
+    else:
+        return render_template('only_stopchar.html',stops=stops,stop_ids=stop_ids, message="Build Route First", data=data)
 
 
 @app.route('/table', methods=['GET', 'POST'])
@@ -371,7 +375,7 @@ def table_details():
     if stops_list and 'periods' in session:
         message=None
         return render_template('only_table.html', stops_list=stops_list, rows=list(range(session['p_start'],session['p_end'])), message=message,periods=periods)
-    elif stops_list:
+    elif tuple:
         message = "Enter Route Information First"
         return render_template('only_table.html', stops_list=stops_list, rows=0, message=message,periods=periods)
     elif 'periods' in session:
@@ -567,7 +571,7 @@ def table_selected():
 def table_filled():
     # Get filled data
     data = request.form.to_dict()
-    c = conn.cursor()
+    c = connx.cursor()
     c.execute(f"SELECT s.id,s.Stop_Name FROM T_ROUTE_INFO AS r INNER JOIN T_STOPS_INFO AS s ON (s.id = r.Stop_id) WHERE r.Operator = '{session['email']}' and r.Route='{session['route']}' ORDER BY r.Stop_num")
     stops= c.fetchall()
     stop_ids = [n[0] for n in stops]
@@ -708,7 +712,7 @@ def retrieve_data():
 # new
 @app.route('/clear-table', methods=['GET', 'POST'])
 def clear_table():
-    c = conn.cursor()
+    c = connx.cursor()
     c.execute(f"SELECT s.id,s.Stop_Name FROM T_ROUTE_INFO AS r INNER JOIN T_STOPS_INFO AS s ON (s.id = r.Stop_id) WHERE r.Operator = '{session['email']}' and r.Route='{session['route']}' ORDER BY r.Stop_num")
     stops= c.fetchall()
     stop_ids = [n[0] for n in stops]
@@ -772,7 +776,7 @@ def download_csv_data():
     data = request.form.to_dict()
 
     # Get stops list
-    c = conn.cursor()
+    c = connx.cursor()
     c.execute(f"SELECT s.id,s.Stop_Name FROM T_ROUTE_INFO AS r INNER JOIN T_STOPS_INFO AS s ON (s.id = r.Stop_id) WHERE r.Operator = '{session['email']}' and r.Route='{session['route']}' ORDER BY r.Stop_num")
     stops= c.fetchall()
     stop_ids = [n[0] for n in stops]
