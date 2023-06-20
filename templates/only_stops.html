@@ -45,6 +45,9 @@
 
     var markerCount = 0;
 
+    var latitudes = []
+    var longitudes = []
+
     // Fetch data from Flask endpoint
     fetch('/data')
       .then(response => response.json())
@@ -53,11 +56,16 @@
         data.forEach(point => {
           var marker = L.marker([point.lat, point.lng]).addTo(markersLayer);
           marker.bindPopup(point.name);
+          latitudes.push(point.lat);
+          longitudes.push(point.lng);
         });
+        map.setView([latitudes[0], longitudes[0]],15);
       })
       .catch(error => {
         console.error('Error:', error);
       });
+
+    
 
     // Search box
     var searchControl = L.Control.geocoder({
@@ -70,6 +78,14 @@
       map.setView(e.geocode.center, 13);
       addMarker(e.geocode.center);
     }).addTo(map);
+
+    // For clearing search results
+    document.querySelector('div.leaflet-top.leaflet-right > div > ul').addEventListener('click', function () {
+        searchControl._clearResults()
+    })
+    document.querySelector('#map').addEventListener('click', function () {
+        searchControl._clearResults()
+    })
 
     map.on('click', function(e) {
       var markerName = 'Stop ' + (markerCount + 1);

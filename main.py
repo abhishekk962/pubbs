@@ -92,6 +92,17 @@ def get_data():
         data.append({"id":n[0],"name": n[1], "lat": n[2], "lng": n[3]})
     return jsonify(data)
 
+@app.route('/route-data')
+def get_route_data():
+    conn1 = connpool.get_connection()
+    c = conn1.cursor()
+    c.execute(f"SELECT s.id,s.Stop_Name,s.Stop_Lat,s.Stop_Long FROM T_ROUTE_INFO AS r INNER JOIN T_STOPS_INFO AS s ON (s.id = r.Stop_id) WHERE r.Operator = '{session['email']}' and r.Route='{session['route']}' ORDER BY r.Stop_num")
+    stops_list= c.fetchall()
+    data = []
+    for n in stops_list:
+        data.append({"id":n[0],"name": n[1], "lat": n[2], "lng": n[3]})
+    return jsonify(data)
+
 @app.route('/status-display')
 def get_status():
     conn2 = connpool.get_connection()
@@ -295,7 +306,7 @@ def route_details():
     data= c.fetchall()
     stops = [n[1] for n in data]
     if stops:
-        return render_template('only_route.html', message="Your existing route is shown below. Click 'Rebuild' if you want to build the route again.", stops=stops)
+        return render_template('only_route.html', message="Your existing route is:", stops=stops)
     return render_template('only_route.html')
 
 @app.route('/stop-char', methods=['GET', 'POST'])
@@ -534,7 +545,8 @@ def table_selected():
     stops= c.fetchall()
     stop_ids = [n[0] for n in stops]
     stops_list = [n[1] for n in stops]
-    table = request.form.get("db_table")
+    table = request.form["db_table"]
+
     rows = []
     if "DN" in table:
         stop_ids.reverse()
@@ -563,15 +575,16 @@ def table_filled():
     # Upload to Database
     c = conn.cursor()
     db_table = request.form['selected_table']
-    c.execute(f"DROP TABLE IF EXISTS {db_table}")
+    print(db_table,"eesvdddddddddddddddddddddddddddddddddd")
+    # c.execute(f"DROP TABLE IF EXISTS {db_table}")
     # query = f"CREATE TABLE IF NOT EXISTS {db_table} (Operator TEXT,Route TEXT,Rows TEXT,{','.join([f'`Stop {n+1}` FLOAT' for n in range(30)])});"
-    table = request.form.get("selected_table")
+    table = request.form["selected_table"]
 
-    if "DN" in table:
+    if "DN" in db_table:
         stop_ids.reverse()
         stops_list.reverse()
 
-    if "OD" in table:
+    if "OD" in db_table:
         rows=stop_ids
         rowheader=stops_list
         query = f"CREATE TABLE IF NOT EXISTS T_OD (Operator TEXT,Route TEXT,Stop_num INT,Stop_id INT,Direction TEXT,Period INT,{','.join([f'`Stop_{n+1}` FLOAT' for n in range(30)])});"
@@ -646,8 +659,9 @@ def table_filled():
                 fare += 0.5
         c.execute(f"UPDATE T_STATUS SET `Fare` = '{fare}' WHERE Route = '{session['route']}' and Operator = '{session['email']}';")
         conn.commit()
-
+    
     return render_template('only_table.html', rowheader=rowheader, stop_ids=stop_ids, stops_list=stops_list, rows=rows, selected_table=table,periods=list(range(session['p_start'],session['p_end'])))
+    
 
 # new
 @app.route('/retrieve-data', methods=['GET', 'POST'])

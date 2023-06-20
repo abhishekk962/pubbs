@@ -6,7 +6,7 @@ body{
     background-position-y: bottom;
     background-size: 80%,100%;
     background-repeat: no-repeat, repeat;
-
+    /* overflow: hidden; */
 }
 
 *{
@@ -101,7 +101,8 @@ header > div > button ,.nav-button{
     background: linear-gradient(to bottom right, #3f255547, #8888893d);
     backdrop-filter: blur( 4px );
     -webkit-backdrop-filter: blur( 4px );
-    border: 1px solid rgb(255 255 255 / 7%);
+    /* border: 1px solid rgb(255 255 255 / 7%); */
+    z-index: 1;
 }
 
 .sidebar::-webkit-scrollbar {
@@ -111,6 +112,12 @@ header > div > button ,.nav-button{
 .sidebar {
     -ms-overflow-style: none;  /* IE and Edge */
     scrollbar-width: none;  /* Firefox */
+}
+
+.sidebar *{
+    -webkit-user-select: none; /* Safari */
+    -ms-user-select: none; /* IE 10 and IE 11 */
+    user-select: none; /* Standard syntax */
 }
 
 .content{
@@ -126,7 +133,7 @@ header > div > button ,.nav-button{
     backdrop-filter: blur( 4px );
     -webkit-backdrop-filter: blur( 4px );
     border-radius: 10px;
-    border: 1px solid rgb(255 255 255 / 7%);
+    /* border: 1px solid rgb(255 255 255 / 7%); */
 }
 
 .content form{
@@ -252,6 +259,8 @@ section button[type="submit"]{
     width: 20%;
     overflow: scroll;
     background: rgb(255, 255, 255);
+    box-shadow: 0 0 8px 4px rgb(0 0 0 / 22%);
+    z-index: 1;
 }
 
 .maptable::-webkit-scrollbar {
