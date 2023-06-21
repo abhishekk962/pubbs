@@ -13,7 +13,7 @@
   </select>
 </form>
 {% endif %}
-<form id="myform" action="{{url_for('busroute')}}" method="post">
+<form action="{{url_for('busroute')}}" method="post">
   <div class="busroute-form">
     <b>Bus Route Details</b><br>
     <section>
@@ -25,7 +25,7 @@
         <label for="Terminal_2_destination">Terminal 2 (Destination): </label>
         <input type="text" id="Terminal_2_destination" name="Terminal_2_destination" required {%if data%}value="{{data['Terminal_2_destination']}}"{%endif%}/>
       </div>
-      <br style="clear:both;" />
+      <!-- <br style="clear:both;" /> -->
     </section>
     <section>
       <div class="label-field-1">

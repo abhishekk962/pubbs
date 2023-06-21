@@ -78,6 +78,7 @@
           marker.bindTooltip(point.name, {permanent: true, className: "my-label", offset: [0, 0] });
           marker.bindPopup(point.name);
           marker.key = point.id;
+          marker._icon.style.filter = "hue-rotate(120deg)"
           latitudes.push(point.lat);
           longitudes.push(point.lng);
           clickedMarkersarray.push(marker);
@@ -123,6 +124,8 @@
             clickedMarkersarray.push(marker);
             // Update the table with the clicked marker
             updateTable(marker);
+            // Change marker color
+            marker._icon.style.filter = "hue-rotate(120deg)"
             // Update the lines
             updateLines();
           });

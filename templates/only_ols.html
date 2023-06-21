@@ -5,6 +5,7 @@
 {% if not data %}
 <h4>{{ message }}</h4>
 <form id="myform" action="{{url_for('ols_details')}}" method="post">
+  <b>OLS Coefficients</b><br>
   <div>
     <label for="A">Const:</label>
     <input value="4.09" type="text" id="Const" name="Const" required>
@@ -43,6 +44,7 @@
 {% if data %}
 <h4>{{ message }}</h4>
 <form id="myform" action="{{url_for('ols_details')}}" method="post">
+  <b>OLS Coefficients</b><br>
   <div>
     <label for="A">Const:</label>
     <input value="{{data['Const']}}" type="text" id="Const" name="Const" required>

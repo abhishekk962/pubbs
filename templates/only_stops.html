@@ -55,7 +55,9 @@
         // Loop through the data and add markers
         data.forEach(point => {
           var marker = L.marker([point.lat, point.lng]).addTo(markersLayer);
+          marker.bindTooltip(point.name, {permanent: true, className: "my-label", offset: [0, 0] });
           marker.bindPopup(point.name);
+          marker._icon.style.filter = "hue-rotate(120deg)"
           latitudes.push(point.lat);
           longitudes.push(point.lng);
         });

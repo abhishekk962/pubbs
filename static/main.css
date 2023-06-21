@@ -137,6 +137,7 @@ header > div > button ,.nav-button{
 }
 
 .content form{
+    text-align: center;
     color: #1E0431;
     margin: auto auto;
     padding: 20px;
@@ -145,6 +146,10 @@ header > div > button ,.nav-button{
     border: 1px solid #ccc;
     border-radius: 5px;
     box-shadow: 0 0 10px 5px rgba(0, 0, 0, 0.1);
+}
+
+form b{
+    display: block;
 }
 
 .center-form{
@@ -164,6 +169,7 @@ header > div > button ,.nav-button{
 form > div{
     display: grid;
     grid-template-columns: auto auto auto auto;
+    text-align: left;
 }
 
 .scroll-table{
@@ -181,8 +187,9 @@ form > div{
 }
 
 .busroute-form label{
-    font-size: 12px;
+    font-size: 13px;
     width: 200px;
+    text-align: left;
 }
 
 .busroute-form input{
@@ -192,15 +199,28 @@ form > div{
     border-radius: 5px;
 }
 
+#myform{
+    text-align: center;
+}
+
+#myform label{
+    display: inline-block;
+    font-size: 13px;
+    font-weight: bold;
+    vertical-align: middle;
+    margin: auto 5px;
+    text-align: left;
+}
+
 input{
     width: 200px;
-    padding: 5px;
+    padding: 4px;
     box-shadow: 0 0 6px 1px rgb(0 0 0 / 22%);
     border-style: none;
     border-radius: 5px;
 }
 
-.label-button, input[type="submit"]{
+.label-button, input[type="submit"],section button[type="submit"]{
     font-size: 15px;
     width: fit-content;
     padding: 5px 10px;
@@ -210,6 +230,11 @@ input{
     font-weight: bold;
     border-style: none;
     box-shadow: 0 0 6px 1px rgb(0 0 0 / 22%);
+}
+
+.label-button:hover, input[type="submit"]:hover,section button[type="submit"]:hover{
+    font-weight: bolder;
+    box-shadow: 0 0 6px 1px rgba(0, 0, 0, 85%);
 }
 
 .label-button:disabled{
@@ -224,18 +249,6 @@ input[type="file" ]{
     display: flex;
     flex-direction: row;
     justify-content: space-between;
-}
-
-section button[type="submit"]{
-    font-size: 15px;
-    width: fit-content;
-    padding: 5px 10px;
-    border-radius: 5px;
-    background-color: #8C025D;
-    color: white;
-    font-weight: bold;
-    border-style: none;
-    box-shadow: 0 0 6px 1px rgb(0 0 0 / 22%);
 }
 
 #routemap {
@@ -357,7 +370,7 @@ td{
 }
 
 input{
-    margin: 5px;
+    margin: 4px;
 }
 
 button{
@@ -403,6 +416,12 @@ input[type="checkbox"] {
     font-size: 20px;
     color: #8C025D;
     background: none;
+    border: none;
+}
+
+.my-label {
+    background: #ffffffab;
+    font-weight: bold;
     border: none;
 }
 

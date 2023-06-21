@@ -4,23 +4,25 @@
 {% block content %}
 <div class="content"> 
 <h4>{{ message }}</h4>
-  <form method="post">
-    <div>
-      <button type="submit" formaction="{{url_for('scheduling_run',method = 'FIFO')}}">FIFO</button>
-      <button type="submit" formaction="{{url_for('scheduling_run',method = 'LIFO')}}">LIFO</button>
-      <button type="submit" formaction="{{url_for('scheduling_run',method = 'Random')}}">Random</button>
-      <div>
-        {% if routes %}
-          <select id="second_route" name="second_route">
-            <option value="" selected="selected" hidden="hidden">Select Second Route</option>
-            {% for route in routes %}
-            <option>{{route}}</option>
-            {% endfor %}
-          </select>
-          <button type="submit" value="Submit" formaction="{{url_for('scheduling_run',method = 'Multiline')}}">Multiline</button>
-        {% endif %}
-      </div>
+  <form id="myform" method="post">
+    <b>Single-line Scheduling</b><br>
+    <div style="display: flex;flex-direction: row;justify-content: space-between;">
+      <button class="label-button" type="submit" formaction="{{url_for('scheduling_run',method = 'FIFO')}}">FIFO</button>
+      <button class="label-button" type="submit" formaction="{{url_for('scheduling_run',method = 'LIFO')}}">LIFO</button>
+      <button class="label-button" type="submit" formaction="{{url_for('scheduling_run',method = 'Random')}}">Random</button>
+    </div>  
+    {% if routes %}
+    <br><hr><br><b>Multi-line Scheduling</b><br>
+    <div style="display: flex;flex-direction: row;justify-content: space-between;">
+        <select id="second_route" name="second_route">
+          <option value="" selected="selected" hidden="hidden">Select Second Route</option>
+          {% for route in routes %}
+          <option>{{route}}</option>
+          {% endfor %}
+        </select>
+        <button class="label-button" type="submit" value="Submit" formaction="{{url_for('scheduling_run',method = 'Multiline')}}">Multiline</button>
     </div>
+    {% endif %}
   </form>
 </div>
 {% endblock %}

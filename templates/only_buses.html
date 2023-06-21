@@ -7,7 +7,7 @@
 <h4>{{ message }}</h4>
 {% if buses != 0 %}
   <form action="{{url_for('buses')}}" method="post">
-    Enter Bus Names
+    <b>Enter Bus Names</b><br>
     <div class="buses">
       {% for n in range(buses) %}
         {% if busnames %}

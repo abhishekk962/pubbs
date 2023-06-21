@@ -5,6 +5,7 @@
 {% if not data %}
 <h4>{{ message }}</h4>
 <form id="myform" action="{{url_for('service_details')}}" method="post">
+  <b>Service Details</b><br>
   <div>
     <label for="A">Terminal 1:</label>
     <input type="text" id="A" name="A" required>
@@ -94,6 +95,7 @@
 {% if data %}
 <h4>{{ message }}</h4>
 <form id="myform" action="{{url_for('service_details')}}" method="post">
+  <b>Service Details</b><br>
   <div>
     <label for="A">Terminal 1:</label>
     <input value="{{data['A']}}" type="text" id="A" name="A" required>

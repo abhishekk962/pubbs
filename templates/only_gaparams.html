@@ -5,7 +5,8 @@
 {% if not data %}
 <h4>{{ message }}</h4>
 <form id="myform" action="{{url_for('ga_params')}}" method="post">
-  <div>
+  <b>Genetic Algorithm Parameters</b><br>
+  <div style="grid-template-columns: auto auto;">
     <label for="sol_per_pop">No of sol set of freq in one popl. for GA: </label>
     <input value="20" type="number" id="sol_per_pop" name="sol_per_pop" required>
 
@@ -19,7 +20,8 @@
 {% if data %}
 <h4>{{ message }}</h4>
 <form id="myform" action="{{url_for('ga_params')}}" method="post">
-  <div>
+  <b>Genetic Algorithm Parameters</b><br>
+  <div style="grid-template-columns: auto auto;">
     <label for="sol_per_pop">No of sol set of freq in one popl. for GA: </label>
     <input value="{{data['sol_per_pop']}}" type="number" id="sol_per_pop" name="sol_per_pop" required>
 

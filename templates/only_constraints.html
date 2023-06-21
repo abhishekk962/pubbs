@@ -6,7 +6,9 @@
 <h4>{{ message }}</h4>
 <form id="myform" action="{{url_for('constraints_details')}}" method="post" style="grid-template-columns: auto auto;">
   <div>
-    <span>CONSTRAINTS FULL DAY SERVICES</span>
+    <b>CONSTRAINTS FULL DAY SERVICES</b>
+    <span> </span>
+    <span> </span>
     <span> </span>
 
     <label for="max_oppp">Maximum operation cost/person: </label>
@@ -30,8 +32,12 @@
     <label for="min_crr"> Min cost recovery ratio: </label>
     <input value="0" type="number" id="min_crr" name="min_crr" required>
 
-  <span class="title">CONSTRAINTS TRIP WISE</span>
+    <span> </span>
+    <span> </span>
+    <b>CONSTRAINTS TRIP WISE</b>
     <span></span>
+    <span> </span>
+    <span> </span>
 
     <label for="min_ppp">Minimum Passenger per trip: </label>
     <input value="0" type="number" id="min_ppp" name="min_ppp" required>
@@ -53,7 +59,9 @@
 <h4>{{ message }}</h4>
 <form id="myform" action="{{url_for('constraints_details')}}" method="post" style="grid-template-columns: auto auto;">
   <div>
-    <span>CONSTRAINTS FULL DAY SERVICES</span>
+    <span><b>CONSTRAINTS FULL DAY SERVICES</b></span>
+    <span> </span>
+    <span> </span>
     <span> </span>
 
     <label for="max_oppp">Maximum operation cost/person: </label>
@@ -77,8 +85,12 @@
     <label for="min_crr"> Min cost recovery ratio: </label>
     <input value="{{data['min_crr']}}" type="number" id="min_crr" name="min_crr" required>
 
-  <span class="title">CONSTRAINTS TRIP WISE</span>
+    <span> </span>
+    <span> </span>
+    <span class="title"><b>CONSTRAINTS TRIP WISE</b></span>
     <span></span>
+    <span> </span>
+    <span> </span>
 
     <label for="min_ppp">Minimum Passenger per trip: </label>
     <input value="{{data['min_ppp']}}" type="number" id="min_ppp" name="min_ppp" required>

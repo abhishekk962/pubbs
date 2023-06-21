@@ -22,7 +22,7 @@
   </form>
   {% if selected_table %}
   <form action="{{url_for('table_filled')}}" method="POST" enctype="multipart/form-data">
-    <b>{{selected_table}}</b>
+    <b>{{selected_table}}</b><br>
     <input id="selected_table" name="selected_table" value="{{selected_table}}" hidden>
     <div class="scroll-table">
       <table>
