@@ -4,8 +4,9 @@
 {% block content %}
 <script>var tab = $( "button:contains('Buses')" ).attr('disabled','');</script>
 <div class="content">
-{% if message %}<div id="messagebox">{{message}}</div>{{message}}{% endif %}
+{% if buses == 0 %}{{message}}{% endif %}
 {% if buses != 0 %}
+{% if message %}<div id="messagebox">{{message}}</div>{% endif %}
   <form action="{{url_for('buses')}}" method="post">
     <b>Enter Bus Names</b><br>
     <div class="buses">

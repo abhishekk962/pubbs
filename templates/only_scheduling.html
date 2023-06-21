@@ -7,19 +7,35 @@
   <b>Upload Scheduling Input Files</b><br>
   <div class='csvfiles' style="grid-template-columns: auto auto;">
       <label for="departuretimeDN">departuretimeDN</label>
+      <span>No file chosen</span>
       <input type="file" accept=".csv" id="departuretimeDN" name="departuretimeDN" required>
       <label for="departuretimeUP">departuretimeUP</label>
+      <span>No file chosen</span>
       <input type="file" accept=".csv" id="departuretimeUP" name="departuretimeUP" required>
       <label for="stoparrivalDN">stoparrivalDN</label>
+      <span>No file chosen</span>
       <input type="file" accept=".csv" id="stoparrivalDN" name="stoparrivalDN" required>
       <label for="stoparrivalUP">stoparrivalUP</label>
+      <span>No file chosen</span>
       <input type="file" accept=".csv" id="stoparrivalUP" name="stoparrivalUP" required>
       <label for="travel_time_totDN">travel_time_totDN</label>
+      <span>No file chosen</span>
       <input type="file" accept=".csv" id="travel_time_totDN" name="travel_time_totDN" required>
       <label for="travel_time_totUP">travel_time_totUP</label>
+      <span>No file chosen</span>
       <input type="file" accept=".csv" id="travel_time_totUP" name="travel_time_totUP" required>
   </div>
   <button class="label-button" type="submit" value="Upload">Upload CSVs</button>
 </form>
 </div>
+{% endblock %}
+{% block foot %}
+<script>
+  let filebtns = document.querySelectorAll("form div input");
+  filebtns.forEach(btn => {
+    btn.addEventListener('change', function() {
+      btn.previousElementSibling.textContent = this.files[0].name
+    })
+  });
+</script>
 {% endblock %}
