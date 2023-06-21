@@ -2,8 +2,9 @@
 {% block content %}
 <script>var tab = $( "button:contains('Stop Characteristics')" ).attr('disabled','');</script>
 <div class="content"> 
-<h4>{{ message }}</h4>
-    <form style="max-width: 70%;"action="{{url_for('stop_char')}}" method="POST">
+  {% if message %}<div id="messagebox">{{message}}</div>{% endif %}
+  {% if stop_ids %}
+  <form style="max-width: 70%;"action="{{url_for('stop_char')}}" method="POST">
       <b>Stop Characteristics</b><br>  
       <table style="table-layout: fixed;text-align: center;height: auto;">
           <thead>
@@ -53,5 +54,9 @@
         <input type="submit" formaction="{{url_for('stop_char')}}" value="Save" name="save" >
         <input type="submit" formaction="{{url_for('stop_char')}}" value="Get From DB" name="getfromdb" >
     </form>
+    {% endif %}
+    {% if not stop_ids %}
+      {{ message }}
+    {% endif %}
 </div>
 {% endblock %}

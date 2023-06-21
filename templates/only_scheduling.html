@@ -2,6 +2,7 @@
 {% block content %}
 <script>var tab = $( "button:contains('Scheduling Files')" ).attr('disabled','');</script>
 <div class="content"> 
+{% if message %}<div id="messagebox">{{message}}</div>{% endif %}
 <form action="{{url_for('scheduling')}}" method="POST" enctype="multipart/form-data">
   <b>Upload Scheduling Input Files</b><br>
   <div class='csvfiles' style="grid-template-columns: auto auto;">

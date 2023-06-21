@@ -2,9 +2,9 @@
 {% block content %}
 <script>var tab = $( "button:contains('Bus Route')" ).attr('disabled','');</script>
 <div class="content">
-<h4>{{ message }}</h4>
+{% if message %}<div id="messagebox">{{message}}</div>{% endif %}
 {% if routes %}
-<form method="POST" action="{{url_for('import_route')}}" style="margin: 0;padding: 0;">
+<form method="POST" action="{{url_for('import_route')}}" style="margin: 0;padding: 0;position: absolute;top: 80%;">
   <select id="route_for_import" name="route_for_import" onchange="this.form.submit();">
     <option value="" selected="selected" hidden="hidden">Use Previous Routes</option>
     {% for route in routes %}

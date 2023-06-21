@@ -3,15 +3,15 @@
 <script>var tab = $( "button:contains('Service Details')" ).attr('disabled','');</script>
 <div class="content"> 
 {% if not data %}
-<h4>{{ message }}</h4>
+{% if message %}<div id="messagebox">{{message}}</div>{% endif %}
 <form id="myform" action="{{url_for('service_details')}}" method="post">
   <b>Service Details</b><br>
   <div>
     <label for="A">Terminal 1:</label>
-    <input type="text" id="A" name="A" required>
+    <input value="Origin" type="text" id="A" name="A" required>
 
     <label for="B">Terminal 2:</label>
-    <input type="text" id="B" name="B" required>
+    <input value="Destination" type="text" id="B" name="B" required>
 
     <label for="frequencydefault">Frequency Default:</label>
     <input value="3" type="number" id="frequencydefault" name="frequencydefault" required>
@@ -93,7 +93,7 @@
 </form>
 {% endif %}
 {% if data %}
-<h4>{{ message }}</h4>
+{% if message %}<div id="messagebox">{{message}}</div>{% endif %}
 <form id="myform" action="{{url_for('service_details')}}" method="post">
   <b>Service Details</b><br>
   <div>

@@ -3,7 +3,7 @@
 <script>var tab = $( "button:contains('OLS Details')" ).attr('disabled','');</script>
 <div class="content"> 
 {% if not data %}
-<h4>{{ message }}</h4>
+{% if message %}<div id="messagebox">{{message}}</div>{% endif %}
 <form id="myform" action="{{url_for('ols_details')}}" method="post">
   <b>OLS Coefficients</b><br>
   <div>
@@ -42,7 +42,7 @@
 </form>
 {% endif %}
 {% if data %}
-<h4>{{ message }}</h4>
+{% if message %}<div id="messagebox">{{message}}</div>{% endif %}
 <form id="myform" action="{{url_for('ols_details')}}" method="post">
   <b>OLS Coefficients</b><br>
   <div>

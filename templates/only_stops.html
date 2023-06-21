@@ -6,11 +6,9 @@
 {% block content %}
 <script>var tab = $( "button:contains('Stop Details')" ).attr('disabled','');</script>
   <div class="mapdata">
+    {% if message %}<div id="messagebox">{{message}}</div>{% endif %}
     <div id="map"></div>
     <div class="maptable">
-      {% if message %}
-      <h4>{{message}}</h4>
-      {% endif %}
       <form class="center-form" action="{{url_for('save_stops')}}" method="post">
         <table id="markerTable">
           <thead>

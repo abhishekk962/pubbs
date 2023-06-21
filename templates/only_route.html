@@ -7,6 +7,7 @@
 <script>var tab = $( "button:contains('Build Route')" ).attr('disabled','');</script>
 {% if message %}
 <div class="mapdata">
+  <div id="messagebox">{{message}}</div>
   <div id="map"></div>
   <div class="maptable">
     <form class="center-form" action="{{url_for('route_details')}}" method="post">  

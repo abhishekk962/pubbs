@@ -2,8 +2,9 @@
 {% block content %}
 <script>var tab = $( "button:contains('Table Details')" ).attr('disabled','');</script>
 <div class="content"> 
-{% if not message %}
-  <form action="{{url_for('table_selected')}}" method="POST" style="margin: 0;padding: 0;">
+{% if message %}<div id="messagebox">{{message}}</div>{% endif %}
+{% if rows and stops_list %}
+  <form action="{{url_for('table_selected')}}" method="POST" style="margin: 10px;padding: 0;">
     <div style="display: flex; flex-direction: row;">
       <select id="db_table" name="db_table" onchange="this.form.submit();">
         <option value="" selected="selected" hidden="hidden">Select table</option>
@@ -21,7 +22,7 @@
     </div>
   </form>
   {% if selected_table %}
-  <form action="{{url_for('table_filled')}}" method="POST" enctype="multipart/form-data">
+  <form class='tableform' action="{{url_for('table_filled')}}" method="POST" enctype="multipart/form-data">
     <b>{{selected_table}}</b><br>
     <input id="selected_table" name="selected_table" value="{{selected_table}}" hidden>
     <div class="scroll-table">
@@ -72,10 +73,8 @@
       </section>
   </form>
   {% endif %}
-{% endif%}
-
-{% if message %}
-  {{message}}
+{% else %}
+  {{ message }}
 {% endif%}
 
 </div>

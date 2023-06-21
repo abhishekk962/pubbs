@@ -70,6 +70,19 @@
         {% block content %}
         {% endblock %}
     </div>
+    
+    {% if message %}
+      <script>
+        var msgbox = document.getElementById('messagebox')
+
+        msgbox.innerHTML = '<i class="fa fa-circle-info" style="color: #3f59a6;"></i>&nbsp;' + msgbox.innerHTML + '&nbsp; <i class="fa fa-x"></i>'
+
+        msgbox.addEventListener('click',function(){
+          msgbox.style.display = 'none'
+        })
+
+      </script>
+    {% endif %}
     <script>
       const statusfreq = document.getElementById("statusfreq");
       const showfreq = document.getElementById("showfreq");

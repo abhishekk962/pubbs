@@ -249,14 +249,19 @@ def busroute():
             c.execute(f"INSERT INTO T_STATUS (Operator, Route,`Route Details`) VALUES ('{session['email']}','{session['route']}','1')")
         conn.commit()
 
-        return render_template('only_busroute.html', message="Bus Route info was saved", data=request.form.to_dict())
+        c = conn.cursor()
+        c.execute(f"SELECT DISTINCT Bus_route_name FROM T_ONLY_ROUTES WHERE Operator = '{session['email']}'")
+        data = c.fetchall()
+        routes = [n[0] for n in data]
+
+        return render_template('only_busroute.html', routes=routes, message="Bus Route info was saved", data=request.form.to_dict())
     
     c = conn.cursor()
     c.execute("CREATE TABLE IF NOT EXISTS T_ONLY_ROUTES (Operator TEXT,Bus_route_name TEXT,Terminal_1_origin TEXT,Terminal_2_destination TEXT,Bus_service_timings_From TEXT,Bus_service_timings_To TEXT,Number_of_service_periods TEXT)")
     c.execute(f"SELECT DISTINCT Bus_route_name FROM T_ONLY_ROUTES WHERE Operator = '{session['email']}'")
     data = c.fetchall()
     routes = [n[0] for n in data]
-    return render_template('only_busroute.html', message="",routes=routes)
+    return render_template('only_busroute.html',routes=routes, message="Enter Bus Route Info to begin")
 
 @app.route('/import-route', methods=['GET', 'POST'])
 def import_route():
@@ -294,7 +299,7 @@ def clear_route():
 
 @app.route('/stops', methods=['GET', 'POST'])
 def stop_details():
-    return render_template('only_stops.html', message="")
+    return render_template('only_stops.html')
 
 @app.route('/build-route', methods=['GET', 'POST'])
 def route_details():
@@ -307,7 +312,7 @@ def route_details():
     data= c.fetchall()
     stops = [n[1] for n in data]
     if stops:
-        return render_template('only_route.html', message="Your existing route is:", stops=stops)
+        return render_template('only_route.html', message="Your existing route is shown below:", stops=stops)
     return render_template('only_route.html')
 
 @app.route('/stop-char', methods=['GET', 'POST'])
@@ -364,6 +369,27 @@ def stop_char():
         return render_template('only_stopchar.html',stops=stops,stop_ids=stop_ids, message="Build Route First", data=data)
 
 
+# @app.route('/table', methods=['GET', 'POST'])
+# def table_details():
+#     c = conn.cursor()
+#     # c.execute(f"CREATE TABLE IF NOT EXISTS T_ROUTE_INFO (id INT NOT NULL AUTO_INCREMENT,uid VARCHAR(50),Operator TEXT,Route TEXT,Stop_num INT,Stop_id INT,UP_Dist FLOAT, DN_Dist FLOAT,PRIMARY KEY (id));") #,PRIMARY KEY (id),FOREIGN KEY (Stop_id) REFERENCES T_STOPS_INFO(id) )
+#     c.execute(f"SELECT s.id,s.Stop_Name FROM T_ROUTE_INFO AS r INNER JOIN T_STOPS_INFO AS s ON (s.id = r.Stop_id) WHERE r.Operator = '{session['email']}' and r.Route='{session['route']}' ORDER BY r.Stop_num")
+#     stops= c.fetchall()
+#     stops_list = [n[1] for n in stops]
+#     periods=list(range(session['p_start'],session['p_end']))
+#     if stops_list and 'periods' in session:
+#         message=None
+#         return render_template('only_table.html', stops_list=stops_list, rows=list(range(session['p_start'],session['p_end'])),periods=periods)
+#     elif stops_list:
+#         message = "Enter Route Information First"
+#         return render_template('only_table.html', stops_list=stops_list, rows=0, message=message,periods=periods)
+#     elif 'periods' in session:
+#         message = "Enter Stops Information First"
+#         return render_template('only_table.html', stops_list=stops_list, rows=list(range(session['p_start'],session['p_end'])), message=message,periods=periods)
+#     else:
+#         message = "Enter Route and Stops Information First"
+#         return render_template('only_table.html', stops_list=[], rows=0, message=message,periods=periods)
+
 @app.route('/table', methods=['GET', 'POST'])
 def table_details():
     c = conn.cursor()
@@ -372,18 +398,12 @@ def table_details():
     stops= c.fetchall()
     stops_list = [n[1] for n in stops]
     periods=list(range(session['p_start'],session['p_end']))
-    if stops_list and 'periods' in session:
+    if stops_list:
         message=None
-        return render_template('only_table.html', stops_list=stops_list, rows=list(range(session['p_start'],session['p_end'])), message=message,periods=periods)
-    elif tuple:
-        message = "Enter Route Information First"
-        return render_template('only_table.html', stops_list=stops_list, rows=0, message=message,periods=periods)
-    elif 'periods' in session:
-        message = "Enter Stops Information First"
-        return render_template('only_table.html', stops_list=stops_list, rows=list(range(session['p_start'],session['p_end'])), message=message,periods=periods)
+        return render_template('only_table.html', stops_list=stops_list, rows=list(range(session['p_start'],session['p_end'])),periods=periods)
     else:
-        message = "Enter Route and Stops Information First"
-        return render_template('only_table.html', stops_list=[], rows=0, message=message,periods=periods)
+        message = "Build Route First"
+        return render_template('only_table.html', message=message)
 
 @app.route('/ols', methods=['GET', 'POST'])
 def ols_details():
@@ -404,7 +424,7 @@ def ols_details():
             data = c.fetchall()
             return render_template('only_ols.html', message="Data was Retrieved", data=data[0])
     else:
-        return render_template('only_ols.html', message="")
+        return render_template('only_ols.html')
 
 @app.route('/scheduling-details', methods=['GET', 'POST'])
 def scheduling_details():
@@ -421,7 +441,7 @@ def scheduling_details():
             data = c.fetchall()
             return render_template('only_scheduling_details.html', message="Retrieved",data=data[0])
     else:
-        return render_template('only_scheduling_details.html', message="")
+        return render_template('only_scheduling_details.html')
 
 @app.route('/constraints', methods=['GET', 'POST'])
 def constraints_details():
@@ -438,7 +458,7 @@ def constraints_details():
             data = c.fetchall()
             return render_template('only_constraints.html', message="Retrieved",data=data[0])
     else:
-        return render_template('only_constraints.html', message="")
+        return render_template('only_constraints.html')
 
 @app.route('/service', methods=['GET', 'POST'])
 def service_details():
@@ -455,7 +475,7 @@ def service_details():
             data = c.fetchall()
             return render_template('only_service.html', message="Retrieved",data=data[0])
     else:
-        return render_template('only_service.html', message="")
+        return render_template('only_service.html')
 
 @app.route('/ga-params', methods=['GET', 'POST'])
 def ga_params():
@@ -472,7 +492,7 @@ def ga_params():
             data = c.fetchall()
             return render_template('only_gaparams.html', message="Retrieved",data=data[0])
     else:
-        return render_template('only_gaparams.html', message="")
+        return render_template('only_gaparams.html')
 
 @app.route('/save-stops', methods=['POST'])
 def save_stops():
@@ -540,7 +560,8 @@ def save_route():
     c = conn.cursor()
     c.execute(f"DELETE FROM T_ROUTE_INFO WHERE Route = '{session['route']}' and Operator = '{session['email']}' and uid != '{uid}';")
     conn.commit()
-    return render_template('only_table.html', stops_list=session['stops_list'], rows=list(range(session['p_start'],session['p_end'])),periods=list(range(session['p_start'],session['p_end'])))
+    # return render_template('only_table.html', stops_list=session['stops_list'], rows=list(range(session['p_start'],session['p_end'])),periods=list(range(session['p_start'],session['p_end'])))
+    return redirect('/build-route')
 
 @app.route('/table-selected', methods=['GET', 'POST'])
 def table_selected():
@@ -579,7 +600,7 @@ def table_filled():
     # Upload to Database
     c = conn.cursor()
     db_table = request.form['selected_table']
-    print(db_table,"eesvdddddddddddddddddddddddddddddddddd")
+    
     # c.execute(f"DROP TABLE IF EXISTS {db_table}")
     # query = f"CREATE TABLE IF NOT EXISTS {db_table} (Operator TEXT,Route TEXT,Rows TEXT,{','.join([f'`Stop {n+1}` FLOAT' for n in range(30)])});"
     table = request.form["selected_table"]
@@ -664,7 +685,7 @@ def table_filled():
         c.execute(f"UPDATE T_STATUS SET `Fare` = '{fare}' WHERE Route = '{session['route']}' and Operator = '{session['email']}';")
         conn.commit()
     
-    return render_template('only_table.html', rowheader=rowheader, stop_ids=stop_ids, stops_list=stops_list, rows=rows, selected_table=table,periods=list(range(session['p_start'],session['p_end'])))
+    return render_template('only_table.html', message="Data was Saved", rowheader=rowheader, stop_ids=stop_ids, stops_list=stops_list, rows=rows, selected_table=table,periods=list(range(session['p_start'],session['p_end'])))
     
 
 # new
@@ -707,7 +728,7 @@ def retrieve_data():
     #     return "The specified number of periods don't match the data from the database. Please check and try again."
     # if len(db_data) != len(stops_list):
     #     return "The specified number of stops don't match the data from the database. Please check and try again."
-    return render_template('only_table.html', rowheader=rowheader, stop_ids=stop_ids, stops_list=stops_list, rows=rows, db_data=db_data,selected_table=db_table,periods=list(range(session['p_start'],session['p_end'])))
+    return render_template('only_table.html', message="Data was Retrieved", rowheader=rowheader, stop_ids=stop_ids, stops_list=stops_list, rows=rows, db_data=db_data,selected_table=db_table,periods=list(range(session['p_start'],session['p_end'])))
 
 # new
 @app.route('/clear-table', methods=['GET', 'POST'])
@@ -732,7 +753,7 @@ def clear_table():
     elif db_table in ["T_Fare_DN","T_Fare_UP"]:
         rows=stop_ids
         rowheader=stops_list
-    return render_template('only_table.html', rowheader=rowheader, stop_ids=stop_ids, stops_list=stops_list, rows=rows, selected_table=db_table,periods=list(range(session['p_start'],session['p_end'])))
+    return render_template('only_table.html', message="Table was Cleared", rowheader=rowheader, stop_ids=stop_ids, stops_list=stops_list, rows=rows, selected_table=db_table,periods=list(range(session['p_start'],session['p_end'])))
 
 # new
 @app.route('/upload-csv-data', methods=['GET', 'POST'])
@@ -767,7 +788,7 @@ def upload_csv_data():
     #     return "The specified number of periods don't match the csv data uploaded. Please check and try again."
     # if len(csvdata[0]) != len(stops_list):
     #     return "The specified number of stops don't match the csv data uploaded. Please check and try again."
-    return render_template('only_table.html', rowheader=rowheader, stop_ids=stop_ids, stops_list=stops_list, rows=rows, selected_table=db_table,db_data=csvdata,periods=list(range(session['p_start'],session['p_end'])))
+    return render_template('only_table.html', message="Data filled from CSV", rowheader=rowheader, stop_ids=stop_ids, stops_list=stops_list, rows=rows, selected_table=db_table,db_data=csvdata,periods=list(range(session['p_start'],session['p_end'])))
 
 # new
 @app.route('/download-csv-data', methods=['GET', 'POST'])
@@ -820,6 +841,7 @@ def scheduling():
         c.execute(f"UPDATE T_STATUS SET `Scheduling Files` = '1' WHERE Route = '{session['route']}' and Operator = '{session['email']}';")
         c.execute(query,tuple([request.files[n].read() for n in request.files.keys()]))
         conn.commit()
+        return render_template('only_scheduling.html', message='Files Uploaded')
         # return str(request.files.keys())
     return render_template('only_scheduling.html')
 
