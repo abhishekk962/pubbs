@@ -40,10 +40,10 @@
             <th>{{rowheader[i]}}</th>
             {%for n in range(stop_ids|length) %}
               {% if db_data %}
-              <td><input type="number" name="{{stop_ids[n]}}{{'_'}}{{rows[i]}}" value="{{db_data[n][i]}}" {% if i >= n and rowheader[0] is not number %} hidden {% endif %} /></td>
+              <td><input type="number" name="{{stop_ids[n]}}{{'_'}}{{rows[i]}}" value="{{db_data[n][i]}}" {% if i >= n and rowheader[0] is not number %} style="opacity:0" {% endif %} /></td>
               {% endif %}
               {% if not db_data %}
-              <td><input type="number" name="{{stop_ids[n]}}{{'_'}}{{rows[i]}}" value="0" {% if i >= n and rowheader[0] is not number %} hidden {% endif %} /></td>
+              <td><input type="number" name="{{stop_ids[n]}}{{'_'}}{{rows[i]}}" value="0" {% if i >= n and rowheader[0] is not number %} style="opacity:0" {% endif %} /></td>
               {% endif %}
             {% endfor %}
             {% if 'Trave' in selected_table or 'Passenger' in selected_table %}

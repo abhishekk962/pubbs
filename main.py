@@ -30,10 +30,9 @@ connpool = pymysqlpool.ConnectionPool(host="103.21.58.10",
                        password="Matrix__111",
                        database="pubbsm8z_uba",
                        port = 3306,
-                       size=4
+                       size=3
                        )
 conn = connpool.get_connection()
-connx = connpool.get_connection()
 conn1 = connpool.get_connection()
 conn2 = connpool.get_connection()
 
@@ -127,6 +126,7 @@ def get_status():
 @app.route('/')
 @app.route('/login', methods =['GET', 'POST'])
 def login():
+    conn = connpool.get_connection()
     c = conn.cursor()
     c.execute('CREATE TABLE IF NOT EXISTS T_USER (name TEXT,email VARCHAR(50), password VARCHAR(50))')
     message = ''
@@ -149,6 +149,7 @@ def loggedin():
     if request.method == 'POST' and 'email' in request.form and 'password' in request.form:
         email = request.form['email']
         password = request.form['password']
+        conn = connpool.get_connection()
         c = conn.cursor()
         c.execute('SELECT * FROM T_USER WHERE email = % s AND password = % s', (email, password, ))
         user = c.fetchone()
@@ -187,6 +188,7 @@ def registered():
         name = request.form['name']
         password = request.form['password']
         email = request.form['email']
+        conn = connpool.get_connection()
         c = conn.cursor()
         c.execute('SELECT * FROM T_USER WHERE email = % s', (email, ))
         account = c.fetchone()
@@ -200,7 +202,8 @@ def registered():
             c.execute('INSERT INTO T_USER (name, email, password) VALUES (% s, % s, % s)', (name, email, password, ))
             conn.commit()
             message = 'Registered Successfully! Please Login'
-        return render_template('register1.html', message = message)
+        return render_template('login1.html', message = message)
+        # return render_template('register1.html', message = message)
 
 # DATA ENTRY================================================================================================================
 
@@ -222,6 +225,7 @@ def busroute():
 
         columns = list(request.form.to_dict())
 
+        conn = connpool.get_connection()
         c = conn.cursor()
         c.execute("CREATE TABLE IF NOT EXISTS T_ONLY_ROUTES (Operator TEXT,Bus_route_name TEXT,Terminal_1_origin TEXT,Terminal_2_destination TEXT,Bus_service_timings_From TEXT,Bus_service_timings_To TEXT,Number_of_service_periods TEXT)")
         c.execute(f"DELETE FROM T_ONLY_ROUTES WHERE Bus_route_name = '{session['route']}' and Operator = '{session['email']}'")
@@ -249,6 +253,7 @@ def busroute():
             c.execute(f"INSERT INTO T_STATUS (Operator, Route,`Route Details`) VALUES ('{session['email']}','{session['route']}','1')")
         conn.commit()
 
+        conn = connpool.get_connection()
         c = conn.cursor()
         c.execute(f"SELECT DISTINCT Bus_route_name FROM T_ONLY_ROUTES WHERE Operator = '{session['email']}'")
         data = c.fetchall()
@@ -256,6 +261,7 @@ def busroute():
 
         return render_template('only_busroute.html', routes=routes, message="Bus Route info was saved", data=request.form.to_dict())
     
+    conn = connpool.get_connection()
     c = conn.cursor()
     c.execute("CREATE TABLE IF NOT EXISTS T_ONLY_ROUTES (Operator TEXT,Bus_route_name TEXT,Terminal_1_origin TEXT,Terminal_2_destination TEXT,Bus_service_timings_From TEXT,Bus_service_timings_To TEXT,Number_of_service_periods TEXT)")
     c.execute(f"SELECT DISTINCT Bus_route_name FROM T_ONLY_ROUTES WHERE Operator = '{session['email']}'")
@@ -265,6 +271,7 @@ def busroute():
 
 @app.route('/import-route', methods=['GET', 'POST'])
 def import_route():
+    conn = connpool.get_connection()
     c = conn.cursor()
     c.execute(f"SELECT DISTINCT Bus_route_name FROM T_ONLY_ROUTES WHERE Operator = '{session['email']}'")
     data = c.fetchall()
@@ -285,6 +292,7 @@ def import_route():
 
 @app.route('/clear-route', methods=['GET', 'POST'])
 def clear_route():
+    conn = connpool.get_connection()
     c = conn.cursor()
     c.execute(f"SELECT DISTINCT Bus_route_name FROM T_ONLY_ROUTES WHERE Operator = '{session['email']}'")
     data = c.fetchall()
@@ -303,6 +311,7 @@ def stop_details():
 
 @app.route('/build-route', methods=['GET', 'POST'])
 def route_details():
+    conn = connpool.get_connection()
     c = conn.cursor()
     # c.execute(f"CREATE TABLE IF NOT EXISTS T_ROUTE_INFO (id INT NOT NULL AUTO_INCREMENT,uid VARCHAR(50),Operator TEXT,Route TEXT,Stop_num INT,Stop_id INT,UP_Dist FLOAT, DN_Dist FLOAT,PRIMARY KEY (id));") #,FOREIGN KEY (Stop_id) REFERENCES T_STOPS_INFO(id) )
     if request.method=='POST':
@@ -317,7 +326,8 @@ def route_details():
 
 @app.route('/stop-char', methods=['GET', 'POST'])
 def stop_char():
-    c = connx.cursor()
+    conn = connpool.get_connection()
+    c = conn.cursor()
     c.execute(f"SELECT s.id,s.Stop_Name FROM T_ROUTE_INFO AS r INNER JOIN T_STOPS_INFO AS s ON (s.id = r.Stop_id) WHERE r.Operator = '{session['email']}' and r.Route='{session['route']}' ORDER BY r.Stop_num")
     data= c.fetchall()
     stop_ids = [n[0] for n in data]
@@ -335,6 +345,7 @@ def stop_char():
             stop_rad = [data[n] for n in data if '_stoprad' in n]
 
             # Upload to Database
+            conn = connpool.get_connection()
             c = conn.cursor()
             query = f"CREATE TABLE IF NOT EXISTS T_STOPS_INFO (id INT NOT NULL AUTO_INCREMENT,uid VARCHAR(50),Operator TEXT,\
                     Stop_Name TEXT,Stop_Lat FLOAT,Stop_Long FLOAT, Dummy BOOLEAN, Cong_Int BOOLEAN,Before_Int BOOLEAN, \
@@ -342,6 +353,7 @@ def stop_char():
             c.execute(query)
             conn.commit()
 
+            conn = connpool.get_connection()
             c = conn.cursor()
             for n in range(len(stops)):
                 c.execute(f"UPDATE T_STOPS_INFO SET Before_Int = {before_int[n]}, Far_From_Int = {far_from_int[n]} , Commercial = \
@@ -350,17 +362,20 @@ def stop_char():
                 conn.commit()
             c.execute(f"UPDATE T_STATUS SET `Stop Characteristics` = '1' WHERE Route = '{session['route']}' and Operator = '{session['email']}';")
             conn.commit()
+            conn = connpool.get_connection()
             c = conn.cursor()
             c.execute(f"SELECT s.Before_Int,s.Far_From_Int,s.Commercial,s.Transport_Hub,s.Bus_bay,s.Stop_rad FROM T_STOPS_INFO AS s INNER JOIN T_ROUTE_INFO AS r ON (s.id = r.Stop_id) WHERE s.id IN {tuple(stop_ids)} and r.Operator='{session['email']}' and r.Route='{session['route']}' ORDER BY r.Stop_num")
             data= c.fetchall()
             return render_template('only_stopchar.html',stops=stops, stop_ids=stop_ids, message="Data was Saved", data=data)
         elif 'getfromdb' in request.form:
+            conn = connpool.get_connection()
             c = conn.cursor()
             c.execute(f"SELECT s.Before_Int,s.Far_From_Int,s.Commercial,s.Transport_Hub,s.Bus_bay,s.Stop_rad FROM T_STOPS_INFO AS s INNER JOIN T_ROUTE_INFO AS r ON (s.id = r.Stop_id) WHERE s.id IN {tuple(stop_ids)} and r.Operator='{session['email']}' and r.Route='{session['route']}' ORDER BY r.Stop_num")
             data= c.fetchall()
             # return str(data)
             return render_template('only_stopchar.html',stops=stops, stop_ids=stop_ids, message="Data was updated from DB", data=data)
     if stop_ids:
+        conn = connpool.get_connection()
         c = conn.cursor()
         c.execute(f"SELECT s.Before_Int,s.Far_From_Int,s.Commercial,s.Transport_Hub,s.Bus_bay,s.Stop_rad FROM T_STOPS_INFO AS s INNER JOIN T_ROUTE_INFO AS r ON (s.id = r.Stop_id) WHERE s.id IN {tuple(stop_ids)} and r.Operator='{session['email']}' and r.Route='{session['route']}' ORDER BY r.Stop_num")
         data= c.fetchall()
@@ -371,6 +386,7 @@ def stop_char():
 
 # @app.route('/table', methods=['GET', 'POST'])
 # def table_details():
+#     conn = connpool.get_connection()
 #     c = conn.cursor()
 #     # c.execute(f"CREATE TABLE IF NOT EXISTS T_ROUTE_INFO (id INT NOT NULL AUTO_INCREMENT,uid VARCHAR(50),Operator TEXT,Route TEXT,Stop_num INT,Stop_id INT,UP_Dist FLOAT, DN_Dist FLOAT,PRIMARY KEY (id));") #,PRIMARY KEY (id),FOREIGN KEY (Stop_id) REFERENCES T_STOPS_INFO(id) )
 #     c.execute(f"SELECT s.id,s.Stop_Name FROM T_ROUTE_INFO AS r INNER JOIN T_STOPS_INFO AS s ON (s.id = r.Stop_id) WHERE r.Operator = '{session['email']}' and r.Route='{session['route']}' ORDER BY r.Stop_num")
@@ -392,6 +408,7 @@ def stop_char():
 
 @app.route('/table', methods=['GET', 'POST'])
 def table_details():
+    conn = connpool.get_connection()
     c = conn.cursor()
     # c.execute(f"CREATE TABLE IF NOT EXISTS T_ROUTE_INFO (id INT NOT NULL AUTO_INCREMENT,uid VARCHAR(50),Operator TEXT,Route TEXT,Stop_num INT,Stop_id INT,UP_Dist FLOAT, DN_Dist FLOAT,PRIMARY KEY (id));") #,PRIMARY KEY (id),FOREIGN KEY (Stop_id) REFERENCES T_STOPS_INFO(id) )
     c.execute(f"SELECT s.id,s.Stop_Name FROM T_ROUTE_INFO AS r INNER JOIN T_STOPS_INFO AS s ON (s.id = r.Stop_id) WHERE r.Operator = '{session['email']}' and r.Route='{session['route']}' ORDER BY r.Stop_num")
@@ -409,6 +426,7 @@ def table_details():
 def ols_details():
     if request.method == "POST":
         if 'save' in request.form:
+            conn = connpool.get_connection()
             c = conn.cursor()
             c.execute(f"CREATE TABLE IF NOT EXISTS T_OLS_COEFF (Operator TEXT,Route TEXT,Const FLOAT,No_of_Boarding FLOAT, No_of_Alighting FLOAT, Occupancy_Level FLOAT, Morning_Peak FLOAT, Before_Intersection FLOAT,Far_from_Intersection FLOAT,Commercial FLOAT,Transport_hub FLOAT,Bus_Bay FLOAT);")
             conn.commit()
@@ -430,6 +448,7 @@ def ols_details():
 def scheduling_details():
     if request.method == "POST":
         if 'save' in request.form:
+            conn = connpool.get_connection()
             c = conn.cursor()
             c.execute(f"UPDATE T_PARAMETERS SET dead_todepot_t1 = '{request.form['dead_todepot_t1']}', dead_todepot_t2 = '{request.form['dead_todepot_t2']}', layover_depot = '{request.form['layover_depot']}', start_ser = '{request.form['start_ser']}', end_ser = '{request.form['end_ser']}', shift = '{request.form['shift']}', max_ideal = '{request.form['max_ideal']}' WHERE Route = '{session['route']}' and Operator = '{session['email']}';")
             c.execute(f"UPDATE T_STATUS SET `Scheduling Details` = '1' WHERE Route = '{session['route']}' and Operator = '{session['email']}';")
@@ -447,6 +466,7 @@ def scheduling_details():
 def constraints_details():
     if request.method == "POST":
         if 'save' in request.form:
+            conn = connpool.get_connection()
             c = conn.cursor()
             c.execute(f"UPDATE T_PARAMETERS SET max_oppp = '{request.form['max_oppp']}', min_ppvk = '{request.form['min_ppvk']}', min_ppt = '{request.form['min_ppt']}', max_ocpp = '{request.form['max_ocpp']}', max_fleet = '{request.form['max_fleet']}', max_ppl = '{request.form['max_ppl']}', min_crr = '{request.form['min_crr']}', min_ppp = '{request.form['min_ppp']}', max_pplpt = '{request.form['max_pplpt']}', min_rvpt = '{request.form['min_rvpt']}', max_opc = '{request.form['max_opc']}' WHERE Route = '{session['route']}' and Operator = '{session['email']}';")
             c.execute(f"UPDATE T_STATUS SET `Constraints` = '1' WHERE Route = '{session['route']}' and Operator = '{session['email']}';")
@@ -464,6 +484,7 @@ def constraints_details():
 def service_details():
     if request.method == "POST":
         if 'save' in request.form:
+            conn = connpool.get_connection()
             c = conn.cursor()
             c.execute(f"UPDATE T_PARAMETERS SET A = '{request.form['A']}', B = '{request.form['B']}', frequencydefault = '{request.form['frequencydefault']}', seatcap = '{request.form['seatcap']}', min_c_lvl = '{request.form['min_c_lvl']}', max_c_lvl = '{request.form['max_c_lvl']}', max_wait = '{request.form['max_wait']}', bus_left = '{request.form['bus_left']}', min_dwell = '{request.form['min_dwell']}', slack = '{request.form['slack']}', lay_overtime = '{request.form['lay_overtime']}', buscost = '{request.form['buscost']}', buslifecycle = '{request.form['buslifecycle']}', crewperbus = '{request.form['crewperbus']}', creqincome = '{request.form['creqincome']}', cr_trip = '{request.form['cr_trip']}', cr_day = '{request.form['cr_day']}', busmaintenance = '{request.form['busmaintenance']}', fuelprice = '{request.form['fuelprice']}', kmperliter = '{request.form['kmperliter']}', kmperliter2 = '{request.form['kmperliter2']}', c_cantboard = '{request.form['c_cantboard']}', c_waittime = '{request.form['c_waittime']}', c_invehtime = '{request.form['c_invehtime']}', penalty = '{request.form['penalty']}', hrinperiod = '{request.form['hrinperiod']}', ser_period = '{request.form['ser_period']}' WHERE Route = '{session['route']}' and Operator = '{session['email']}';")
             c.execute(f"UPDATE T_STATUS SET `Service Details` = '1' WHERE Route = '{session['route']}' and Operator = '{session['email']}';")
@@ -481,6 +502,7 @@ def service_details():
 def ga_params():
     if request.method == "POST":
         if 'save' in request.form:
+            conn = connpool.get_connection()
             c = conn.cursor()
             c.execute(f"UPDATE T_PARAMETERS SET sol_per_pop = '{request.form['sol_per_pop']}', num_generations = '{request.form['num_generations']}' WHERE Route = '{session['route']}' and Operator = '{session['email']}';")
             c.execute(f"UPDATE T_STATUS SET `GA Parameters` = '1' WHERE Route = '{session['route']}' and Operator = '{session['email']}';")
@@ -509,6 +531,7 @@ def save_stops():
     is_intersection = [True if f"{n}_Cong" in stops else False for n in stops_list]
 
     # Upload to Database
+    conn = connpool.get_connection()
     c = conn.cursor()
 
     query = f"CREATE TABLE IF NOT EXISTS T_STOPS_INFO (id INT NOT NULL AUTO_INCREMENT,uid VARCHAR(50),Operator TEXT,\
@@ -517,6 +540,7 @@ def save_stops():
     c.execute(query)
     conn.commit()
 
+    conn = connpool.get_connection()
     c = conn.cursor()
     for n in range(len(stops_list)):
         c.execute(f"INSERT INTO T_STOPS_INFO (uid,Operator,Stop_Name,Stop_Lat,Stop_Long,Dummy,Cong_Int) VALUES \
@@ -524,6 +548,7 @@ def save_stops():
                   {is_intersection[n]});")
         conn.commit()
     
+    # conn = connpool.get_connection()
     # c = conn.cursor()
     # c.execute(f"DELETE FROM T_STOPS_INFO WHERE Route = '{session['route']}' and Operator = '{session['email']}' and uid != '{uid}';")
     # conn.commit()
@@ -544,12 +569,12 @@ def save_route():
     stop_ids = [stops[n] for n in stops if '_ID' in n]
 
     # Upload to Database
+    conn = connpool.get_connection()
     c = conn.cursor()
     query = f"CREATE TABLE IF NOT EXISTS T_ROUTE_INFO (id INT NOT NULL AUTO_INCREMENT,uid VARCHAR(50),Operator TEXT,Route TEXT,Stop_num INT,Stop_id INT,UP_Dist FLOAT, DN_Dist FLOAT,PRIMARY KEY (id));" # ,FOREIGN KEY (Stop_id) REFERENCES T_STOPS_INFO(id) )
     c.execute(query)
     conn.commit()
 
-    c = conn.cursor()
     for n in range(len(stops_list)):
         c.execute(f"INSERT INTO T_ROUTE_INFO (uid,Operator,Route,Stop_num,Stop_id,UP_Dist,DN_Dist) VALUES ('{uid}','{session['email']}','{session['route']}','{n+1}','{stop_ids[n]}','{up_distances[n]}','{dn_distances[n]}');")
         conn.commit()
@@ -557,7 +582,6 @@ def save_route():
     c.execute(f"UPDATE T_STATUS SET `Build Route` = '1' WHERE Route = '{session['route']}' and Operator = '{session['email']}';")
     conn.commit()
 
-    c = conn.cursor()
     c.execute(f"DELETE FROM T_ROUTE_INFO WHERE Route = '{session['route']}' and Operator = '{session['email']}' and uid != '{uid}';")
     conn.commit()
     # return render_template('only_table.html', stops_list=session['stops_list'], rows=list(range(session['p_start'],session['p_end'])),periods=list(range(session['p_start'],session['p_end'])))
@@ -565,6 +589,7 @@ def save_route():
 
 @app.route('/table-selected', methods=['GET', 'POST'])
 def table_selected():
+    conn = connpool.get_connection()
     c = conn.cursor()
     c.execute(f"SELECT s.id,s.Stop_Name FROM T_ROUTE_INFO AS r INNER JOIN T_STOPS_INFO AS s ON (s.id = r.Stop_id) WHERE r.Operator = '{session['email']}' and r.Route='{session['route']}' ORDER BY r.Stop_num")
     stops= c.fetchall()
@@ -592,12 +617,14 @@ def table_selected():
 def table_filled():
     # Get filled data
     data = request.form.to_dict()
-    c = connx.cursor()
+    conn = connpool.get_connection()
+    c = conn.cursor()
     c.execute(f"SELECT s.id,s.Stop_Name FROM T_ROUTE_INFO AS r INNER JOIN T_STOPS_INFO AS s ON (s.id = r.Stop_id) WHERE r.Operator = '{session['email']}' and r.Route='{session['route']}' ORDER BY r.Stop_num")
     stops= c.fetchall()
     stop_ids = [n[0] for n in stops]
     stops_list = [n[1] for n in stops]
     # Upload to Database
+    conn = connpool.get_connection()
     c = conn.cursor()
     db_table = request.form['selected_table']
     
@@ -693,6 +720,7 @@ def table_filled():
 def retrieve_data():
     # Retrieve from Database
     db_table = request.form['selected_table']
+    conn = connpool.get_connection()
     c = conn.cursor()
     c.execute(f"SELECT s.id,s.Stop_Name FROM T_ROUTE_INFO AS r INNER JOIN T_STOPS_INFO AS s ON (s.id = r.Stop_id) WHERE r.Operator = '{session['email']}' and r.Route='{session['route']}' ORDER BY r.Stop_num")
     stops= c.fetchall()
@@ -706,6 +734,7 @@ def retrieve_data():
     if "OD" in db_table:
         rows=stop_ids
         rowheader=stops_list
+        conn = connpool.get_connection()
         c = conn.cursor()
         c.execute(f"SELECT{','.join([f'`Stop_{n+1}`' for n in range(len(stop_ids))])} FROM T_OD WHERE Operator = '{session['email']}' and Route='{session['route']}' and Direction='{db_table[3:5]}' and Period='{db_table[6:8]}' ORDER BY Stop_num")
         db_data= c.fetchall()
@@ -713,6 +742,7 @@ def retrieve_data():
     elif db_table in ["T_Passenger_Arrival_UP", "T_Passenger_Arrival_DN","T_TravelTimeDN_ANN","T_TraveTimeUP_ANN"]:
         rows=list(range(session['p_start'],session['p_end']))
         rowheader = rows
+        conn = connpool.get_connection()
         c = conn.cursor()
         c.execute(f"SELECT {','.join([f'`{n}`' for n in rows])} FROM {db_table} WHERE Operator = '{session['email']}' and Route='{session['route']}' ORDER BY Stop_num")
         db_data= c.fetchall()
@@ -720,6 +750,7 @@ def retrieve_data():
     elif db_table in ["T_Fare_DN","T_Fare_UP"]:
         rows=stop_ids
         rowheader=stops_list
+        conn = connpool.get_connection()
         c = conn.cursor()
         c.execute(f"SELECT{','.join([f'`Stop_{n+1}`' for n in range(len(stop_ids))])} FROM {db_table} WHERE Operator = '{session['email']}' and Route='{session['route']}' ORDER BY Stop_num")
         db_data= c.fetchall()
@@ -733,7 +764,8 @@ def retrieve_data():
 # new
 @app.route('/clear-table', methods=['GET', 'POST'])
 def clear_table():
-    c = connx.cursor()
+    conn = connpool.get_connection()
+    c = conn.cursor()
     c.execute(f"SELECT s.id,s.Stop_Name FROM T_ROUTE_INFO AS r INNER JOIN T_STOPS_INFO AS s ON (s.id = r.Stop_id) WHERE r.Operator = '{session['email']}' and r.Route='{session['route']}' ORDER BY r.Stop_num")
     stops= c.fetchall()
     stop_ids = [n[0] for n in stops]
@@ -759,6 +791,7 @@ def clear_table():
 @app.route('/upload-csv-data', methods=['GET', 'POST'])
 def upload_csv_data():
     # Get stops list
+    conn = connpool.get_connection()
     c = conn.cursor()
     c.execute(f"SELECT s.id,s.Stop_Name FROM T_ROUTE_INFO AS r INNER JOIN T_STOPS_INFO AS s ON (s.id = r.Stop_id) WHERE r.Operator = '{session['email']}' and r.Route='{session['route']}' ORDER BY r.Stop_num")
     stops= c.fetchall()
@@ -797,7 +830,8 @@ def download_csv_data():
     data = request.form.to_dict()
 
     # Get stops list
-    c = connx.cursor()
+    conn = connpool.get_connection()
+    c = conn.cursor()
     c.execute(f"SELECT s.id,s.Stop_Name FROM T_ROUTE_INFO AS r INNER JOIN T_STOPS_INFO AS s ON (s.id = r.Stop_id) WHERE r.Operator = '{session['email']}' and r.Route='{session['route']}' ORDER BY r.Stop_num")
     stops= c.fetchall()
     stop_ids = [n[0] for n in stops]
@@ -834,6 +868,7 @@ def download_csv_data():
 @app.route('/scheduling',methods=['GET','POST'])
 def scheduling():
     if request.method == "POST":
+        conn = connpool.get_connection()
         c = conn.cursor()
         c.execute(f"CREATE TABLE IF NOT EXISTS T_SCHEDULING_FILES (Operator TEXT, Route TEXT,{','.join([f'{n} TEXT' for n in request.files.keys()])})")
         c.execute(f"DELETE FROM T_SCHEDULING_FILES WHERE Route = '{session['route']}' and Operator = '{session['email']}';")
@@ -847,6 +882,7 @@ def scheduling():
 
 @app.route('/buses',methods=['GET','POST'])
 def buses():
+    conn = connpool.get_connection()
     c = conn.cursor()
     c.execute(f"SELECT max_fleet from T_PARAMETERS WHERE Operator = '{session['email']}' and Route = '{session['route']}'")
     buses = c.fetchone()
@@ -859,6 +895,7 @@ def buses():
         return render_template('only_buses.html',buses=0,message=message)
     if request.method == "POST":
         buslist = ','.join(request.form.values())
+        conn = connpool.get_connection()
         c = conn.cursor()
         c.execute(f"CREATE TABLE IF NOT EXISTS T_BUSES (Operator TEXT, Buses TEXT);")
         c.execute(f"DELETE FROM T_BUSES WHERE Operator = '{session['email']}'")
@@ -874,6 +911,7 @@ def buses():
 @app.route('/frequency', methods=['GET', 'POST'])
 def frequency():
     # Get stops list
+    conn = connpool.get_connection()
     c = conn.cursor()
     c.execute(f"SELECT s.id,s.Stop_Name FROM T_ROUTE_INFO AS r INNER JOIN T_STOPS_INFO AS s ON (s.id = r.Stop_id) WHERE r.Operator = '{session['email']}' and r.Route='{session['route']}' ORDER BY r.Stop_num")
     stops= c.fetchall()
@@ -998,6 +1036,7 @@ def frequency():
 @app.route('/scheduling-run/<method>', methods=['GET', 'POST'])
 def scheduling_run(method):
     if method == "Choose":
+        conn = connpool.get_connection()
         c = conn.cursor()
         c.execute("CREATE TABLE IF NOT EXISTS T_ONLY_ROUTES (Operator TEXT,Bus_route_name TEXT,Terminal_1_origin TEXT,Terminal_2_destination TEXT,Bus_service_timings_From TEXT,Bus_service_timings_To TEXT,Number_of_service_periods TEXT)")
         c.execute(f"SELECT DISTINCT Bus_route_name FROM T_ONLY_ROUTES WHERE Operator = '{session['email']}'")
@@ -1015,6 +1054,7 @@ def scheduling_run(method):
 
         globals().update(data)
 
+        conn = connpool.get_connection()
         c = conn.cursor()
         c.execute(f"SELECT * FROM T_SCHEDULING_FILES WHERE Route = '{session['route']}' and Operator = '{session['email']}';")
         files = c.fetchone()
