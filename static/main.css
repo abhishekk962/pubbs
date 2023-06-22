@@ -29,6 +29,7 @@ body{
     border-radius: 5px;
     text-align: center;
     box-shadow: 0 0 8px 4px rgb(0 0 0 / 22%);
+    cursor: pointer;
 }
 
 header{
@@ -57,10 +58,12 @@ header{
     text-decoration: none;
     margin: auto;
     padding: 0 10px;
+    cursor: pointer;
 }
 
 .header-buttons{
     padding-right: 10px;
+    cursor: pointer;
 }
 
 nav{
@@ -87,6 +90,7 @@ header > div > button ,.nav-button{
     color: white;
     text-transform: uppercase;
     font-weight: bold;
+    cursor: pointer;
 }
 
 .nav-button:disabled{
@@ -258,6 +262,7 @@ input{
     font-weight: bold;
     border-style: none;
     box-shadow: 0 0 6px 1px rgb(0 0 0 / 22%);
+    cursor: pointer;
 }
 
 .label-button:hover, input[type="submit"]:hover,section button[type="submit"]:hover{
@@ -301,6 +306,7 @@ input[type="file" ]{
     align-self: top;
     align-items: center;
     z-index: 0;
+    cursor: crosshair;
   }
 
 .maptable{
@@ -403,6 +409,7 @@ input{
 
 button{
     margin: 5px;
+    cursor: pointer;
 }
 
 select{
@@ -412,6 +419,7 @@ select{
     font-size: 15px;
     color: #1E0431;
     font-weight: bold;
+    cursor: pointer;
 }
 
 label{
@@ -445,6 +453,7 @@ input[type="checkbox"] {
     color: #8C025D;
     background: none;
     border: none;
+    cursor: pointer;
 }
 
 .my-label {
