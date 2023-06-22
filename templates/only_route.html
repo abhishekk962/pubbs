@@ -127,6 +127,7 @@
             updateTable(marker);
             // Change marker color
             marker._icon.style.filter = "hue-rotate(120deg)"
+            marker.off()
             // Update the lines
             updateLines();
           });
