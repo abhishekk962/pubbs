@@ -88,6 +88,7 @@
     <label for="ser_period">service hours: </label>
     <input value="16" type="number" id="ser_period" name="ser_period" required>
   </div>
+  <br>
   <input type="submit" formaction="{{url_for('service_details')}}" value="Submit" name="save" >
   <input type="submit" formaction="{{url_for('service_details')}}" value="Get From DB" name="getfromdb" >
 </form>
@@ -178,6 +179,7 @@
     <label for="ser_period">service hours: </label>
     <input value="{{data['ser_period']}}" type="number" id="ser_period" name="ser_period" required>
   </div>
+  <br>
   <input type="submit" formaction="{{url_for('service_details')}}" value="Submit" name="save" >
   <input type="submit" formaction="{{url_for('service_details')}}" value="Get From DB" name="getfromdb" >
 </form>

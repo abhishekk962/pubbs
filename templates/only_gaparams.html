@@ -13,6 +13,7 @@
     <label for="num_generations">Number of generations for GA: </label>
     <input value="5" type="number" id="num_generations" name="num_generations" required>
   </div>
+  <br>
   <input type="submit" formaction="{{url_for('ga_params')}}" value="Submit" name="save" >
   <input type="submit" formaction="{{url_for('ga_params')}}" value="Get From DB" name="getfromdb" >
 </form>
@@ -28,6 +29,7 @@
     <label for="num_generations">Number of generations for GA: </label>
     <input value="{{data['num_generations']}}" type="number" id="num_generations" name="num_generations" required>
   </div>
+  <br>
   <input type="submit" formaction="{{url_for('ga_params')}}" value="Submit" name="save" >
   <input type="submit" formaction="{{url_for('ga_params')}}" value="Get From DB" name="getfromdb" >
 </form>

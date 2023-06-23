@@ -44,11 +44,11 @@ header{
     padding-left: 10px;
     display: flex;
     flex-direction: row;
-    justify-content: space-around;
+    justify-content: space-between;
+    width: 100%;
 }
 
 .header-brand > div{
-    padding-right: 30px;
     display: flex;
 }
 
@@ -89,7 +89,7 @@ header > div > button ,.nav-button{
     height: 100%;
     color: white;
     text-transform: uppercase;
-    font-weight: bold;
+    /* font-weight: bold; */
     cursor: pointer;
 }
 
@@ -215,7 +215,7 @@ form > div{
     flex-direction: column;
     align-items: center;
     color: #1E0431;
-    font-weight: bold;
+    /* font-weight: bold; */
 }
 
 .busroute-form label{
@@ -238,7 +238,7 @@ form > div{
 #myform label{
     display: inline-block;
     font-size: 13px;
-    font-weight: bold;
+    /* font-weight: bold; */
     vertical-align: middle;
     margin: auto 5px;
     text-align: left;
@@ -256,18 +256,16 @@ input{
     font-size: 15px;
     width: fit-content;
     padding: 5px 10px;
-    border-radius: 5px;
+    border-radius: 50px;
     background-color: #8C025D;
     color: white;
-    font-weight: bold;
     border-style: none;
     box-shadow: 0 0 6px 1px rgb(0 0 0 / 22%);
     cursor: pointer;
 }
 
 .label-button:hover, input[type="submit"]:hover,section button[type="submit"]:hover{
-    font-weight: bolder;
-    box-shadow: 0 0 6px 1px rgba(0, 0, 0, 85%);
+    box-shadow: 0 0 6px 1px rgba(0, 0, 0, 42%);
 }
 
 .label-button:disabled{
@@ -413,12 +411,11 @@ button{
 }
 
 select{
-    margin: 5px;
+    margin: 0;
     background: none;
     border: none;
     font-size: 15px;
     color: #1E0431;
-    font-weight: bold;
     cursor: pointer;
 }
 
@@ -449,7 +446,7 @@ input[type="checkbox"] {
 }
 
 .icon-button{
-    font-size: 20px;
+    font-size: 15px;
     color: #8C025D;
     background: none;
     border: none;
@@ -458,7 +455,7 @@ input[type="checkbox"] {
 
 .my-label {
     background: #ffffffab;
-    font-weight: bold;
+    /* font-weight: bold; */
     border: none;
 }
 
@@ -496,3 +493,8 @@ thead *{
     opacity: 0;
 }
 
+.csvlabels{
+    display: flex;
+    align-items: center;
+    font-size: 15px;
+}

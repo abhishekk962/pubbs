@@ -13,6 +13,7 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,0,0" />
     {% block head %}
     {% endblock %}
   </head>
@@ -24,12 +25,11 @@
           <a href="https://mohua.gov.in/" target="_blank">MOHUA</a>
         </div>
         <div>
+          <a href="/logout" style="display: flex;"><span class="material-symbols-outlined">logout</span></a>
+          <div style="border-left:2px solid #ffffff84;height:100%;margin-right: 10px;"></div>
           <img src="{{url_for('static',filename='images/Pubbs_transit_logo_transparent.png')}}" height="35">
           <a href="https://pubbs.co.in/" target="_blank">PUBBS</a>
         </div>
-      </div>
-      <div class="header-buttons">
-        <a href="/logout">Logout</a>
       </div>
     </header>
     <nav>
@@ -47,6 +47,7 @@
         <button type="submit" class="nav-button" formaction="{{url_for('scheduling_details')}}">Scheduling Details</button>
         <button type="submit" class="nav-button" formaction="{{url_for('scheduling')}}">Scheduling Files</button>
         <button type="submit" class="nav-button" formaction="{{url_for('buses')}}">Buses</button>
+        <button type="submit" class="nav-button" formaction="{{url_for('livelocation')}}">Live</button>
         {% endif %}
       </form>
     </nav>

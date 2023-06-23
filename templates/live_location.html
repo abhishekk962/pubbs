@@ -1,0 +1,208 @@
+{% extends "dashboard.html" %}
+{% block head %}
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js" integrity="sha512-q/dWJ3kcmjBLU4Qc47E4A9kTB4m3wuTY7vkFJDTZKjTs8jhyGQnaUrxa0Ytd0ssMZhbNua9hE+E7Qv1j+DyZwA==" crossorigin="anonymous"></script>
+{% endblock %}
+{% block content %}
+<script>var tab = $( "button:contains('Stop Details')" ).attr('disabled','');</script>
+  <div class="mapdata">
+    {% if message %}<div id="messagebox">{{message}}</div>{% endif %}
+    <div id="map"></div>
+    <div class="maptable">
+
+    </div>
+  </div>
+  <p style="position:fixed;opacity:0;" id="username">{{ session['email'] }}</p>
+{% endblock %}
+{% block foot %}
+  <script src="https://cdn.jsdelivr.net/npm/leaflet@1.7.1/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
+  <script>
+    var map = L.map('map').setView([51.505, -0.09], 13);
+
+    var email = document.getElementById('username').textContent
+
+    var socket = io();
+    socket.on('connect', function() {
+        socket.emit('join',{room: email})
+        socket.emit('my event', {data: 'I\'m connected!'});
+    });
+
+    var layerGroup = L.layerGroup().addTo(map);
+
+    socket.on('receivedlocation', function(data) {
+      map.setView([data['latitude'],data['longitude']],20)
+      layerGroup.clearLayers();
+      var pointer = L.marker([data['latitude'],data['longitude']]).addTo(layerGroup)
+      document.querySelector('.maptable').innerHTML = data['latitude'] + ' , ' + data['longitude']
+    });
+
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+      subdomains: 'abcd',
+      maxZoom: 20
+    }).addTo(map);
+
+    var markersLayer = L.layerGroup().addTo(map);
+    var linesLayer = L.layerGroup().addTo(map);
+
+    var markerCount = 0;
+
+    var latitudes = []
+    var longitudes = []
+
+    // Fetch data from Flask endpoint
+    fetch('/data')
+      .then(response => response.json())
+      .then(data => {
+        // Loop through the data and add markers
+        data.forEach(point => {
+          var marker = L.marker([point.lat, point.lng]).addTo(markersLayer);
+          marker.bindTooltip(point.name, {permanent: true, className: "my-label", offset: [0, 0] });
+          marker.bindPopup(point.name);
+          marker._icon.style.filter = "hue-rotate(120deg)"
+          latitudes.push(point.lat);
+          longitudes.push(point.lng);
+        });
+        map.setView([latitudes[0], longitudes[0]],15);
+      })
+      .catch(error => {
+        console.error('Error:', error);
+      });
+
+    
+
+    // Search box
+    var searchControl = L.Control.geocoder({
+      defaultMarkGeocode: false,
+      placeholder: 'Search location...',
+      errorMessage: 'No results found.',
+      showResultIcons: true,
+      collapsed: false,
+    }).on('markgeocode', function (e) {
+      map.setView(e.geocode.center, 13);
+      addMarker(e.geocode.center);
+    }).addTo(map);
+
+    // For clearing search results
+    document.querySelector('div.leaflet-top.leaflet-right > div > ul').addEventListener('click', function () {
+        searchControl._clearResults()
+    })
+    document.querySelector('#map').addEventListener('click', function () {
+        searchControl._clearResults()
+    })
+
+    map.on('click', function(e) {
+      socket.emit('location', {latitude: e.latlng.lat, longitude: e.latlng.lng})
+
+      var markerName = 'Stop ' + (markerCount + 1);
+
+      var markerRow = document.createElement('tr');
+      markerRow.id = 'markerRow' + markerCount;
+
+      var markerNameCell = document.createElement('td');
+      markerNameCell.style.border = "None";
+      markerNameCell.style.background = "White";
+      var markerInputBox = document.createElement('input');
+      var markerNameName = markerName + '_Name';
+      markerInputBox.id = markerNameName;
+      markerInputBox.name = markerNameName;
+      markerInputBox.value = markerName;
+      markerNameCell.appendChild(markerInputBox);
+      markerRow.appendChild(markerNameCell);
+
+      var dummyCell = document.createElement('td');
+      dummyCell.style.border = "None";
+      dummyCell.style.background = "White";
+      var dummyInputBox = document.createElement('input');
+      var dummyname = markerName + '_Dummy';
+      dummyInputBox.id = dummyname;
+      dummyInputBox.name = dummyname;
+      dummyInputBox.type = "checkbox";
+      dummyCell.appendChild(dummyInputBox);
+      markerRow.appendChild(dummyCell);
+
+      var cong_int_Cell = document.createElement('td');
+      cong_int_Cell.style.border = "None";
+      cong_int_Cell.style.background = "White";
+      var cong_int_InputBox = document.createElement('input');
+      var cong_int_name = markerName + '_Cong';
+      cong_int_InputBox.id = cong_int_name;
+      cong_int_InputBox.name = cong_int_name;
+      cong_int_InputBox.type = "checkbox";
+      cong_int_Cell.appendChild(cong_int_InputBox);
+      markerRow.appendChild(cong_int_Cell);
+
+      var actionsCell = document.createElement('td');
+      actionsCell.style.border = "None";
+      actionsCell.style.background = "White";
+      var deleteButton = document.createElement('button');
+      deleteButton.type = 'button';
+      deleteButton.classList.add('icon-button')
+      deleteButton.innerHTML = '<i class="fa fa-trash"></i>';
+      actionsCell.appendChild(deleteButton);
+      markerRow.appendChild(actionsCell);
+
+      var latCell = document.createElement('td');
+      latCell.style.border = "None";
+      latCell.style.background = "White";
+      var latInputBox = document.createElement('input');
+      var latname = markerName + '_lat'
+      latInputBox.id = latname;
+      latInputBox.name = latname;
+      latInputBox.value = e.latlng.lat;
+      latInputBox.readonly = true;
+      latCell.appendChild(latInputBox);
+      latCell.style.display = 'none'
+      markerRow.appendChild(latCell);
+
+      var lngCell = document.createElement('td');
+      lngCell.style.border = "None";
+      lngCell.style.background = "White";
+      var lngInputBox = document.createElement('input');
+      var lngname = markerName + '_lng'
+      lngInputBox.id = lngname;
+      lngInputBox.name = lngname;
+      lngInputBox.value = e.latlng.lng;
+      lngInputBox.readonly = true;
+      lngCell.appendChild(lngInputBox);
+      lngCell.style.display = 'none'
+      markerRow.appendChild(lngCell);
+
+      // var marker = L.marker(e.latlng, { draggable: true }).addTo(markersLayer);
+      // marker.bindPopup(markerName);
+
+      // marker.on('dragend', function(event) {
+      //   updateLines();
+      // });
+
+      markersLayer.addLayer(marker);
+      updateLines();
+
+      deleteButton.addEventListener('click', function() {
+        markersLayer.removeLayer(marker);
+        markerRow.remove();
+        updateLines();
+      });
+
+      markerCount++;
+
+      document.getElementById('markerTable').getElementsByTagName('tbody')[0].appendChild(markerRow);
+    });
+
+    function updateLines() {
+      linesLayer.clearLayers();
+
+      var markers = markersLayer.getLayers();
+
+      if (markers.length > 1) {
+        var latlngs = markers.map(function(marker) {
+          return marker.getLatLng();
+        });
+
+        // var polyline = L.polyline(latlngs, { color: '#3388ff' }).addTo(linesLayer);
+      }
+    }
+  </script>
+{% endblock %}

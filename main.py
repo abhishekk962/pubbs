@@ -12,6 +12,8 @@ import secrets
 import pandas as pd
 import numpy as np
 from flask import Flask, render_template, make_response,request, Response, session, redirect, jsonify,url_for,send_file
+from flask_socketio import SocketIO, send, emit, join_room, leave_room
+
 import os
 import re
 import zipfile
@@ -21,8 +23,8 @@ from yaml.loader import SafeLoader
 
 app = Flask(__name__)
 app.json.sort_keys = False
-
 app.secret_key = os.urandom(24)
+socketio = SocketIO(app,logger=True, engineio_logger=True)
 
 # Connect to phpMyAdmin Database
 connpool = pymysqlpool.ConnectionPool(host="103.21.58.10",
@@ -267,7 +269,7 @@ def busroute():
     c.execute(f"SELECT DISTINCT Bus_route_name FROM T_ONLY_ROUTES WHERE Operator = '{session['email']}'")
     data = c.fetchall()
     routes = [n[0] for n in data]
-    return render_template('only_busroute.html',routes=routes, message="Enter Bus Route Info to begin")
+    return render_template('only_busroute.html',routes=routes)
 
 @app.route('/import-route', methods=['GET', 'POST'])
 def import_route():
@@ -1195,15 +1197,45 @@ def scheduling_run(method):
             print('\n Total ideal time in hours:', tot_ideal_time.round(0))
 
         sche_out.seek(0)
-        return send_file(sche_out, download_name=f'{method} Output.zip', as_attachment=True)   
+        return send_file(sche_out, download_name=f'{method} Output.zip', as_attachment=True)
+
+@app.route('/livelocation', methods=['GET', 'POST'])
+def livelocation():
+    return render_template('live_location.html')
+
+@app.route('/sendlocation')
+def sendlocation():
+    latitude = request.args.get('latitude')
+    longitude = request.args.get('longitude')
+    room = request.args.get('room')
+    data = jsonify({"latitude": latitude,"longitude": longitude})
+    socketio.emit('receivedlocation',{"latitude": latitude,"longitude": longitude})
+    return "Successfully sent"
+
+@socketio.on('connect')
+def test_connect():
+    emit('my response', {'data': 'Connected'})
+
+@socketio.on('join')
+def on_join(data):
+    global room
+    room = data['room']
+    join_room(room)
+    emit('joined room', data)
+
+@socketio.on('location')
+def show_location(data):
+    emit('receivedlocation',data,room=room)
+    print(str(data))
 
 def open_browser():
     webbrowser.open_new("http://localhost:8080/")
 
 if __name__ == '__main__':
-    # app.run(debug=True)
-    from waitress import serve
     Timer(1, open_browser).start()
-    serve(app, host="0.0.0.0", port=8080) # http://localhost:8080/
+    socketio.run(app, host="0.0.0.0", port=8080)
+    # app.run(debug=True)
+    # from waitress import serve
+    # serve(app, host="0.0.0.0", port=8080) # http://localhost:8080/
 
 

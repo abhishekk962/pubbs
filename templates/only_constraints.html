@@ -6,7 +6,7 @@
 {% if message %}<div id="messagebox">{{message}}</div>{% endif %}
 <form id="myform" action="{{url_for('constraints_details')}}" method="post" style="grid-template-columns: auto auto;">
   <div>
-    <b>CONSTRAINTS FULL DAY SERVICES</b>
+    <b>Constraints Full Day Services</b>
     <span> </span>
     <span> </span>
     <span> </span>
@@ -31,10 +31,16 @@
 
     <label for="min_crr"> Min cost recovery ratio: </label>
     <input value="0" type="number" id="min_crr" name="min_crr" required>
+    
+    <span></span>
+    <span> </span>
+    <span> </span>
+    <span></span>
+
 
     <span> </span>
     <span> </span>
-    <b>CONSTRAINTS TRIP WISE</b>
+    <b>Constraints Trip Wise</b>
     <span></span>
     <span> </span>
     <span> </span>
@@ -51,6 +57,7 @@
     <label for="max_opc">Maximum operation cost: </label>
     <input value="15000" type="number" id="max_opc" name="max_opc" required>
   </div>
+  <br>
   <input type="submit" formaction="{{url_for('constraints_details')}}" value="Submit" name="save" >
   <input type="submit" formaction="{{url_for('constraints_details')}}" value="Get From DB" name="getfromdb" >
 </form>

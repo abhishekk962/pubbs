@@ -4,7 +4,7 @@
 <div class="content">
 {% if message %}<div id="messagebox">{{message}}</div>{% endif %}
 {% if routes %}
-<form method="POST" action="{{url_for('import_route')}}" style="margin: 0;padding: 0;position: absolute;top: 80%;">
+<form method="POST" action="{{url_for('import_route')}}" style="margin: 0;padding: 0;position: absolute;top: 33%;">
   <select id="route_for_import" name="route_for_import" onchange="this.form.submit();">
     <option value="" selected="selected" hidden="hidden">Use Previous Routes</option>
     {% for route in routes %}
@@ -15,7 +15,7 @@
 {% endif %}
 <form action="{{url_for('busroute')}}" method="post">
   <div class="busroute-form">
-    <b>Bus Route Details</b><br>
+    <b>Bus Route Details</b><br><br>
     <section>
       <div class="label-field-1">
         <label for="Terminal_1_origin">Terminal 1 (Origin): </label>
@@ -47,6 +47,7 @@
         <input type="time" id="Bus_service_timings_To" name="Bus_service_timings_To" required {%if data%}value="{{data['Bus_service_timings_To']}}"{%endif%}/>
       </div>
     </section>
+    <br>
     <div>
       <button class="label-button" value="Submit" type="submit">Save</button>
       <button class="label-button" value="Clear" type="submit" formaction="/clear-route">Clear</button>
