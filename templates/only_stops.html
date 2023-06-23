@@ -21,7 +21,7 @@
           </thead>
           <tbody></tbody>
         </table>
-        <input type="submit" value="Confirm Stops">
+        <input type="submit" value="Confirm Stops" id="confirm-stops" hidden>
       </form>
     </div>
   </div>
@@ -176,11 +176,17 @@
         markersLayer.removeLayer(marker);
         markerRow.remove();
         updateLines();
+        var count = document.getElementById('markerTable').getElementsByTagName('tbody')[0].childElementCount
+        if (count == 0) {
+          document.getElementById('confirm-stops').setAttribute('hidden','');
+        };
       });
 
       markerCount++;
 
       document.getElementById('markerTable').getElementsByTagName('tbody')[0].appendChild(markerRow);
+
+      document.getElementById('confirm-stops').removeAttribute('hidden');
     });
 
     function updateLines() {

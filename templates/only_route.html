@@ -37,7 +37,7 @@
           </thead>
           <tbody></tbody>
         </table>
-        <input type="submit" value="Confirm Stops">
+        <input type="submit" value="Confirm Stops" id="confirm-stops" hidden>
       </form>
     </div>
   </div>
@@ -131,6 +131,8 @@
             marker.off()
             // Update the lines
             updateLines();
+            // Unhide Submit button
+            document.getElementById('confirm-stops').removeAttribute('hidden');
           });
         });
         map.setView([latitudes[0], longitudes[0]],15);
@@ -242,6 +244,10 @@
           clickedMarkersarray.splice(index, 1);
         }
         updateLines();
+        var count = document.getElementById('markerTable').getElementsByTagName('tbody')[0].childElementCount
+        if (count == 0) {
+          document.getElementById('confirm-stops').setAttribute('hidden','');
+        };
       });
 
       markerCount++;

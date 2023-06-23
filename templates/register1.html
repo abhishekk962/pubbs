@@ -36,22 +36,21 @@
     <nav>
     </nav>
 <div class="page-body">
-    <div class="content">
-        <h1 class="heading" style="margin-bottom: 0%;"> Bus Dispatch and <span>control system</span></h1>        
-        <form method="POST" action="/registered" style="display: flex;flex-direction: column;text-align: center;padding: 30px;">
-            <h2 style="text-align: left;margin: 0;">Register</h2>
+    <div class="content" style="backdrop-filter: none;">
+      <div id="login-content">
+        <h2 class="heading" style="margin-bottom: 0%;"> Bus Dispatch & Control System</h2>    
+        <form method="POST" action="/registered" id="login-form">
+            <h3 style="text-align: left;margin: 0;">Register</h2>
             <p style="text-align: left; color: dimgrey; margin-top: 0; font-size: 12px;">Enter your details to continue</p>
             <p style="text-align: left; color: rgb(38, 38, 38); margin-top: 0; font-size: 12px;">{{message}}</p>
             <input type="text" name="name" id="name" placeholder="Enter your Name" required>
-            <input type="email" name="email" id="email" placeholder="Enter your Email" required>
+            <input type="email" name="email" id="email" placeholder="Enter Your Email" required>
             <input type="password" name="password" id="password" placeholder="Enter Password" required>
             <button class="label-button" type="submit" style="width: 90%;align-self: center;">Register</button>
             <p style="font-size: 11px;color: #1E0431;margin-top: 0;">Already have an account? <a href="/login" style="text-decoration: none;color: #8C025D;">Login Here</a></p>
         </form>
+      </div>
     </div>
 </div>
 </body>
 </html>
-
-
-        

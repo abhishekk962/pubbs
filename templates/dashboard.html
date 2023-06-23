@@ -25,7 +25,7 @@
           <a href="https://mohua.gov.in/" target="_blank">MOHUA</a>
         </div>
         <div>
-          <a href="/logout" style="display: flex;"><span class="material-symbols-outlined">logout</span></a>
+          <a style="display: flex;"><span id='account-show' class="material-symbols-outlined">account_circle</span></a>
           <div style="border-left:2px solid #ffffff84;height:100%;margin-right: 10px;"></div>
           <img src="{{url_for('static',filename='images/Pubbs_transit_logo_transparent.png')}}" height="35">
           <a href="https://pubbs.co.in/" target="_blank">PUBBS</a>
@@ -50,6 +50,16 @@
         <button type="submit" class="nav-button" formaction="{{url_for('livelocation')}}">Live</button>
         {% endif %}
       </form>
+      <div id="account">
+        <div id="profile">
+          <span class="material-symbols-outlined" style="padding: 5px;font-size: 40px;">person</span>
+          <b style="font-size: 15px;">{{ session['email'] }}</b>
+        </div>
+        <br>
+        <a class="" href="{{ url_for('logout')}}" id="logout-button">
+          <span class="material-symbols-outlined">logout</span><span>Log out</span>
+        </a>
+      </div>
     </nav>
     <div class="page-body">
       <div class="sidebar">
@@ -84,6 +94,18 @@
 
       </script>
     {% endif %}
+    <script>
+      var accountshow = document.getElementById('account-show');
+      var account = document.getElementById('account');
+      accountshow.addEventListener('click',function(){
+        if (account.style.display == 'flex'){
+          account.style.display = 'none'
+        } else {
+          account.style.display = 'flex'
+        }
+      })
+
+    </script>
     <script>
       const statusfreq = document.getElementById("statusfreq");
       const showfreq = document.getElementById("showfreq");

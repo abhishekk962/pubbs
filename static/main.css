@@ -47,6 +47,12 @@ body{
     text-align: center;
     box-shadow: 0 0 8px 4px rgb(0 0 0 / 22%);
     cursor: pointer;
+    animation: pop 0.5s ease-in-out;
+}
+
+@keyframes messagebox {
+    from{top:8%;opacity: 0%;}
+    to{top:11%;opacity: 100%;}
 }
 
 header{
@@ -523,4 +529,58 @@ thead *{
     display: flex;
     align-items: center;
     font-size: 15px;
+}
+
+#account {
+    position: absolute;
+    display: none;
+    right: 0;
+    top: 6%;
+    margin: auto auto;
+    width: fit-content;
+    height: fit-content;
+    padding: 0.5%;
+    background: white;
+    color: #1E0431;
+    z-index: 5;
+    border-radius: 5px;
+    text-align: center;
+    box-shadow: 0 0 8px 4px rgb(0 0 0 / 22%);
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    text-transform: none;
+    padding: 0.8%;
+    color: #4c4c4c;
+    animation: pop 0.2s ease-in-out;
+}
+
+@keyframes pop {
+    from{opacity: 0%;scale: 0.5;}
+    to{opacity: 100%;scale: 1;}
+}
+
+#profile{
+    border-radius: 5px;
+    background: #f7efff;
+    display: flex;
+    align-items: center;
+    flex-direction: row;
+    padding: 5px;
+}
+
+#logout-button{
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    color: #4c4c4c;
+    margin-bottom: 10px;
+}
+
+.hide {
+    display: none;
+}
+
+.show-acc {
+    display: flex;
 }
