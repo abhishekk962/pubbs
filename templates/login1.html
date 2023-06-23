@@ -36,10 +36,11 @@
     <nav>
     </nav>
 <div class="page-body">
-    <div class="content">
-        <h1 class="heading" style="margin-bottom: 0%;"> Bus Dispatch and <span>control system</span></h1>        
-        <form method="POST" action="{{url_for('loggedin')}}" style="display: flex;flex-direction: column;text-align: center;padding: 30px;">
-            <h2 style="text-align: left;margin: 0;">Login</h2>
+    <div class="content" style="backdrop-filter: none;">
+      <div id="login-content">
+        <h2 class="heading" style="margin-bottom: 0%;"> Bus Dispatch & Control System</h2>        
+        <form method="POST" action="{{url_for('loggedin')}}" id="login-form">
+            <h3 style="text-align: left;margin: 0;">Login</h3>
             <p style="text-align: left; color: dimgrey; margin-top: 0; font-size: 12px;">Enter your details to continue</p>
             <p style="text-align: left; color: rgb(38, 38, 38); margin-top: 0; font-size: 12px;">{{message}}</p>
             <input type="email" name="email" id="email" placeholder="Enter Your Email" required>
@@ -48,6 +49,7 @@
             <button class="label-button" type="submit" style="width: 90%;align-self: center;">Log In</button>
             <p style="font-size: 11px;color: #1E0431;margin-top: 0;">Don't have an account? <a href="/register" style="text-decoration: none;color: #8C025D;">Sign up</a></p>
         </form>
+      </div>
     </div>
 </div>
 </body>

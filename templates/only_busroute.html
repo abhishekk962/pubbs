@@ -4,18 +4,22 @@
 <div class="content">
 {% if message %}<div id="messagebox">{{message}}</div>{% endif %}
 {% if routes %}
-<form method="POST" action="{{url_for('import_route')}}" style="margin: 0;padding: 0;position: absolute;top: 33%;">
-  <select id="route_for_import" name="route_for_import" onchange="this.form.submit();">
-    <option value="" selected="selected" hidden="hidden">Use Previous Routes</option>
-    {% for route in routes %}
-    <option>{{route}}</option>
-    {% endfor %}
-  </select>
+<form method="POST" action="{{url_for('import_route')}}" style="margin: 0;padding: 0;position: absolute;top: 33%;display: none;">
+  <input id="route_for_import" name="route_for_import">
+  <button id="s_route_for_import" value="Submit"  type="submit"></button>
 </form>
 {% endif %}
 <form action="{{url_for('busroute')}}" method="post">
   <div class="busroute-form">
-    <b>Bus Route Details</b><br><br>
+    <b>Bus Route Details</b>
+    <br>
+    <select onchange="document.getElementById('route_for_import').value = this.value;document.getElementById('s_route_for_import').click();">
+      <option value="" selected="selected" hidden="hidden">Previous Routes</option>
+      {% for route in routes %}
+      <option>{{route}}</option>
+      {% endfor %}
+    </select>
+    <br>
     <section>
       <div class="label-field-1">
         <label for="Terminal_1_origin">Terminal 1 (Origin): </label>

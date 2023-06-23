@@ -6,7 +6,7 @@
 {% if message %}<div id="messagebox">{{message}}</div>{% endif %}
 <form id="myform" action="{{url_for('constraints_details')}}" method="post" style="grid-template-columns: auto auto;">
   <div>
-    <b>Constraints Full Day Services</b>
+    <b style="margin-bottom: 5px;">Constraints Full Day Services</b>
     <span> </span>
     <span> </span>
     <span> </span>
@@ -34,13 +34,13 @@
     
     <span></span>
     <span> </span>
-    <span> </span>
-    <span></span>
 
+    <hr style="opacity:0">
+    <hr style="opacity:0">
+    <hr style="opacity:0">
+    <hr style="opacity:0">
 
-    <span> </span>
-    <span> </span>
-    <b>Constraints Trip Wise</b>
+    <b style="margin-bottom: 5px;">Constraints Trip Wise</b>
     <span></span>
     <span> </span>
     <span> </span>
@@ -66,7 +66,7 @@
 {% if message %}<div id="messagebox">{{message}}</div>{% endif %}
 <form id="myform" action="{{url_for('constraints_details')}}" method="post" style="grid-template-columns: auto auto;">
   <div>
-    <span><b>CONSTRAINTS FULL DAY SERVICES</b></span>
+    <b style="margin-bottom: 5px;">Constraints Full Day Services</b>
     <span> </span>
     <span> </span>
     <span> </span>
@@ -92,9 +92,15 @@
     <label for="min_crr"> Min cost recovery ratio: </label>
     <input value="{{data['min_crr']}}" type="number" id="min_crr" name="min_crr" required>
 
+    <span></span>
     <span> </span>
-    <span> </span>
-    <span class="title"><b>CONSTRAINTS TRIP WISE</b></span>
+
+    <hr style="opacity:0">
+    <hr style="opacity:0">
+    <hr style="opacity:0">
+    <hr style="opacity:0">
+
+    <b style="margin-bottom: 5px;">Constraints Trip Wise</b>
     <span></span>
     <span> </span>
     <span> </span>
