@@ -10,7 +10,9 @@
     {% if message %}<div id="messagebox">{{message}}</div>{% endif %}
     <div id="map"></div>
     <div class="maptable">
-
+      <div></div>
+      <div></div>
+      <div></div>
     </div>
   </div>
   <p style="position:fixed;opacity:0;" id="username">{{ session['email'] }}</p>
@@ -20,59 +22,7 @@
   <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
   <script>
     var map = L.map('map').setView([51.505, -0.09], 13);
-
-    var email = document.getElementById('username').textContent
-
-    var socket = io();
-    socket.on('connect', function() {
-        socket.emit('join',{room: email})
-        socket.emit('my event', {data: 'I\'m connected!'});
-    });
-
-    var layerGroup = L.layerGroup().addTo(map);
-
-    socket.on('receivedlocation', function(data) {
-      map.setView([data['latitude'],data['longitude']],20)
-      layerGroup.clearLayers();
-      var pointer = L.marker([data['latitude'],data['longitude']]).addTo(layerGroup)
-      document.querySelector('.maptable').innerHTML = data['latitude'] + ' , ' + data['longitude']
-    });
-
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
-      subdomains: 'abcd',
-      maxZoom: 20
-    }).addTo(map);
-
-    var markersLayer = L.layerGroup().addTo(map);
-    var linesLayer = L.layerGroup().addTo(map);
-
-    var markerCount = 0;
-
-    var latitudes = []
-    var longitudes = []
-
-    // Fetch data from Flask endpoint
-    fetch('/data')
-      .then(response => response.json())
-      .then(data => {
-        // Loop through the data and add markers
-        data.forEach(point => {
-          var marker = L.marker([point.lat, point.lng]).addTo(markersLayer);
-          marker.bindTooltip(point.name, {permanent: true, className: "my-label", offset: [0, 0] });
-          marker.bindPopup(point.name);
-          marker._icon.style.filter = "hue-rotate(120deg)"
-          latitudes.push(point.lat);
-          longitudes.push(point.lng);
-        });
-        map.setView([latitudes[0], longitudes[0]],15);
-      })
-      .catch(error => {
-        console.error('Error:', error);
-      });
-
     
-
     // Search box
     var searchControl = L.Control.geocoder({
       defaultMarkGeocode: false,
@@ -93,116 +43,143 @@
         searchControl._clearResults()
     })
 
-    map.on('click', function(e) {
-      socket.emit('location', {latitude: e.latlng.lat, longitude: e.latlng.lng})
+    var markersLayer = L.layerGroup().addTo(map);
+    var linesLayer = L.layerGroup().addTo(map);
+    var clickedmarkers = L.layerGroup().addTo(map);
 
-      var markerName = 'Stop ' + (markerCount + 1);
+    var markerCount = 0;
 
-      var markerRow = document.createElement('tr');
-      markerRow.id = 'markerRow' + markerCount;
+    var markersarray = [];
+    var polyline = null;
 
-      var markerNameCell = document.createElement('td');
-      markerNameCell.style.border = "None";
-      markerNameCell.style.background = "White";
-      var markerInputBox = document.createElement('input');
-      var markerNameName = markerName + '_Name';
-      markerInputBox.id = markerNameName;
-      markerInputBox.name = markerNameName;
-      markerInputBox.value = markerName;
-      markerNameCell.appendChild(markerInputBox);
-      markerRow.appendChild(markerNameCell);
+    var latitudes = []
+    var longitudes = []
 
-      var dummyCell = document.createElement('td');
-      dummyCell.style.border = "None";
-      dummyCell.style.background = "White";
-      var dummyInputBox = document.createElement('input');
-      var dummyname = markerName + '_Dummy';
-      dummyInputBox.id = dummyname;
-      dummyInputBox.name = dummyname;
-      dummyInputBox.type = "checkbox";
-      dummyCell.appendChild(dummyInputBox);
-      markerRow.appendChild(dummyCell);
-
-      var cong_int_Cell = document.createElement('td');
-      cong_int_Cell.style.border = "None";
-      cong_int_Cell.style.background = "White";
-      var cong_int_InputBox = document.createElement('input');
-      var cong_int_name = markerName + '_Cong';
-      cong_int_InputBox.id = cong_int_name;
-      cong_int_InputBox.name = cong_int_name;
-      cong_int_InputBox.type = "checkbox";
-      cong_int_Cell.appendChild(cong_int_InputBox);
-      markerRow.appendChild(cong_int_Cell);
-
-      var actionsCell = document.createElement('td');
-      actionsCell.style.border = "None";
-      actionsCell.style.background = "White";
-      var deleteButton = document.createElement('button');
-      deleteButton.type = 'button';
-      deleteButton.classList.add('icon-button')
-      deleteButton.innerHTML = '<i class="fa fa-trash"></i>';
-      actionsCell.appendChild(deleteButton);
-      markerRow.appendChild(actionsCell);
-
-      var latCell = document.createElement('td');
-      latCell.style.border = "None";
-      latCell.style.background = "White";
-      var latInputBox = document.createElement('input');
-      var latname = markerName + '_lat'
-      latInputBox.id = latname;
-      latInputBox.name = latname;
-      latInputBox.value = e.latlng.lat;
-      latInputBox.readonly = true;
-      latCell.appendChild(latInputBox);
-      latCell.style.display = 'none'
-      markerRow.appendChild(latCell);
-
-      var lngCell = document.createElement('td');
-      lngCell.style.border = "None";
-      lngCell.style.background = "White";
-      var lngInputBox = document.createElement('input');
-      var lngname = markerName + '_lng'
-      lngInputBox.id = lngname;
-      lngInputBox.name = lngname;
-      lngInputBox.value = e.latlng.lng;
-      lngInputBox.readonly = true;
-      lngCell.appendChild(lngInputBox);
-      lngCell.style.display = 'none'
-      markerRow.appendChild(lngCell);
-
-      // var marker = L.marker(e.latlng, { draggable: true }).addTo(markersLayer);
-      // marker.bindPopup(markerName);
-
-      // marker.on('dragend', function(event) {
-      //   updateLines();
-      // });
-
-      markersLayer.addLayer(marker);
-      updateLines();
-
-      deleteButton.addEventListener('click', function() {
-        markersLayer.removeLayer(marker);
-        markerRow.remove();
-        updateLines();
+    // Fetch data from Flask endpoint
+    fetch('/route-data')
+      .then(response => response.json())
+      .then(data => {
+        // Loop through the data and add markers
+        data.forEach(point => {
+          var marker = L.marker([point.lat, point.lng]).addTo(markersLayer);
+          marker.bindTooltip(point.name, {permanent: true, className: "my-label", offset: [0, 0] });
+          marker.bindPopup(point.name);
+          marker.key = point.id;
+          marker._icon.style.filter = "hue-rotate(120deg)"
+          latitudes.push(point.lat);
+          longitudes.push(point.lng);
+          markersarray.push(marker);
+        });
+        if (markersarray.length > 1) {
+          var latlngs = markersarray.map(function(marker) {
+            return marker.getLatLng();
+          });
+          // Remove the previous polyline if it exists
+          if (polyline) {
+            linesLayer.removeLayer(polyline);
+          }
+          var polyline = L.polyline(latlngs, { color: '#3388ff' }).addTo(linesLayer);
+        }
+        map.setView([latitudes[0], longitudes[0]],15);
+      })
+      .catch(error => {
+        console.error('Error:', error);
       });
 
-      markerCount++;
+      // livelocation
+      var email = document.getElementById('username').textContent
 
-      document.getElementById('markerTable').getElementsByTagName('tbody')[0].appendChild(markerRow);
-    });
+      var socket = io();
+      socket.on('connect', function() {
+          socket.emit('join',{room: email})
+          socket.emit('my event', {data: 'I\'m connected!'});
+      });
 
-    function updateLines() {
-      linesLayer.clearLayers();
+      var layerGroup = L.layerGroup().addTo(map);
 
-      var markers = markersLayer.getLayers();
+      var prevstop = markersarray[0]
+      var nextstop = markersarray[1]
 
-      if (markers.length > 1) {
-        var latlngs = markers.map(function(marker) {
-          return marker.getLatLng();
-        });
+      socket.on('receivedlocation', function(data) {
+        // map.setView([data['latitude'],data['longitude']],20)
+        layerGroup.clearLayers();
+        var pointer = L.marker([data['latitude'],data['longitude']])
+        var threeCoord = document.querySelectorAll('.maptable > div')
 
-        // var polyline = L.polyline(latlngs, { color: '#3388ff' }).addTo(linesLayer);
+        threeCoord[2].innerHTML = threeCoord[1].innerHTML
+        threeCoord[1].innerHTML = threeCoord[0].innerHTML
+        threeCoord[0].innerHTML = data['latitude'] + ' , ' + data['longitude']
+
+        // var distances = []
+        // markersarray.forEach(marker => {
+        //   distances.push(distBet(marker,pointer));
+        // })
+
+        // var prevstop = getClosestStops(distances, markersarray)[0];
+        // var nextstop = getClosestStops(distances, markersarray)[1];
+        
+        for (let i = 0; i < markersarray.length; i++) {
+          if (distBet(markersarray[i],pointer) < 0.00005) {
+            console.log(distBet(markersarray[i],pointer))
+            prevstop = markersarray[i]
+            nextstop = markersarray[i+1]
+            break
+          }
+        }
+
+        prevstop._icon.style.filter = "grayscale(1)";
+        prevstop.addTo(map);
+        nextstop._icon.style.filter = "sepia(1)";
+        nextstop.addTo(map);
+
+        var proj = calculateProjection(prevstop.getLatLng(),nextstop.getLatLng(),pointer.getLatLng());
+        var projMarker = L.marker([proj.x,proj.y]).addTo(layerGroup);
+      });
+      
+      map.on('click', function(e) {
+        socket.emit('location', {latitude: e.latlng.lat, longitude: e.latlng.lng})
+      });
+
+      function distBet(marker1,marker2) {
+        let lat1 = marker1.getLatLng().lat
+        let lng1 = marker1.getLatLng().lng
+        let lat2 = marker2.getLatLng().lat
+        let lng2 = marker2.getLatLng().lng
+        
+        let deltalat = lat1 - lat2
+        let deltalng = lng1 - lng2
+        let distance = Math.sqrt(deltalat ** 2 + deltalng ** 2);
+        return distance
       }
-    }
+
+
+      function getClosestStops(distances, stops) {
+        // Find the index of the minimum value in distances
+        let minIndex = 0;
+        for (let i = 1; i < distances.length; i++) {
+          if (distances[i] < distances[minIndex]) {
+            minIndex = i;
+          }
+        }
+
+        // Access the element in stops using the minIndex
+        const prevstop = stops[minIndex];
+        const nextstop = stops[minIndex+1];
+
+        return [prevstop,nextstop];
+      }
+
+      function calculateProjection(A, B, X) {
+        const AB = { lat: B.lat - A.lat, lng: B.lng - A.lng };
+        const AX = { lat: X.lat - A.lat, lng: X.lng - A.lng };
+        const dotProduct = AX.lat * AB.lat + AX.lng * AB.lng;
+        const lengthABSquared = AB.lat * AB.lat + AB.lng * AB.lng;
+        const scalarProjection = dotProduct / lengthABSquared;
+        const P = {
+          x: A.lat + scalarProjection * AB.lat,
+          y: A.lng + scalarProjection * AB.lng,
+        };
+        return P;
+      }
   </script>
 {% endblock %}
