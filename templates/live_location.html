@@ -21,7 +21,33 @@
   <script src="https://cdn.jsdelivr.net/npm/leaflet@1.7.1/dist/leaflet.js"></script>
   <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
   <script>
+    var busMarker = {
+        radius : 10,
+        color  : '#125482',
+        opacity: 1,
+        stroke : false,
+        fillOpacity: 1,
+        weight:5,
+        fillcolor:'#ff0000',
+    }
+
+    var stopMarker = {
+        radius : 10,
+        color  : '#235523',
+        opacity: 1,
+        stroke : false,
+        fillOpacity: 1,
+        weight:5,
+        fillcolor:'#ff0000',
+    }
+
     var map = L.map('map').setView([51.505, -0.09], 13);
+
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+      subdomains: 'abcd',
+      maxZoom: 20
+    }).addTo(map);
     
     // Search box
     var searchControl = L.Control.geocoder({
@@ -43,9 +69,9 @@
         searchControl._clearResults()
     })
 
-    var markersLayer = L.layerGroup().addTo(map);
-    var linesLayer = L.layerGroup().addTo(map);
-    var clickedmarkers = L.layerGroup().addTo(map);
+    var linesLayer = L.layerGroup();
+    var clickedmarkers = L.layerGroup();
+    var markersLayer = L.layerGroup();
 
     var markerCount = 0;
 
@@ -61,11 +87,11 @@
       .then(data => {
         // Loop through the data and add markers
         data.forEach(point => {
-          var marker = L.marker([point.lat, point.lng]).addTo(markersLayer);
+          var marker = L.circleMarker([point.lat, point.lng],busMarker).addTo(markersLayer);
           marker.bindTooltip(point.name, {permanent: true, className: "my-label", offset: [0, 0] });
           marker.bindPopup(point.name);
           marker.key = point.id;
-          marker._icon.style.filter = "hue-rotate(120deg)"
+          marker._path.style.filter = "hue-rotate(120deg)"
           latitudes.push(point.lat);
           longitudes.push(point.lng);
           markersarray.push(marker);
@@ -78,7 +104,7 @@
           if (polyline) {
             linesLayer.removeLayer(polyline);
           }
-          var polyline = L.polyline(latlngs, { color: '#3388ff' }).addTo(linesLayer);
+          var polyline = L.polyline(latlngs, { color: '#3388ff', weight: 20 , opacity: 0.5}).addTo(linesLayer);
         }
         map.setView([latitudes[0], longitudes[0]],15);
       })
@@ -95,14 +121,14 @@
           socket.emit('my event', {data: 'I\'m connected!'});
       });
 
-      var layerGroup = L.layerGroup().addTo(map);
+      var busGroup = L.layerGroup().addTo(map);
 
       var prevstop = markersarray[0]
       var nextstop = markersarray[1]
 
       socket.on('receivedlocation', function(data) {
         // map.setView([data['latitude'],data['longitude']],20)
-        layerGroup.clearLayers();
+        busGroup.clearLayers();
         var pointer = L.marker([data['latitude'],data['longitude']])
         var threeCoord = document.querySelectorAll('.maptable > div')
 
@@ -127,14 +153,18 @@
           }
         }
 
-        prevstop._icon.style.filter = "grayscale(1)";
+        prevstop._path.style.filter = "grayscale(1)";
         prevstop.addTo(map);
-        nextstop._icon.style.filter = "sepia(1)";
+        nextstop._path.style.filter = "sepia(1)";
         nextstop.addTo(map);
 
         var proj = calculateProjection(prevstop.getLatLng(),nextstop.getLatLng(),pointer.getLatLng());
-        var projMarker = L.marker([proj.x,proj.y]).addTo(layerGroup);
+        var projMarker = L.circleMarker([proj.x,proj.y],busMarker).addTo(busGroup);
       });
+
+      clickedmarkers.addTo(map);
+      markersLayer.addTo(map);
+      linesLayer.addTo(map);
       
       map.on('click', function(e) {
         socket.emit('location', {latitude: e.latlng.lat, longitude: e.latlng.lng})

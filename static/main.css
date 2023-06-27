@@ -31,6 +31,7 @@ body{
 }
 
 #messagebox{
+    scale: 0;
     position: absolute;
     right: 0;
     left: 0;
@@ -43,16 +44,20 @@ body{
     background: white;
     color: #1E0431;
     z-index: 5;
-    border-radius: 5px;
+    border-radius: 2px;
     text-align: center;
     box-shadow: 0 0 8px 4px rgb(0 0 0 / 22%);
     cursor: pointer;
-    animation: pop 0.5s ease-in-out;
+    display: flex;
+    padding: 0;
+    animation: messagebox 5s ease-in-out;
 }
 
 @keyframes messagebox {
-    from{top:8%;opacity: 0%;}
-    to{top:11%;opacity: 100%;}
+    0% {scale:0;opacity: 0%;}
+    20% {scale:1.2;opacity: 100%;}
+    80% {scale:1.2;opacity: 100%;}
+    100% {scale:0;opacity: 0%;}
 }
 
 header{

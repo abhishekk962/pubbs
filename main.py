@@ -427,8 +427,8 @@ def table_details():
 @app.route('/ols', methods=['GET', 'POST'])
 def ols_details():
     if request.method == "POST":
+        conn = connpool.get_connection()
         if 'save' in request.form:
-            conn = connpool.get_connection()
             c = conn.cursor()
             c.execute(f"CREATE TABLE IF NOT EXISTS T_OLS_COEFF (Operator TEXT,Route TEXT,Const FLOAT,No_of_Boarding FLOAT, No_of_Alighting FLOAT, Occupancy_Level FLOAT, Morning_Peak FLOAT, Before_Intersection FLOAT,Far_from_Intersection FLOAT,Commercial FLOAT,Transport_hub FLOAT,Bus_Bay FLOAT);")
             conn.commit()
@@ -449,8 +449,8 @@ def ols_details():
 @app.route('/scheduling-details', methods=['GET', 'POST'])
 def scheduling_details():
     if request.method == "POST":
+        conn = connpool.get_connection()
         if 'save' in request.form:
-            conn = connpool.get_connection()
             c = conn.cursor()
             c.execute(f"UPDATE T_PARAMETERS SET dead_todepot_t1 = '{request.form['dead_todepot_t1']}', dead_todepot_t2 = '{request.form['dead_todepot_t2']}', layover_depot = '{request.form['layover_depot']}', start_ser = '{request.form['start_ser']}', end_ser = '{request.form['end_ser']}', shift = '{request.form['shift']}', max_ideal = '{request.form['max_ideal']}' WHERE Route = '{session['route']}' and Operator = '{session['email']}';")
             c.execute(f"UPDATE T_STATUS SET `Scheduling Details` = '1' WHERE Route = '{session['route']}' and Operator = '{session['email']}';")
@@ -467,8 +467,8 @@ def scheduling_details():
 @app.route('/constraints', methods=['GET', 'POST'])
 def constraints_details():
     if request.method == "POST":
+        conn = connpool.get_connection()
         if 'save' in request.form:
-            conn = connpool.get_connection()
             c = conn.cursor()
             c.execute(f"UPDATE T_PARAMETERS SET max_oppp = '{request.form['max_oppp']}', min_ppvk = '{request.form['min_ppvk']}', min_ppt = '{request.form['min_ppt']}', max_ocpp = '{request.form['max_ocpp']}', max_fleet = '{request.form['max_fleet']}', max_ppl = '{request.form['max_ppl']}', min_crr = '{request.form['min_crr']}', min_ppp = '{request.form['min_ppp']}', max_pplpt = '{request.form['max_pplpt']}', min_rvpt = '{request.form['min_rvpt']}', max_opc = '{request.form['max_opc']}' WHERE Route = '{session['route']}' and Operator = '{session['email']}';")
             c.execute(f"UPDATE T_STATUS SET `Constraints` = '1' WHERE Route = '{session['route']}' and Operator = '{session['email']}';")
@@ -485,8 +485,8 @@ def constraints_details():
 @app.route('/service', methods=['GET', 'POST'])
 def service_details():
     if request.method == "POST":
+        conn = connpool.get_connection()
         if 'save' in request.form:
-            conn = connpool.get_connection()
             c = conn.cursor()
             c.execute(f"UPDATE T_PARAMETERS SET A = '{request.form['A']}', B = '{request.form['B']}', frequencydefault = '{request.form['frequencydefault']}', seatcap = '{request.form['seatcap']}', min_c_lvl = '{request.form['min_c_lvl']}', max_c_lvl = '{request.form['max_c_lvl']}', max_wait = '{request.form['max_wait']}', bus_left = '{request.form['bus_left']}', min_dwell = '{request.form['min_dwell']}', slack = '{request.form['slack']}', lay_overtime = '{request.form['lay_overtime']}', buscost = '{request.form['buscost']}', buslifecycle = '{request.form['buslifecycle']}', crewperbus = '{request.form['crewperbus']}', creqincome = '{request.form['creqincome']}', cr_trip = '{request.form['cr_trip']}', cr_day = '{request.form['cr_day']}', busmaintenance = '{request.form['busmaintenance']}', fuelprice = '{request.form['fuelprice']}', kmperliter = '{request.form['kmperliter']}', kmperliter2 = '{request.form['kmperliter2']}', c_cantboard = '{request.form['c_cantboard']}', c_waittime = '{request.form['c_waittime']}', c_invehtime = '{request.form['c_invehtime']}', penalty = '{request.form['penalty']}', hrinperiod = '{request.form['hrinperiod']}', ser_period = '{request.form['ser_period']}' WHERE Route = '{session['route']}' and Operator = '{session['email']}';")
             c.execute(f"UPDATE T_STATUS SET `Service Details` = '1' WHERE Route = '{session['route']}' and Operator = '{session['email']}';")
@@ -503,8 +503,8 @@ def service_details():
 @app.route('/ga-params', methods=['GET', 'POST'])
 def ga_params():
     if request.method == "POST":
+        conn = connpool.get_connection()
         if 'save' in request.form:
-            conn = connpool.get_connection()
             c = conn.cursor()
             c.execute(f"UPDATE T_PARAMETERS SET sol_per_pop = '{request.form['sol_per_pop']}', num_generations = '{request.form['num_generations']}' WHERE Route = '{session['route']}' and Operator = '{session['email']}';")
             c.execute(f"UPDATE T_STATUS SET `GA Parameters` = '1' WHERE Route = '{session['route']}' and Operator = '{session['email']}';")
