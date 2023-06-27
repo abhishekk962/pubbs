@@ -1233,9 +1233,9 @@ def open_browser():
 
 if __name__ == '__main__':
     Timer(1, open_browser).start()
-    socketio.run(app, host="0.0.0.0", port=8080)
+    # socketio.run(app, host="0.0.0.0", port=8080)
     # app.run(debug=True)
-    # from waitress import serve
-    # serve(app, host="0.0.0.0", port=8080) # http://localhost:8080/
+    from waitress import serve
+    serve(app, host="0.0.0.0", port=8080) # http://localhost:8080/
 
 
