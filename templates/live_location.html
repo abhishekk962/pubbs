@@ -33,7 +33,7 @@
 
     var stopMarker = {
         radius : 10,
-        color  : '#235523',
+        color  : '#ff0000',
         opacity: 1,
         stroke : false,
         fillOpacity: 1,
@@ -69,9 +69,10 @@
         searchControl._clearResults()
     })
 
-    var linesLayer = L.layerGroup();
-    var clickedmarkers = L.layerGroup();
-    var markersLayer = L.layerGroup();
+
+    var linesLayer = L.layerGroup().addTo(map);
+    var clickedmarkers = L.layerGroup().addTo(map);
+    var markersLayer = L.layerGroup().addTo(map);
 
     var markerCount = 0;
 
@@ -104,7 +105,7 @@
           if (polyline) {
             linesLayer.removeLayer(polyline);
           }
-          var polyline = L.polyline(latlngs, { color: '#3388ff', weight: 20 , opacity: 0.5}).addTo(linesLayer);
+          var polyline = L.polyline(latlngs, { color: '#3388ff', weight: 20 , opacity: 0.5}).bringToBack().addTo(linesLayer);
         }
         map.setView([latitudes[0], longitudes[0]],15);
       })
@@ -113,28 +114,69 @@
       });
 
       // livelocation
-      var email = document.getElementById('username').textContent
+      var email = document.getElementById('username').textContent;
 
       var socket = io();
       socket.on('connect', function() {
-          socket.emit('join',{room: email})
+          socket.emit('join',{room: email});
           socket.emit('my event', {data: 'I\'m connected!'});
       });
 
-      var busGroup = L.layerGroup().addTo(map);
+      map.on('click', function(e) {
+        socket.emit('location', {latitude: e.latlng.lat, longitude: e.latlng.lng})
+      });
 
-      var prevstop = markersarray[0]
-      var nextstop = markersarray[1]
+      var prevstop = markersarray[0];
+      var nextstop = markersarray[1];
 
-      socket.on('receivedlocation', function(data) {
+      var coord2 = null;
+      var coord1 = null;
+      var coord0 = null;
+
+      var prevCoord = null;
+      var currCoord = null;
+
+      var busLayer = L.layerGroup().addTo(map);
+
+      pollInterval = setInterval(function() { // run function every 2000 ms
+          refreshPings();
+        }, 2000);
+
+      refreshPings();
+
+      function refreshPings() {
+          $.ajax({
+            url: '/get-pings',
+            dataType: 'json',
+            type: 'get',
+            success: function(data) { // check if available
+              if ( data ) { // get and check data value
+                console.log(data);
+                processPing(data); // get and print data string
+              }
+            },
+            error: function() { // error logging
+              console.log('Error!');
+            }
+          });
+        };
+
+      function processPing(data) {
+        var threeCoord = document.querySelectorAll('.maptable > div');
+        threeCoord[2].innerHTML = threeCoord[1].innerHTML;
+        threeCoord[1].innerHTML = threeCoord[0].innerHTML;
+        threeCoord[0].innerHTML = data['latitude'] + ' , ' + data['longitude'];
+
+        coord2 = coord1;
+        coord1 = coord0;
+        coord0 = [data['latitude'],data['longitude']];
+
+        currCoord = [(coord2[0]+coord1[0]+coord0[0])/3,(coord2[1]+coord1[1]+coord0[1])/3];
+
         // map.setView([data['latitude'],data['longitude']],20)
-        busGroup.clearLayers();
-        var pointer = L.marker([data['latitude'],data['longitude']])
-        var threeCoord = document.querySelectorAll('.maptable > div')
-
-        threeCoord[2].innerHTML = threeCoord[1].innerHTML
-        threeCoord[1].innerHTML = threeCoord[0].innerHTML
-        threeCoord[0].innerHTML = data['latitude'] + ' , ' + data['longitude']
+        busLayer.clearLayers();
+        var pointer = L.marker(currCoord);
+        console.log(pointer)
 
         // var distances = []
         // markersarray.forEach(marker => {
@@ -153,22 +195,27 @@
           }
         }
 
+        if (distBet(prevstop,pointer) > distBet(prevstop,nextstop)) {
+          prevstop = nextstop
+          nextstop = markersarray[markersarray.indexOf(prevstop)+1]
+        }
+
         prevstop._path.style.filter = "grayscale(1)";
         prevstop.addTo(map);
         nextstop._path.style.filter = "sepia(1)";
         nextstop.addTo(map);
 
         var proj = calculateProjection(prevstop.getLatLng(),nextstop.getLatLng(),pointer.getLatLng());
-        var projMarker = L.circleMarker([proj.x,proj.y],busMarker).addTo(busGroup);
-      });
+        var projMarker = L.circleMarker([proj.x,proj.y],busMarker)
+        
+        if (distBet(projMarker,nextstop) > distBet(prevstop,nextstop)) {
+          projMarker = L.circleMarker([prevstop.getLatLng().lat,prevstop.getLatLng().lng],busMarker)
+        }
 
-      clickedmarkers.addTo(map);
-      markersLayer.addTo(map);
-      linesLayer.addTo(map);
-      
-      map.on('click', function(e) {
-        socket.emit('location', {latitude: e.latlng.lat, longitude: e.latlng.lng})
-      });
+        projMarker.addTo(busLayer);
+
+        prevCoord = currCoord;
+      };
 
       function distBet(marker1,marker2) {
         let lat1 = marker1.getLatLng().lat

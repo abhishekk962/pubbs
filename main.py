@@ -381,7 +381,7 @@ def stop_char():
         c = conn.cursor()
         c.execute(f"SELECT s.Before_Int,s.Far_From_Int,s.Commercial,s.Transport_Hub,s.Bus_bay,s.Stop_rad FROM T_STOPS_INFO AS s INNER JOIN T_ROUTE_INFO AS r ON (s.id = r.Stop_id) WHERE s.id IN {tuple(stop_ids)} and r.Operator='{session['email']}' and r.Route='{session['route']}' ORDER BY r.Stop_num")
         data= c.fetchall()
-        return render_template('only_stopchar.html',stops=stops,stop_ids=stop_ids, message="Fill or Update Details", data=data)
+        return render_template('only_stopchar.html',stops=stops,stop_ids=stop_ids, data=data)
     else:
         return render_template('only_stopchar.html',stops=stops,stop_ids=stop_ids, message="Build Route First", data=data)
 
@@ -1225,8 +1225,27 @@ def on_join(data):
 
 @socketio.on('location')
 def show_location(data):
+    conn = connpool.get_connection()
+    c = conn.cursor()
+    c.execute(f"CREATE TABLE IF NOT EXISTS T_PINGS (Operator TEXT, Route TEXT, Latitude FLOAT, Longitude FLOAT, Timestamp TIMESTAMP)")
+    c.execute(f"INSERT INTO T_PINGS (Operator, Route, Latitude, Longitude) VALUES ('{session['email']}','{session['route']}','{data['latitude']}','{data['longitude']}')")
+    conn.commit()
+    c.execute(f"SELECT * FROM T_PINGS;")
+    result = c.fetchall()
+    print(result[0][4])
+    print(type(result[0][4]))
     emit('receivedlocation',data,room=room)
     print(str(data))
+
+@app.route('/get-pings')
+def get_pings():
+    with connpool.get_connection() as conn1:
+        c = conn1.cursor()
+        c.execute(f"SELECT Latitude, Longitude FROM T_PINGS WHERE Operator = '{session['email']}' and Route='{session['route']}' ORDER BY Timestamp Desc LIMIT 1")
+        result= c.fetchall()[0]
+        data = {"latitude": result[0],"longitude": result[1]}
+        print(data,"sdffffffffffffffffffffffffffffffffffffffffffffff")
+        return jsonify(data)
 
 def open_browser():
     webbrowser.open_new("http://localhost:8080/")
