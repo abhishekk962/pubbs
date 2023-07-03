@@ -30,6 +30,43 @@ body{
     font-family: 'Fira Sans', sans-serif;
 }
 
+#route-bar {
+    z-index: 15;
+    position: fixed;
+    background: #7d7d7d;
+    height: 10px;
+    width: 50%;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    margin: auto auto;
+    display: flex;
+    flex-direction: row;
+}
+
+.route-segment {
+    background: rgba(255, 255, 255, 0.516);
+    height: 10px;
+}
+
+.route-marker {
+    position: absolute;
+    height: inherit;
+    width: 10px;
+    background: #ffffff;
+    border: 2px green;
+    z-index: 9;
+    border-radius: 5px;
+    margin-left: -5px;
+}
+
+.route-bus {
+    background: #7d7d7d;
+    height: 10px;
+    position: absolute;
+}
+
 #messagebox{
     scale: 0;
     position: absolute;

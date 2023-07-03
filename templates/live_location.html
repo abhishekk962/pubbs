@@ -7,6 +7,7 @@
 {% block content %}
 <script>var tab = $( "button:contains('Live')" ).attr('disabled','');</script>
   <div class="mapdata">
+    <div id="route-bar"></div>
     {% if message %}<div id="messagebox">{{message}}</div>{% endif %}
     <div id="map"></div>
     <div class="maptable">
@@ -105,7 +106,7 @@
           if (polyline) {
             linesLayer.removeLayer(polyline);
           }
-          var polyline = L.polyline(latlngs, { color: '#3388ff', weight: 20 , opacity: 0.5}).bringToBack().addTo(linesLayer);
+          var polyline = L.polyline(latlngs, { color: '#3388ff', weight: 20 , opacity: 0.1}).bringToBack().addTo(linesLayer);
         }
         map.setView([latitudes[0], longitudes[0]],15);
       })
@@ -134,7 +135,6 @@
       var coord0 = null;
 
       var prevCoord = null;
-      var currCoord = null;
 
       var busLayer = L.layerGroup().addTo(map);
 
@@ -162,59 +162,152 @@
         };
 
       function processPing(data) {
-        var threeCoord = document.querySelectorAll('.maptable > div');
-        threeCoord[2].innerHTML = threeCoord[1].innerHTML;
-        threeCoord[1].innerHTML = threeCoord[0].innerHTML;
-        threeCoord[0].innerHTML = data['latitude'] + ' , ' + data['longitude'];
-
-        coord2 = coord1;
-        coord1 = coord0;
-        coord0 = [data['latitude'],data['longitude']];
-
-        currCoord = [(coord2[0]+coord1[0]+coord0[0])/3,(coord2[1]+coord1[1]+coord0[1])/3];
-
-        // map.setView([data['latitude'],data['longitude']],20)
+        // Clear bus location
         busLayer.clearLayers();
+
+        // Show previous 3 coordinates on page
+        var threeCoord = document.querySelectorAll('.maptable > div');
+        threeCoord[2].innerHTML = data[2]['latitude'] + ' , ' + data[2]['longitude'];
+        threeCoord[1].innerHTML = data[1]['latitude'] + ' , ' + data[1]['longitude'];
+        threeCoord[0].innerHTML = data[0]['latitude'] + ' , ' + data[0]['longitude'];
+
+        // Save previous threee coordinates
+        coord2 = [data[2]['latitude'],data[2]['longitude']];
+        coord1 = [data[1]['latitude'],data[1]['longitude']];
+        coord0 = [data[0]['latitude'],data[0]['longitude']];
+
+        var timediff = data[0]['Timediff']
+        var speed = data[0]['Speed']
+        console.log(timediff,speed)
+
+        // Get the average of the coordinates and create a pointer at the location
+        // currCoord = [(coord2[0]+coord1[0]+coord0[0])/3,(coord2[1]+coord1[1]+coord0[1])/3];
+        var currCoord = [coord0[0],coord0[1]];
         var pointer = L.marker(currCoord);
-        console.log(pointer)
 
+        // // Save the perpendicular distance of pointer from each segment
         // var distances = []
-        // markersarray.forEach(marker => {
-        //   distances.push(distBet(marker,pointer));
-        // })
-
-        // var prevstop = getClosestStops(distances, markersarray)[0];
-        // var nextstop = getClosestStops(distances, markersarray)[1];
+        // for (let i = 0; i < markersarray.length - 1; i++) {
+        //   var proj = calculateProjection(markersarray[i].getLatLng(),markersarray[i+1].getLatLng(),pointer.getLatLng());
+        //   var projMarker = L.circleMarker([proj.x,proj.y])
+        //   distances.push(distBet(projMarker,pointer));
+        // }
         
+        var distances = []
+        markersarray.forEach(marker => {
+          distances.push(distBet(marker,pointer));
+        })
+        
+        // Based on perpendicular distance from segment, determine previous and next stop
+        var closestStop = getClosestStop(distances, markersarray);
+
+        // Three sides of trianble joining nearest stop, prev stop and next stop
+        var side1 = distBet(pointer,closestStop)
+        var side2 = distBet(closestStop,markersarray[markersarray.indexOf(closestStop)+1])
+        var side3 = distBet(markersarray[markersarray.indexOf(closestStop)+1],pointer)
+
+        //If triangle is obtuse, previous stop is the one before closest stop
+        if (side3**2 > side2**2+side1**2){
+          prevstop = markersarray[markersarray.indexOf(closestStop) - 1]
+        } else {
+          prevstop = closestStop
+        }
+
+
+        // var prevClose = markersarray[markersarray.indexOf(closestStop) - 1]
+        // var prevCloseProj = calculateProjection(closestStop.getLatLng(),prevClose.getLatLng(),pointer.getLatLng());
+        // var prevProjMarker = L.circleMarker([prevCloseProj.x,prevCloseProj.y])
+        
+        // var nextClose = markersarray[markersarray.indexOf(closestStop) + 1]
+        // var nextCloseProj = calculateProjection(closestStop.getLatLng(),nextClose.getLatLng(),pointer.getLatLng());
+        // var nextProjMarker = L.circleMarker([nextCloseProj.x,nextCloseProj.y])
+
+        // if (distBet(prevProjMarker,pointer) < distBet(nextProjMarker,pointer)) {
+        //   prevstop = markersarray[markersarray.indexOf(closestStop) - 1]
+        // } else {
+        //   prevstop = closestStop
+        // }
+
+        nextstop = markersarray[markersarray.indexOf(prevstop)+1]
+
+        
+        // If the ping location is close to a stop, the previous and next stops will change
         for (let i = 0; i < markersarray.length; i++) {
           if (distBet(markersarray[i],pointer) < 0.00005) {
-            console.log(distBet(markersarray[i],pointer))
             prevstop = markersarray[i]
-            nextstop = markersarray[i+1]
+            nextstop = markersarray[markersarray.indexOf(prevstop)+1]
             break
           }
         }
 
+        // If the pointer's distance from previous stop is more than the segment length, move to next segment
         if (distBet(prevstop,pointer) > distBet(prevstop,nextstop)) {
           prevstop = nextstop
           nextstop = markersarray[markersarray.indexOf(prevstop)+1]
         }
 
+        // Show previous and next stops
         prevstop._path.style.filter = "grayscale(1)";
         prevstop.addTo(map);
         nextstop._path.style.filter = "sepia(1)";
         nextstop.addTo(map);
-
+        
+        // Get the location of pointer prjected on final segment
         var proj = calculateProjection(prevstop.getLatLng(),nextstop.getLatLng(),pointer.getLatLng());
         var projMarker = L.circleMarker([proj.x,proj.y],busMarker)
         
+        // If the pointer's distance from next stop is more than segment length, bus will be at the previous stop
         if (distBet(projMarker,nextstop) > distBet(prevstop,nextstop)) {
           projMarker = L.circleMarker([prevstop.getLatLng().lat,prevstop.getLatLng().lng],busMarker)
         }
 
         projMarker.addTo(busLayer);
 
-        prevCoord = currCoord;
+        var segments = []
+        var totalDist = 0
+        for (let i = 0; i < markersarray.length-1; i++) {
+          var dist = distBet(markersarray[i],markersarray[i+1])
+          segments.push(dist);
+          totalDist = totalDist + dist
+        };
+
+        document.getElementById('route-bar').replaceChildren()
+        
+        segments.forEach(segment => {
+          var segElem = document.createElement('div')
+          segElem.classList.add('route-segment')
+          segElem.style.width = segment*100/totalDist + '%'
+          var stopElem = document.createElement('div')
+          stopElem.classList.add('route-marker')
+          segElem.appendChild(stopElem)
+          document.getElementById('route-bar').appendChild(segElem)
+        });
+        var segElem = document.createElement('div')
+        segElem.classList.add('route-segment')
+        segElem.style.width = '0%'
+        var stopElem = document.createElement('div')
+        stopElem.classList.add('route-marker')
+        segElem.appendChild(stopElem)
+        document.getElementById('route-bar').appendChild(segElem)
+
+        var covDist = 0;
+        for (let i = 0; i <= markersarray.indexOf(prevstop); i++) {
+          covDist = covDist + distBet(markersarray[i],markersarray[i+1])
+        };
+        covDist = covDist + distBet(prevstop,projMarker);
+
+        var busElem = document.createElement('div')
+        busElem.classList.add('route-bus')
+        busElem.style.width = covDist*100/totalDist + '%'
+        var busLocElem = document.createElement('div')
+        busLocElem.classList.add('route-marker')
+        busLocElem.style.scale = 1.2
+        busLocElem.style.right = 0
+        busLocElem.style.margin = '0 -5px 0 0'
+        busElem.appendChild(busLocElem)
+        document.getElementById('route-bar').appendChild(busElem)
+
+        prevCoord = projMarker;
       };
 
       function distBet(marker1,marker2) {
@@ -230,7 +323,7 @@
       }
 
 
-      function getClosestStops(distances, stops) {
+      function getClosestStop(distances, stops) {
         // Find the index of the minimum value in distances
         let minIndex = 0;
         for (let i = 1; i < distances.length; i++) {
@@ -239,11 +332,9 @@
           }
         }
 
-        // Access the element in stops using the minIndex
-        const prevstop = stops[minIndex];
-        const nextstop = stops[minIndex+1];
+        const closestStop = stops[minIndex];
 
-        return [prevstop,nextstop];
+        return closestStop;
       }
 
       function calculateProjection(A, B, X) {

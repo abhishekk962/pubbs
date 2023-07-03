@@ -13,6 +13,9 @@ import pandas as pd
 import numpy as np
 from flask import Flask, render_template, make_response,request, Response, session, redirect, jsonify,url_for,send_file
 from flask_socketio import SocketIO, send, emit, join_room, leave_room
+from datetime import datetime
+import utm
+import geopy.distance
 
 import os
 import re
@@ -1239,22 +1242,32 @@ def show_location(data):
 
 @app.route('/get-pings')
 def get_pings():
-    with connpool.get_connection() as conn1:
-        c = conn1.cursor()
-        c.execute(f"SELECT Latitude, Longitude FROM T_PINGS WHERE Operator = '{session['email']}' and Route='{session['route']}' ORDER BY Timestamp Desc LIMIT 1")
-        result= c.fetchall()[0]
-        data = {"latitude": result[0],"longitude": result[1]}
-        print(data,"sdffffffffffffffffffffffffffffffffffffffffffffff")
-        return jsonify(data)
+    conn1 = connpool.get_connection()
+    c = conn1.cursor()
+    c.execute(f"SELECT Latitude, Longitude, Timestamp FROM T_PINGS WHERE Operator = '{session['email']}' and Route='{session['route']}' ORDER BY Timestamp Desc LIMIT 3")
+    result= c.fetchall()
+    conn1.close()
+    timediff = result[0][2]-result[1][2]
+    latest_coord = [result[2][0],result[2][1]]
+    previous_coord = [result[1][0],result[1][1]]
+    init_pos = utm.from_latlon(previous_coord[0],previous_coord[1])
+    fin_pos = utm.from_latlon(latest_coord[0],latest_coord[1])
+    distance = geopy.distance.distance(latest_coord, previous_coord).m
+    speed = (distance/timediff.total_seconds())*18/5
+    data = []
+    for res in result:
+        data.append({"latitude": res[0],"longitude": res[1],"Speed" :speed,"Timediff": timediff.total_seconds()})
+    print(data,"sdffffffffffffffffffffffffffffffffffffffffffffff",timediff)
+    return jsonify(data)
 
 def open_browser():
     webbrowser.open_new("http://localhost:8080/")
 
 if __name__ == '__main__':
     Timer(1, open_browser).start()
-    # socketio.run(app, host="0.0.0.0", port=8080)
+    socketio.run(app, host="0.0.0.0", port=8080)
     # app.run(debug=True)
-    from waitress import serve
-    serve(app, host="0.0.0.0", port=8080) # http://localhost:8080/
+    # from waitress import serve
+    # serve(app, host="0.0.0.0", port=8080) # http://localhost:8080/
 
 
