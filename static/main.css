@@ -46,19 +46,52 @@ body{
 }
 
 .route-segment {
-    background: rgba(255, 255, 255, 0.516);
+    background: #7d7d7d;
     height: 10px;
 }
 
-.route-marker {
+.stop-marker {
     position: absolute;
     height: inherit;
     width: 10px;
     background: #ffffff;
-    border: 2px green;
+    border: 2px solid #7d7d7d;
     z-index: 9;
-    border-radius: 5px;
+    border-radius: 50px;
     margin-left: -5px;
+    scale: 1.5;
+    font-size: 8px;
+    text-align: center;
+    margin-top: -2.5px;
+}
+
+.bus-marker {
+    border-radius: 50px 0px 50px 50px;
+    rotate: 45deg;
+    right: 0;
+    margin: 0 -5px 0 0;
+    background: #E32F6B;
+    border: none;
+    scale: 1.8;
+}
+
+.stop-time {
+    position: absolute;
+    font-size: 70%;
+    margin: 25px 0 0 5px;
+    background: #659A9D;
+    /* border: 1px solid #385f61; */
+    border-radius: 5px;
+    padding: 1px 6px;
+    color: white;
+    rotate: 45deg;
+}
+
+.bus-icon {
+    rotate: -45deg;
+    color: white;
+    font-size: 9px !important;
+    padding: 1px 1px;
 }
 
 .route-bus {

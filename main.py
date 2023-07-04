@@ -1246,18 +1246,55 @@ def get_pings():
     c = conn1.cursor()
     c.execute(f"SELECT Latitude, Longitude, Timestamp FROM T_PINGS WHERE Operator = '{session['email']}' and Route='{session['route']}' ORDER BY Timestamp Desc LIMIT 3")
     result= c.fetchall()
-    conn1.close()
     timediff = result[0][2]-result[1][2]
     latest_coord = [result[2][0],result[2][1]]
     previous_coord = [result[1][0],result[1][1]]
     init_pos = utm.from_latlon(previous_coord[0],previous_coord[1])
     fin_pos = utm.from_latlon(latest_coord[0],latest_coord[1])
     distance = geopy.distance.distance(latest_coord, previous_coord).m
-    speed = (distance/timediff.total_seconds())*18/5
+    speed = round((distance/timediff.total_seconds())*18/5)
     data = []
     for res in result:
         data.append({"latitude": res[0],"longitude": res[1],"Speed" :speed,"Timediff": timediff.total_seconds()})
-    print(data,"sdffffffffffffffffffffffffffffffffffffffffffffff",timediff)
+
+    c.execute(f"SELECT s.id,s.Stop_Name,s.Stop_Lat,s.Stop_Long,s.Stop_rad FROM T_ROUTE_INFO AS r INNER JOIN T_STOPS_INFO AS s ON (s.id = r.Stop_id) WHERE r.Operator = '{session['email']}' and r.Route='{session['route']}' ORDER BY r.Stop_num")
+    stops= c.fetchall()
+    stop_ids = [n[0] for n in stops]
+    stops_list = [n[1] for n in stops]
+    stops_coord = [[n[2],n[3]] for n in stops]
+    stops_rad = [n[4] for n in stops]
+
+    c.execute(f"SELECT * FROM T_SCHEDULING_FILES WHERE Route = '{session['route']}' and Operator = '{session['email']}';")
+    files = c.fetchone()
+
+    stoparrivalDN = pd.read_csv(StringIO(files[4]))
+    stoparrivalUP = pd.read_csv(StringIO(files[5]))
+    arrival_times = stoparrivalUP.iloc[0,:].to_list()
+    arrival_times = [f"{int(n)}".zfill(2) + ":" + f"{round((n-int(n))*60)}".zfill(2) for n in arrival_times]
+    data.append({"arrival_times": tuple(arrival_times)})
+    print(data,"===============================================================================")
+
+
+    bus = 'A1000'
+
+    for i,_ in enumerate(stops_coord):
+        distance = geopy.distance.distance(latest_coord, stops_coord[i]).m
+        if distance < stops_rad[i]:
+            print(stoparrivalUP.iloc[0,i])
+            c.execute(f"CREATE TABLE IF NOT EXISTS T_ACTUAL_ARRIVAL (Operator TEXT,Route TEXT,Bus TEXT, {','.join([f'`Stop_{n+1}` FLOAT' for n in range(30)])});")
+            c.execute(f"SELECT * FROM T_ACTUAL_ARRIVAL WHERE Operator = '{session['email']}' and Route = '{session['route']}' and Bus ='{bus}'")
+            res = c.fetchall()
+            if not res:
+                c.execute(f"INSERT INTO T_ACTUAL_ARRIVAL (Operator,Route,Bus) VALUES ('{session['email']}','{session['route']}','{bus}');")
+            c.execute(f"SELECT `Stop_{i+1}` FROM T_ACTUAL_ARRIVAL WHERE Operator = '{session['email']}' and Route = '{session['route']}' and Bus ='{bus}'")
+            res = c.fetchall()
+            print(res)
+            if res[0][0] == None:
+                c.execute(f"UPDATE T_ACTUAL_ARRIVAL SET `Stop_{i+1}` = '{datetime.now().hour + datetime.now().minute/60}' WHERE Operator = '{session['email']}' and Route = '{session['route']}' and Bus ='{bus}'")
+            print(f"Arrived `Stop_{i+1}`")
+            conn1.commit()
+
+    conn1.close()
     return jsonify(data)
 
 def open_browser():
