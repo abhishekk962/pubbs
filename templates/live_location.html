@@ -3,79 +3,95 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js" integrity="sha512-q/dWJ3kcmjBLU4Qc47E4A9kTB4m3wuTY7vkFJDTZKjTs8jhyGQnaUrxa0Ytd0ssMZhbNua9hE+E7Qv1j+DyZwA==" crossorigin="anonymous"></script>
-{% endblock %}
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js"></script>
+  {% endblock %}
 {% block content %}
 <script>var tab = $( "button:contains('Live')" ).attr('disabled','');</script>
+<div class="content">
   <div class="mapdata">
     <div id="route-bar"></div>
     {% if message %}<div id="messagebox">{{message}}</div>{% endif %}
-    <div id="map"></div>
-    <div class="maptable">
-      <div></div>
-      <div></div>
-      <div></div>
+    <div id="map" class="map2"></div>
+    <div id="st-chart-live"><canvas id="myChart" style="width:100%;max-width:100%;height:100%;max-height:100%"></canvas></div>
+    <div id="drivers">
+      <select id="buses">
+        <option value="Bus1">Bus1</option>
+        <option value="Bus2">Bus2</option>
+        <option value="Bus3">Bus3</option>
+      </select>
     </div>
   </div>
   <p style="position:fixed;opacity:0;" id="username">{{ session['email'] }}</p>
+</div>
 {% endblock %}
 {% block foot %}
   <script src="https://cdn.jsdelivr.net/npm/leaflet@1.7.1/dist/leaflet.js"></script>
   <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
   <script>
     var busMarker = {
-        radius : 10,
-        color  : '#125482',
+        radius : 6,
+        color  : '#8C025D',
         opacity: 1,
         stroke : false,
         fillOpacity: 1,
         weight:5,
-        fillcolor:'#ff0000',
+        fillcolor:'#8C025D',
     }
 
     var stopMarker = {
-        radius : 10,
-        color  : '#ff0000',
+        radius : 6,
+        color  : '#68507A',
         opacity: 1,
         stroke : false,
         fillOpacity: 1,
         weight:5,
-        fillcolor:'#ff0000',
+        fillcolor:'#68507A',
     }
 
-    var map = L.map('map').setView([51.505, -0.09], 13);
+    var map = L.map('map',{ zoomControl: false, zoomSnap: 0.25}).setView([51.505, -0.09], 13);
 
     L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
       subdomains: 'abcd',
-      maxZoom: 20
+      // maxZoom: 20
     }).addTo(map);
     
-    // Search box
-    var searchControl = L.Control.geocoder({
-      defaultMarkGeocode: false,
-      placeholder: 'Search location...',
-      errorMessage: 'No results found.',
-      showResultIcons: true,
-      collapsed: false,
-    }).on('markgeocode', function (e) {
-      map.setView(e.geocode.center, 13);
-      addMarker(e.geocode.center);
-    }).addTo(map);
+    // // Search box
+    // var searchControl = L.Control.geocoder({
+    //   defaultMarkGeocode: false,
+    //   placeholder: 'Search location...',
+    //   errorMessage: 'No results found.',
+    //   showResultIcons: true,
+    //   collapsed: false,
+    // }).on('markgeocode', function (e) {
+    //   map.setView(e.geocode.center, 13);
+    //   addMarker(e.geocode.center);
+    // }).addTo(map);
 
-    // For clearing search results
-    document.querySelector('div.leaflet-top.leaflet-right > div > ul').addEventListener('click', function () {
-        searchControl._clearResults()
-    })
-    document.querySelector('#map').addEventListener('click', function () {
-        searchControl._clearResults()
-    })
+    // // For clearing search results
+    // document.querySelector('div.leaflet-top.leaflet-right > div > ul').addEventListener('click', function () {
+    //     searchControl._clearResults()
+    // })
+    // document.querySelector('#map').addEventListener('click', function () {
+    //     searchControl._clearResults()
+    // })
 
+    // livelocation
+    var email = document.getElementById('username').textContent;
+
+    var socket = io();
+    socket.on('connect', function() {
+        socket.emit('join',{room: email});
+        socket.emit('my event', {data: 'I\'m connected!'});
+    });
+
+    map.on('click', function(e) {
+      var selectedbus = document.getElementById('buses').value
+      socket.emit('location', {latitude: e.latlng.lat, longitude: e.latlng.lng, bus:selectedbus})
+    });
 
     var linesLayer = L.layerGroup().addTo(map);
-    var clickedmarkers = L.layerGroup().addTo(map);
     var markersLayer = L.layerGroup().addTo(map);
-
-    var markerCount = 0;
 
     var markersarray = [];
     var polyline = null;
@@ -90,7 +106,7 @@
         // Loop through the data and add markers
         data.forEach(point => {
           var marker = L.circleMarker([point.lat, point.lng],busMarker).addTo(markersLayer);
-          marker.bindTooltip(point.name, {permanent: true, className: "my-label", offset: [0, 0] });
+          marker.bindTooltip(point.name, {permanent: true, className: "my-label",direction : 'bottom', offset: [0, -12] });
           marker.bindPopup(point.name);
           marker.key = point.id;
           marker._path.style.filter = "hue-rotate(120deg)"
@@ -106,37 +122,25 @@
           if (polyline) {
             linesLayer.removeLayer(polyline);
           }
-          var polyline = L.polyline(latlngs, { color: '#3388ff', weight: 20 , opacity: 0.1}).bringToBack().addTo(linesLayer);
+          var polyline = L.polyline(latlngs, { color: '#000000', weight: 8 , opacity: 0.4}).bringToBack().addTo(linesLayer);
         }
-        map.setView([latitudes[0], longitudes[0]],15);
+        var group = L.featureGroup(markersarray);
+        map.setMaxBounds(group.getBounds());
+        var bounds = L.latLngBounds([Math.max(...latitudes),Math.max(...longitudes)], [Math.min(...latitudes),Math.min(...longitudes)]);
+        map.fitBounds(bounds);
       })
       .catch(error => {
         console.error('Error:', error);
       });
 
-      // livelocation
-      var email = document.getElementById('username').textContent;
-
-      var socket = io();
-      socket.on('connect', function() {
-          socket.emit('join',{room: email});
-          socket.emit('my event', {data: 'I\'m connected!'});
-      });
-
-      map.on('click', function(e) {
-        socket.emit('location', {latitude: e.latlng.lat, longitude: e.latlng.lng})
-      });
-
       var prevstop = markersarray[0];
       var nextstop = markersarray[1];
 
-      var prevCoord = null;
-
       var busLayer = L.layerGroup().addTo(map);
 
-      pollInterval = setInterval(function() { // run function every 2000 ms
+      pollInterval = setInterval(function() { // run function every 4000 ms
           refreshPings();
-        }, 2000);
+        }, 4000);
 
       refreshPings();
 
@@ -145,54 +149,64 @@
             url: '/get-pings',
             dataType: 'json',
             type: 'get',
-            success: function(data) { // check if available
-              if ( data ) { // get and check data value
+            success: function(data) {
+              if ( data ) {
                 console.log(data);
-                processPing(data); // get and print data string
+                for (var key in data){
+                  processPing(data[key],key);
+                }
               }
             },
-            error: function() { // error logging
+            error: function() {
               console.log('Error!');
             }
           });
         };
 
-      function processPing(data) {
-        // Clear bus location
-        busLayer.clearLayers();
+      arrival_times = {}
+      busmarkers = {}
 
+      function processPing(data, key) {
+        // // Clear bus location
+        // busLayer.clearLayers();
+
+        var pointer = L.marker([data[0]['latitude'],data[0]['longitude']]);
         var speed = data[0]['Speed']
-        var arrival_times = data[3]['arrival_times'];
+        arrival_times[key] = data[3]['arrival_times'];
 
-        var currCoord = [data[0]['latitude'],data[0]['longitude']];
-        var pointer = L.marker(currCoord);
-
-        // // Save the perpendicular distance of pointer from each segment
-        // var distances = []
-        // for (let i = 0; i < markersarray.length - 1; i++) {
-        //   var proj = calculateProjection(markersarray[i].getLatLng(),markersarray[i+1].getLatLng(),pointer.getLatLng());
-        //   var projMarker = L.circleMarker([proj.x,proj.y])
-        //   distances.push(distBet(projMarker,pointer));
-        // }
-        
         var distances = []
         markersarray.forEach(marker => {
           distances.push(distBet(marker,pointer));
         })
         
-        // Based on perpendicular distance from segment, determine previous and next stop
+        // Based on distance from stops, determine previous and next stop
         var closestStop = getClosestStop(distances, markersarray);
 
-        // Three sides of trianble joining nearest stop, prev stop and next stop
-        var side1 = distBet(pointer,closestStop)
-        var side2 = distBet(closestStop,markersarray[markersarray.indexOf(closestStop)+1])
-        var side3 = distBet(markersarray[markersarray.indexOf(closestStop)+1],pointer)
+        // // Save the perpendicular distance of pointer from each segment
+        // distances = []
+        // for (let i = markersarray.indexOf(closestStop)-1 ; i <= markersarray.indexOf(closestStop); i++) {
+        //   var proj = calculateProjection(markersarray[i].getLatLng(),markersarray[i+1].getLatLng(),pointer.getLatLng());
+        //   var projMarker = L.circleMarker([proj.x,proj.y])
+        //   distances.push(distBet(projMarker,pointer));
+        // }
 
-        //If triangle is obtuse, previous stop is the one before closest stop
-        if (side3**2 > side2**2+side1**2){
-          prevstop = markersarray[markersarray.indexOf(closestStop) - 1]
+        // // Based on perpendicular distance from segment, determine previous and next stop
+        // closestStop = getClosestStop(distances, markersarray.slice(markersarray.indexOf(closestStop)-1));
+
+        if (markersarray.indexOf(closestStop)+1 != markersarray.length){
+          // Three sides of trianble joining nearest stop, prev stop and next stop
+          var side1 = distBet(pointer,closestStop)
+          var side2 = distBet(closestStop,markersarray[markersarray.indexOf(closestStop)+1])
+          var side3 = distBet(markersarray[markersarray.indexOf(closestStop)+1],pointer)
+
+          //If triangle is obtuse, previous stop is the one before closest stop
+          if (side3**2 > side2**2+side1**2){
+            prevstop = markersarray[markersarray.indexOf(closestStop) - 1]
+          } else {
+            prevstop = closestStop
+          }
         } else {
-          prevstop = closestStop
+          prevstop = markersarray[markersarray.indexOf(closestStop) - 1]
         }
 
         // Check if the next stop is last stop
@@ -202,77 +216,72 @@
 
         nextstop = markersarray[markersarray.indexOf(prevstop)+1]
 
+        // // Show previous and next stops
+        // prevstop._path.style.filter = "grayscale(1)";
+        // prevstop.addTo(map);
+        // nextstop._path.style.filter = "sepia(1)";
+        // nextstop.addTo(map);
         
-        // If the ping location is close to a stop, the previous and next stops will change
-        for (let i = 0; i < markersarray.length; i++) {
-          if (distBet(markersarray[i],pointer) < 0.00005) {
-            prevstop = markersarray[i]
-            nextstop = markersarray[markersarray.indexOf(prevstop)+1]
-            break
-          }
+        if (busLayer.hasLayer(busmarkers[key])) {
+          busLayer.removeLayer(busmarkers[key]);
         }
 
-        // If the pointer's distance from previous stop is more than the segment length, move to next segment
-        if (distBet(prevstop,pointer) > distBet(prevstop,nextstop)) {
-          prevstop = nextstop
-          nextstop = markersarray[markersarray.indexOf(prevstop)+1]
-        }
-
-        // Show previous and next stops
-        prevstop._path.style.filter = "grayscale(1)";
-        prevstop.addTo(map);
-        nextstop._path.style.filter = "sepia(1)";
-        nextstop.addTo(map);
-        
         // Get the location of pointer prjected on final segment
         var proj = calculateProjection(prevstop.getLatLng(),nextstop.getLatLng(),pointer.getLatLng());
         var projMarker = L.circleMarker([proj.x,proj.y],busMarker)
-        
-        // If the pointer's distance from next stop is more than segment length, bus will be at the previous stop
-        if (distBet(projMarker,nextstop) > distBet(prevstop,nextstop)) {
-          projMarker = L.circleMarker([prevstop.getLatLng().lat,prevstop.getLatLng().lng],busMarker)
-        }
 
-        projMarker.addTo(busLayer);
+        busmarkers[key] = projMarker;
 
-        var segments = []
-        var totalDist = 0
-        for (let i = 0; i < markersarray.length-1; i++) {
-          var dist = distBet(markersarray[i],markersarray[i+1])
-          segments.push(dist);
-          totalDist = totalDist + dist
-        };
+        busmarkers[key].addTo(busLayer);
 
-        document.getElementById('route-bar').replaceChildren()
-        
-        n = 1
-        segments.forEach(segment => {
+        // document.getElementById('route-bar').replaceChildren()
+
+        if (document.getElementById('route-bar').childNodes.length == 0) {
+          totalDist = 0
+          var segments = []
+          for (let i = 0; i < markersarray.length-1; i++) {
+            var dist = distBet(markersarray[i],markersarray[i+1])
+            segments.push(dist);
+            totalDist = totalDist + dist
+          };
+          
+          n = 1
+          segments.forEach(segment => {
+            var segElem = document.createElement('div')
+            segElem.classList.add('route-segment')
+            segElem.style.width = segment*100/totalDist + '%'
+            var stopElem = document.createElement('div')
+            stopElem.classList.add('stop-marker')
+            stopElem.innerText = n
+            segElem.appendChild(stopElem)
+            document.getElementById('route-bar').appendChild(segElem)
+            n++
+          });
           var segElem = document.createElement('div')
           segElem.classList.add('route-segment')
-          segElem.style.width = segment*100/totalDist + '%'
+          segElem.style.width = '0%'
           var stopElem = document.createElement('div')
           stopElem.classList.add('stop-marker')
           stopElem.innerText = n
           segElem.appendChild(stopElem)
-          var timeElem = document.createElement('div')
-          timeElem.classList.add('stop-time')
-          timeElem.innerText = arrival_times[n-1]
-          segElem.appendChild(timeElem)
           document.getElementById('route-bar').appendChild(segElem)
-          n++
+        }
+
+        document.querySelectorAll('.bus-marker').forEach(e => {
+          e.addEventListener('click', function(){
+            var key = this.parentNode.id.replace('busElem','')
+            console.log('ascasc',key)
+            var route_segments = document.querySelectorAll('#route-bar .route-segment')
+            document.querySelectorAll('.route-segment .stop-time').forEach(e => e.remove());
+
+            for (let i = 0; i < route_segments.length ; i++) {
+              var timeElem = document.createElement('div')
+              timeElem.classList.add('stop-time')
+              timeElem.innerText = arrival_times[key][i]
+              route_segments[i].appendChild(timeElem)
+            }
+          });
         });
-        var segElem = document.createElement('div')
-        segElem.classList.add('route-segment')
-        segElem.style.width = '0%'
-        var stopElem = document.createElement('div')
-        stopElem.classList.add('stop-marker')
-        stopElem.innerText = n
-        segElem.appendChild(stopElem)
-        var timeElem = document.createElement('div')
-        timeElem.classList.add('stop-time')
-        timeElem.innerText = arrival_times[n-1]
-        segElem.appendChild(timeElem)
-        document.getElementById('route-bar').appendChild(segElem)
 
         var covDist = 0;
         for (let i = 0; i <= markersarray.indexOf(prevstop)-1 ; i++) {
@@ -280,7 +289,13 @@
         };
         covDist = covDist + distBet(prevstop,projMarker);
 
+        var e = document.getElementById("busElem" + key)
+        if(e != null){
+          e.remove()
+        } 
+
         var busElem = document.createElement('div')
+        busElem.id = "busElem" + key
         busElem.classList.add('route-bus')
         busElem.style.width = covDist*100/totalDist + '%'
         var busLocElem = document.createElement('div')
@@ -297,7 +312,13 @@
         busElem.appendChild(speedElem)
         document.getElementById('route-bar').appendChild(busElem)
 
-        prevCoord = projMarker;
+        var d = new Date();
+        time_decimal = d.getHours() + d.getMinutes()/60 + d.getSeconds()/3600
+
+        stValues.push({x:time_decimal,y:covDist*100/totalDist})
+        chart.options.scales.xAxes[0].ticks.min = time_decimal-1
+        chart.options.scales.xAxes[0].ticks.max = time_decimal+1
+        chart.update('none');
       };
 
       function distBet(marker1,marker2) {
@@ -339,5 +360,49 @@
         };
         return P;
       }
+
+      function calculateAverage(array) {
+          var total = 0;
+          var count = 0;
+
+          array.forEach(function(item, index) {
+              total += item;
+              count++;
+          });
+
+          return total / count;
+      }
+      
+      stValues = [];
+
+      chart = new Chart("myChart", {
+        type: "scatter",
+        data: {
+          datasets: [{
+            pointRadius: 2,
+            pointBackgroundColor: "rgba(0,0,255,1)",
+            data: stValues
+          }]
+        },
+        options: {
+          legend: {display: false},
+          scales: {
+            xAxes: [{ticks: {min: 0, max: 24},scaleLabel: {display: true,labelString: 'Time'}}],
+            yAxes: [{ticks: {min: 0, max:100},scaleLabel: {display: true,labelString: '% Distance Covered'}}],
+          },
+          title: {
+            display: true,
+            text: 'Live Space-Time Chart',
+            color: 'navy',
+            position: 'top',
+            align: 'center',
+            font: {
+                weight: 'bold'
+            },
+            padding: 8,
+            fullSize: true,
+          }
+        }
+      });
   </script>
 {% endblock %}

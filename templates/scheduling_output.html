@@ -1,0 +1,55 @@
+{% extends "dashboard.html" %}
+{% block content %}
+<div class="content"> 
+{% if message %}<div id="messagebox">{{message}}</div>{% endif %}
+  <select id="output_csvs" style="background: white;">
+    <option value="" selected="selected" hidden="hidden">Select table</option>
+    <option value="Chart">Chart</option>
+    {% for file in csvfiles %}
+    <option value="{{file[0]}}">{{file[0]}}</option>
+    {% endfor %}
+  </select>
+  <img id="Chart" style="display: none;position: absolute; width: auto; height: auto; max-width: 100%; max-height: 100%;" src="data:image/jpeg;base64,{{ img_data }}">
+  {%for file in csvfiles%}
+  <form class='tableform' style="display: none;" id="{{file[0]}}">
+    <div class="scroll-table">
+      <table>
+        <thead>
+          <tr>
+            {%for header in file[1]%}
+            <th>{{header}}</th>
+            {%endfor%}
+          </tr>
+        </thead>
+          {% for row in file[2:] %}
+          <tr>
+            {%for cell in row %}
+              <!-- <td><input value="{{cell}}"></td> -->
+              <td>{{cell}}</td>
+            {% endfor %}
+          </tr>
+          {% endfor %}
+      </table>
+    </div>
+  </form>
+  {% endfor %}
+</div>
+{% endblock %}
+
+{% block foot %}
+<script>
+  document.getElementById('output_csvs').addEventListener('change', function(){
+    document.querySelectorAll('.tableform').forEach(e => e.style.display = 'none');
+    var csv = this.value
+    document.getElementById(csv).style.display = 'block'
+    // this.style.display = 'none'
+    // this.style.position = 'absolute'
+    // this.style.margin = 'auto auto'
+    // this.style.top = '0'
+    // this.style.left = '0'
+    // this.style.right = '0'
+    // this.style.bottom = '0'
+  })
+</script>
+{% endblock %}
+

@@ -35,14 +35,46 @@ body{
     position: fixed;
     background: #7d7d7d;
     height: 10px;
-    width: 50%;
+    width: 90%;
     top: 0;
-    bottom: 0;
+    bottom: 80%;
     left: 0;
     right: 0;
     margin: auto auto;
     display: flex;
     flex-direction: row;
+    color: black;
+}
+
+.map2 {
+    height: 75% !important;
+    width: 40% !important;
+    position: fixed;
+    bottom: 0px;
+    margin: 2%;
+    border-radius: 10px;
+}
+
+#st-chart-live {
+    height: 75%;
+    width: 40%;
+    position: fixed;
+    bottom: 0px;
+    left: 42%;
+    margin: 2%;
+    border-radius: 10px;
+    background-color: white;
+}
+
+#drivers {
+    height: 75%;
+    width: 12%;
+    position: fixed;
+    bottom: 0px;
+    right: 0%;
+    margin: 2%;
+    border-radius: 10px;
+    background-color: white;
 }
 
 .route-segment {
@@ -557,9 +589,20 @@ input[type="checkbox"] {
 }
 
 .my-label {
-    background: #ffffffab;
-    /* font-weight: bold; */
-    border: none;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    /* font-weight: bold !important; */
+    text-shadow:
+    -1px -1px 0 #575757,
+    1px -1px 0 #575757,
+    -1px 1px 0 #575757,
+    1px 1px 0 #575757 !important;
+    color: white !important;
+}
+
+.leaflet-tooltip-top:before, .leaflet-tooltip-bottom:before, .leaflet-tooltip-left:before, .leaflet-tooltip-right:before {
+    border: none !important;
 }
 
 .icon-button:active{
@@ -658,4 +701,16 @@ thead *{
 
 .show-acc {
     display: flex;
+}
+
+#buses {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 55;
+    margin: auto auto;
+    width: 100px;
+    height: 50px;
 }

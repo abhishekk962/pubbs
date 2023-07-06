@@ -6,6 +6,7 @@
 # from flask_session import Session
 import yaml
 from io import BytesIO, StringIO
+import base64
 import pymysqlpool
 import pymysql
 import secrets
@@ -97,11 +98,14 @@ def get_data():
         data.append({"id":n[0],"name": n[1], "lat": n[2], "lng": n[3]})
     return jsonify(data)
 
-@app.route('/route-data')
-def get_route_data():
+@app.route('/route-data', defaults={'route': None})
+@app.route('/route-data/<route>')
+def get_route_data(route):
+    if route == None:
+        route = session['route']
     conn1 = connpool.get_connection()
     c = conn1.cursor()
-    c.execute(f"SELECT s.id,s.Stop_Name,s.Stop_Lat,s.Stop_Long FROM T_ROUTE_INFO AS r INNER JOIN T_STOPS_INFO AS s ON (s.id = r.Stop_id) WHERE r.Operator = '{session['email']}' and r.Route='{session['route']}' ORDER BY r.Stop_num")
+    c.execute(f"SELECT s.id,s.Stop_Name,s.Stop_Lat,s.Stop_Long FROM T_ROUTE_INFO AS r INNER JOIN T_STOPS_INFO AS s ON (s.id = r.Stop_id) WHERE r.Operator = '{session['email']}' and r.Route='{route}' ORDER BY r.Stop_num")
     stops_list= c.fetchall()
     data = []
     for n in stops_list:
@@ -1040,8 +1044,8 @@ def frequency():
 
 @app.route('/scheduling-run/<method>', methods=['GET', 'POST'])
 def scheduling_run(method):
+    conn = connpool.get_connection()
     if method == "Choose":
-        conn = connpool.get_connection()
         c = conn.cursor()
         c.execute("CREATE TABLE IF NOT EXISTS T_ONLY_ROUTES (Operator TEXT,Bus_route_name TEXT,Terminal_1_origin TEXT,Terminal_2_destination TEXT,Bus_service_timings_From TEXT,Bus_service_timings_To TEXT,Number_of_service_periods TEXT)")
         c.execute(f"SELECT DISTINCT Bus_route_name FROM T_ONLY_ROUTES WHERE Operator = '{session['email']}'")
@@ -1148,7 +1152,13 @@ def scheduling_run(method):
                         min_data = laydf1,departure_DN,departure_UP,fleet, depot_tt, crew, timetable, busreq_at_Terminal1, busreq_at_Terminal2, poolsize_at_Terminal1, poolsize_at_Terminal2, veh_sch1, veh_sch2, veh_schedule, bus_details,  reuse_buses, tot_ideal_time,vehicleschedule
             laydf1,departure_DN,departure_UP,fleet, depot_tt, crew, timetable, busreq_at_Terminal1, busreq_at_Terminal2, poolsize_at_Terminal1, poolsize_at_Terminal2, veh_sch1, veh_sch2, veh_schedule, bus_details,  reuse_buses, tot_ideal_time,vehicleschedule = min_data
 
-        
+        veh_schedule.title = f'vehicle_schedule_{method}'
+        crew.title = f'crew_scheduling_{method}'
+        bus_details.title = f'Bus_utility_details_{method}'
+        reuse_buses.title = f'Reuse_{method}'
+        fleet.title = f'fleet_shift_details_{method}'
+        files = [veh_schedule,crew,bus_details,reuse_buses,fleet]
+
         sche_out = BytesIO()
         with zipfile.ZipFile(sche_out, 'w') as sche_zip:
             sche_zip.writestr(f'vehicle_schedule_{method}.csv',veh_schedule.to_csv())
@@ -1157,6 +1167,9 @@ def scheduling_run(method):
             sche_zip.writestr(f'Reuse_{method}.csv', reuse_buses.to_csv(index=False))
             sche_zip.writestr(f'fleet_shift_details_{method}.csv', fleet.to_csv(index=False))
             if method == 'Multiline':
+                r1_timetable.title = f'Time_Table_1_{method}'
+                r2_timetable.title = f'Time_Table_2_{method}'
+                files += [r1_timetable,r2_timetable]
                 sche_zip.writestr(f'Time_Table_1_{method}.csv', r1_timetable.to_csv(index=False))
                 sche_zip.writestr(f'Time_Table_2_{method}.csv', r2_timetable.to_csv(index=False))
                 for i in range(0, len(b_lst.index)):
@@ -1164,21 +1177,33 @@ def scheduling_run(method):
                     df3.reset_index(drop=True, inplace=True)
                     name = b_lst.iloc[i, 0]
                     sche_zip.writestr(f'vehicleschedule/{name}.csv', df3.to_csv())
+                    df3.title = name
+                    files.append(df3)
             else:
+                timetable.title = f'Time_Table_{method}'
+                depot_tt.title = f'depot_shift_details_{method}'
+                files += [timetable,depot_tt]
                 sche_zip.writestr(f'Time_Table_{method}.csv', timetable.to_csv(index=False))
                 sche_zip.writestr(f'depot_shift_details_{method}.csv', depot_tt.to_csv(index=False))
                 for n in vehicleschedule:
                     sche_zip.writestr(f'vehicleschedule/{n.title}.csv', n.to_csv())
-            # if method != 'Random':
-            #     buf = BytesIO()
-            #     fig.savefig(buf,dpi=300)
-            #     sche_zip.writestr(f'vehicle_schedule_visual_{method}.pdf',buf.getvalue())
-            # elif method == 'Random':
-            #     from Timetable_Random import vehiclesched
-            #     fig=vehiclesched(departuretimeDN,departuretimeUP,timetable,depot_tt,laydf1)
-            #     buf = BytesIO()
-            #     fig.savefig(buf,dpi=300)
-            #     sche_zip.writestr(f'vehicle_schedule_visual_{method}.pdf',buf.getvalue())
+                    files.append(n)
+            if method != 'Random':
+                buf = BytesIO()
+                print(type(fig))
+                print(fig)
+                fig.savefig(buf,format='jpg',dpi=300)
+                encoded_img_data = base64.b64encode(buf.getvalue())
+                sche_zip.writestr(f'vehicle_schedule_visual_{method}.pdf',buf.getvalue())
+            elif method == 'Random':
+                print(type(fig))
+                print(fig)
+                from Timetable_Random import vehiclesched
+                fig=vehiclesched(departuretimeDN,departuretimeUP,timetable,depot_tt,laydf1)
+                buf = BytesIO()
+                fig.savefig(buf,format='jpg',dpi=300)
+                encoded_img_data = base64.b64encode(buf.getvalue())
+                sche_zip.writestr(f'vehicle_schedule_visual_{method}.pdf',buf.getvalue())
         if method != 'Multiline':
             print(timetable.to_string())
             print(f'\nNo. of Bus required at Terminal1 Depot :', busreq_at_Terminal1,
@@ -1198,9 +1223,13 @@ def scheduling_run(method):
             tot_ideal_time = b_lst['Ideal time'].sum() - r_bus['Idl_Duration'].sum()
             print('fleet size:', busreq_at_r1t1 + busreq_at_r1t2 + busreq_at_r2t1 + busreq_at_r2t2)
             print('\n Total ideal time in hours:', tot_ideal_time.round(0))
+        
+        # sche_out.seek(0)
+        # return send_file(sche_out, download_name=f'{method} Output.zip', as_attachment=True)
+    
+        csvfiles = [list([n.title]) + list([tuple(n.columns)]) + list(n.itertuples(index=False, name=None)) for n in files]
+        return render_template('scheduling_output.html', csvfiles=csvfiles, img_data=encoded_img_data.decode('utf-8'))
 
-        sche_out.seek(0)
-        return send_file(sche_out, download_name=f'{method} Output.zip', as_attachment=True)
 
 @app.route('/livelocation', methods=['GET', 'POST'])
 def livelocation():
@@ -1230,8 +1259,8 @@ def on_join(data):
 def show_location(data):
     conn = connpool.get_connection()
     c = conn.cursor()
-    c.execute(f"CREATE TABLE IF NOT EXISTS T_PINGS (Operator TEXT, Route TEXT, Latitude FLOAT, Longitude FLOAT, Timestamp TIMESTAMP)")
-    c.execute(f"INSERT INTO T_PINGS (Operator, Route, Latitude, Longitude) VALUES ('{session['email']}','{session['route']}','{data['latitude']}','{data['longitude']}')")
+    c.execute(f"CREATE TABLE IF NOT EXISTS T_PINGS (Operator TEXT, Route TEXT, Bus TEXT, Latitude FLOAT, Longitude FLOAT, Timestamp TIMESTAMP)")
+    c.execute(f"INSERT INTO T_PINGS (Operator, Route, Bus, Latitude, Longitude) VALUES ('{session['email']}','{session['route']}','{data['bus']}','{data['latitude']}','{data['longitude']}')")
     conn.commit()
     c.execute(f"SELECT * FROM T_PINGS;")
     result = c.fetchall()
@@ -1240,62 +1269,67 @@ def show_location(data):
     emit('receivedlocation',data,room=room)
     print(str(data))
 
-@app.route('/get-pings')
-def get_pings():
+@app.route('/get-pings', defaults={'route': None})
+@app.route('/get-pings/<route>')
+def get_pings(route):
+    if route == None:
+        route = session['route']
     conn1 = connpool.get_connection()
     c = conn1.cursor()
-    c.execute(f"SELECT Latitude, Longitude, Timestamp FROM T_PINGS WHERE Operator = '{session['email']}' and Route='{session['route']}' ORDER BY Timestamp Desc LIMIT 3")
+    c.execute(f"SELECT DISTINCT Bus FROM T_PINGS WHERE Operator = '{session['email']}' and Route='{route}' ORDER BY Timestamp > now() - interval 1 hour")
     result= c.fetchall()
-    timediff = result[0][2]-result[1][2]
-    latest_coord = [result[2][0],result[2][1]]
-    previous_coord = [result[1][0],result[1][1]]
-    init_pos = utm.from_latlon(previous_coord[0],previous_coord[1])
-    fin_pos = utm.from_latlon(latest_coord[0],latest_coord[1])
-    distance = geopy.distance.distance(latest_coord, previous_coord).m
-    speed = round((distance/timediff.total_seconds())*18/5)
-    data = []
-    for res in result:
-        data.append({"latitude": res[0],"longitude": res[1],"Speed" :speed,"Timediff": timediff.total_seconds()})
+    buses = [n[0] for n in result]
+    busdata = {}
+    for i_bus,bus in enumerate(buses):
+        c.execute(f"SELECT Latitude, Longitude, Timestamp FROM T_PINGS WHERE Operator = '{session['email']}' and Route='{route}' and Bus = '{bus}' ORDER BY Timestamp Desc LIMIT 3")
+        result= c.fetchall()
+        timediff = result[0][2]-result[1][2]
+        latest_coord = [result[2][0],result[2][1]]
+        previous_coord = [result[1][0],result[1][1]]
+        init_pos = utm.from_latlon(previous_coord[0],previous_coord[1])
+        fin_pos = utm.from_latlon(latest_coord[0],latest_coord[1])
+        distance = geopy.distance.distance(latest_coord, previous_coord).m
+        speed = round((distance/timediff.total_seconds())*18/5)
+        data = []
+        for res in result:
+            data.append({"latitude": res[0],"longitude": res[1],"Speed" :speed,"Timediff": timediff.total_seconds()})
 
-    c.execute(f"SELECT s.id,s.Stop_Name,s.Stop_Lat,s.Stop_Long,s.Stop_rad FROM T_ROUTE_INFO AS r INNER JOIN T_STOPS_INFO AS s ON (s.id = r.Stop_id) WHERE r.Operator = '{session['email']}' and r.Route='{session['route']}' ORDER BY r.Stop_num")
-    stops= c.fetchall()
-    stop_ids = [n[0] for n in stops]
-    stops_list = [n[1] for n in stops]
-    stops_coord = [[n[2],n[3]] for n in stops]
-    stops_rad = [n[4] for n in stops]
+        c.execute(f"SELECT s.id,s.Stop_Name,s.Stop_Lat,s.Stop_Long,s.Stop_rad FROM T_ROUTE_INFO AS r INNER JOIN T_STOPS_INFO AS s ON (s.id = r.Stop_id) WHERE r.Operator = '{session['email']}' and r.Route='{session['route']}' ORDER BY r.Stop_num")
+        stops= c.fetchall()
+        stop_ids = [n[0] for n in stops]
+        stops_list = [n[1] for n in stops]
+        stops_coord = [[n[2],n[3]] for n in stops]
+        stops_rad = [n[4] for n in stops]
 
-    c.execute(f"SELECT * FROM T_SCHEDULING_FILES WHERE Route = '{session['route']}' and Operator = '{session['email']}';")
-    files = c.fetchone()
+        c.execute(f"SELECT * FROM T_SCHEDULING_FILES WHERE Route = '{session['route']}' and Operator = '{session['email']}';")
+        files = c.fetchone()
 
-    stoparrivalDN = pd.read_csv(StringIO(files[4]))
-    stoparrivalUP = pd.read_csv(StringIO(files[5]))
-    arrival_times = stoparrivalUP.iloc[0,:].to_list()
-    arrival_times = [f"{int(n)}".zfill(2) + ":" + f"{round((n-int(n))*60)}".zfill(2) for n in arrival_times]
-    data.append({"arrival_times": tuple(arrival_times)})
-    print(data,"===============================================================================")
+        stoparrivalDN = pd.read_csv(StringIO(files[4]))
+        stoparrivalUP = pd.read_csv(StringIO(files[5]))
+        arrival_times = stoparrivalUP.iloc[i_bus,:].to_list()
+        arrival_times = [f"{int(n)}".zfill(2) + ":" + f"{round((n-int(n))*60)}".zfill(2) for n in arrival_times]
+        data.append({"arrival_times": tuple(arrival_times)})
+        # print(data,"===============================================================================")
 
-
-    bus = 'A1000'
-
-    for i,_ in enumerate(stops_coord):
-        distance = geopy.distance.distance(latest_coord, stops_coord[i]).m
-        if distance < stops_rad[i]:
-            print(stoparrivalUP.iloc[0,i])
-            c.execute(f"CREATE TABLE IF NOT EXISTS T_ACTUAL_ARRIVAL (Operator TEXT,Route TEXT,Bus TEXT, {','.join([f'`Stop_{n+1}` FLOAT' for n in range(30)])});")
-            c.execute(f"SELECT * FROM T_ACTUAL_ARRIVAL WHERE Operator = '{session['email']}' and Route = '{session['route']}' and Bus ='{bus}'")
-            res = c.fetchall()
-            if not res:
-                c.execute(f"INSERT INTO T_ACTUAL_ARRIVAL (Operator,Route,Bus) VALUES ('{session['email']}','{session['route']}','{bus}');")
-            c.execute(f"SELECT `Stop_{i+1}` FROM T_ACTUAL_ARRIVAL WHERE Operator = '{session['email']}' and Route = '{session['route']}' and Bus ='{bus}'")
-            res = c.fetchall()
-            print(res)
-            if res[0][0] == None:
-                c.execute(f"UPDATE T_ACTUAL_ARRIVAL SET `Stop_{i+1}` = '{datetime.now().hour + datetime.now().minute/60}' WHERE Operator = '{session['email']}' and Route = '{session['route']}' and Bus ='{bus}'")
-            print(f"Arrived `Stop_{i+1}`")
-            conn1.commit()
-
+        for i,_ in enumerate(stops_coord):
+            distance = geopy.distance.distance(latest_coord, stops_coord[i]).m
+            if distance < stops_rad[i]:
+                print(stoparrivalUP.iloc[i_bus,i])
+                c.execute(f"CREATE TABLE IF NOT EXISTS T_ACTUAL_ARRIVAL (Operator TEXT,Route TEXT,Bus TEXT, {','.join([f'`Stop_{n+1}` FLOAT' for n in range(30)])});")
+                c.execute(f"SELECT * FROM T_ACTUAL_ARRIVAL WHERE Operator = '{session['email']}' and Route = '{session['route']}' and Bus ='{bus}'")
+                res = c.fetchall()
+                if not res:
+                    c.execute(f"INSERT INTO T_ACTUAL_ARRIVAL (Operator,Route,Bus) VALUES ('{session['email']}','{session['route']}','{bus}');")
+                c.execute(f"SELECT `Stop_{i+1}` FROM T_ACTUAL_ARRIVAL WHERE Operator = '{session['email']}' and Route = '{session['route']}' and Bus ='{bus}'")
+                res = c.fetchall()
+                print(res)
+                if res[0][0] == None:
+                    c.execute(f"UPDATE T_ACTUAL_ARRIVAL SET `Stop_{i+1}` = '{datetime.now().hour + datetime.now().minute/60}' WHERE Operator = '{session['email']}' and Route = '{session['route']}' and Bus ='{bus}'")
+                print(f"Arrived `Stop_{i+1}`")
+                conn1.commit()
+        busdata[f'{bus}'] = data
     conn1.close()
-    return jsonify(data)
+    return jsonify(busdata)
 
 def open_browser():
     webbrowser.open_new("http://localhost:8080/")
