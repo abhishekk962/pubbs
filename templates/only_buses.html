@@ -8,7 +8,7 @@
 {% if buses != 0 %}
 {% if message %}<div id="messagebox">{{message}}</div>{% endif %}
   <form action="{{url_for('buses')}}" method="post">
-    <b>Enter Bus Names</b><br>
+    <b>Enter Bus Names for <input type="text" placeholder="Depot" id="depot" name="depot" {% if depot %} value="{{depot}}" {% endif %}></b><br>
     <div class="buses">
       {% for n in range(buses) %}
         {% if busnames %}

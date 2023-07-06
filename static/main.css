@@ -714,3 +714,13 @@ thead *{
     width: 100px;
     height: 50px;
 }
+
+.pdf {
+    border-radius: 10px;
+    border: none;
+    box-shadow: 0 0 8px 4px rgb(0 0 0 / 22%);
+}
+
+.tableform.files {
+    flex-direction: row;
+}

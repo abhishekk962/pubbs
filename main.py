@@ -903,18 +903,21 @@ def buses():
         message = "Enter Constraints Information First"
         return render_template('only_buses.html',buses=0,message=message)
     if request.method == "POST":
-        buslist = ','.join(request.form.values())
+        depot = request.form['depot']
+        buslist = list(request.form.values())[1:]
         conn = connpool.get_connection()
         c = conn.cursor()
-        c.execute(f"CREATE TABLE IF NOT EXISTS T_BUSES (Operator TEXT, Buses TEXT);")
-        c.execute(f"DELETE FROM T_BUSES WHERE Operator = '{session['email']}'")
-        c.execute(f"INSERT INTO T_BUSES (Operator, Buses) VALUES ('{session['email']}','{buslist}')")
+        c.execute(f"DROP TABLE IF EXISTS T_BUSES")
+        c.execute(f"CREATE TABLE IF NOT EXISTS T_BUSES (Operator TEXT, Depot TEXT, Bus TEXT, Driver TEXT, Conductor TEXT);")
+        c.execute(f"DELETE FROM T_BUSES WHERE Operator = '{session['email']}' and Depot='{depot}'")
+        for bus in buslist:
+            c.execute(f"INSERT INTO T_BUSES (Operator, Depot, Bus) VALUES ('{session['email']}','{depot}','{bus}')")
         c.execute(f"UPDATE T_STATUS SET `Bus Details` = '1' WHERE Route = '{session['route']}' and Operator = '{session['email']}';")
         conn.commit()
-        c.execute(f"SELECT BUSES FROM T_BUSES WHERE Operator = '{session['email']}'")
-        busnames = c.fetchone()
-        busnames = busnames[0].split(',')
-        return render_template('only_buses.html',buses=buses,message="Saved",busnames=busnames)
+        c.execute(f"SELECT Bus FROM T_BUSES WHERE Operator = '{session['email']}' and Depot='{depot}'")
+        busnames = c.fetchall()
+        busnames = [n[0] for n in busnames]
+        return render_template('only_buses.html',buses=buses,message="Saved",busnames=busnames,depot=depot)
     return render_template('only_buses.html',buses=buses)
 
 @app.route('/frequency', methods=['GET', 'POST'])
@@ -1152,6 +1155,7 @@ def scheduling_run(method):
                         min_data = laydf1,departure_DN,departure_UP,fleet, depot_tt, crew, timetable, busreq_at_Terminal1, busreq_at_Terminal2, poolsize_at_Terminal1, poolsize_at_Terminal2, veh_sch1, veh_sch2, veh_schedule, bus_details,  reuse_buses, tot_ideal_time,vehicleschedule
             laydf1,departure_DN,departure_UP,fleet, depot_tt, crew, timetable, busreq_at_Terminal1, busreq_at_Terminal2, poolsize_at_Terminal1, poolsize_at_Terminal2, veh_sch1, veh_sch2, veh_schedule, bus_details,  reuse_buses, tot_ideal_time,vehicleschedule = min_data
 
+        veh_schedule.reset_index(inplace=True)
         veh_schedule.title = f'vehicle_schedule_{method}'
         crew.title = f'crew_scheduling_{method}'
         bus_details.title = f'Bus_utility_details_{method}'
@@ -1161,7 +1165,7 @@ def scheduling_run(method):
 
         sche_out = BytesIO()
         with zipfile.ZipFile(sche_out, 'w') as sche_zip:
-            sche_zip.writestr(f'vehicle_schedule_{method}.csv',veh_schedule.to_csv())
+            sche_zip.writestr(f'vehicle_schedule_{method}.csv',veh_schedule.to_csv(index=False))
             sche_zip.writestr(f'crew_scheduling_{method}.csv', crew.to_csv(index=False))
             sche_zip.writestr(f'Bus_utility_details_{method}.csv', bus_details.to_csv(index=False))
             sche_zip.writestr(f'Reuse_{method}.csv', reuse_buses.to_csv(index=False))
@@ -1192,7 +1196,7 @@ def scheduling_run(method):
                 buf = BytesIO()
                 print(type(fig))
                 print(fig)
-                fig.savefig(buf,format='jpg',dpi=300)
+                fig.savefig(buf,format='pdf',dpi=300)
                 encoded_img_data = base64.b64encode(buf.getvalue())
                 sche_zip.writestr(f'vehicle_schedule_visual_{method}.pdf',buf.getvalue())
             elif method == 'Random':
@@ -1201,7 +1205,7 @@ def scheduling_run(method):
                 from Timetable_Random import vehiclesched
                 fig=vehiclesched(departuretimeDN,departuretimeUP,timetable,depot_tt,laydf1)
                 buf = BytesIO()
-                fig.savefig(buf,format='jpg',dpi=300)
+                fig.savefig(buf,format='pdf',dpi=300)
                 encoded_img_data = base64.b64encode(buf.getvalue())
                 sche_zip.writestr(f'vehicle_schedule_visual_{method}.pdf',buf.getvalue())
         if method != 'Multiline':
@@ -1226,9 +1230,18 @@ def scheduling_run(method):
         
         # sche_out.seek(0)
         # return send_file(sche_out, download_name=f'{method} Output.zip', as_attachment=True)
+
+        c.execute(f"SELECT Depot, Bus FROM T_BUSES WHERE Operator = '{session['email']}'")
+        data = c.fetchall()
+        depots = list(set([n[0] for n in data]))
+        buses = []
+        for depot in depots:
+            buses.append([n[1] for n in data if n[0] == depot])
+        print(data, buses, depots)
     
         csvfiles = [list([n.title]) + list([tuple(n.columns)]) + list(n.itertuples(index=False, name=None)) for n in files]
-        return render_template('scheduling_output.html', csvfiles=csvfiles, img_data=encoded_img_data.decode('utf-8'))
+        busnames=bus_details['bus_name'].to_list()
+        return render_template('scheduling_output.html', csvfiles=csvfiles, img_data=encoded_img_data.decode('utf-8'), busnames=busnames, buses=buses, depots=depots)
 
 
 @app.route('/livelocation', methods=['GET', 'POST'])
