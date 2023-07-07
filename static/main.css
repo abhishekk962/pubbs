@@ -739,3 +739,8 @@ thead *{
     -ms-user-select: none; /* IE 10 and IE 11 */
     user-select: none; /* Standard syntax */
 }
+
+.tableform.files td,.tableform.files th {
+    text-align: center;
+    border-left: 1px solid #00000021;
+}

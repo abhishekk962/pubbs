@@ -633,7 +633,6 @@ def table_filled():
     stop_ids = [n[0] for n in stops]
     stops_list = [n[1] for n in stops]
     # Upload to Database
-    conn = connpool.get_connection()
     c = conn.cursor()
     db_table = request.form['selected_table']
     
@@ -720,7 +719,7 @@ def table_filled():
                 fare += 0.5
         c.execute(f"UPDATE T_STATUS SET `Fare` = '{fare}' WHERE Route = '{session['route']}' and Operator = '{session['email']}';")
         conn.commit()
-    
+    conn.close()
     return render_template('only_table.html', message="Data was Saved", rowheader=rowheader, stop_ids=stop_ids, stops_list=stops_list, rows=rows, selected_table=table,periods=list(range(session['p_start'],session['p_end'])))
     
 
@@ -1394,6 +1393,10 @@ def get_pings(route):
         busdata[f'{bus}'] = data
     conn1.close()
     return jsonify(busdata)
+
+@app.route('/driver')
+def driver():
+    return render_template('driver.html')
 
 def open_browser():
     webbrowser.open_new("http://localhost:8080/")

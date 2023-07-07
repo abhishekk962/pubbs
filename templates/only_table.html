@@ -4,26 +4,29 @@
 <div class="content"> 
 {% if message %}<div id="messagebox">{{message}}</div>{% endif %}
 {% if rows and stops_list %}
-  <form action="{{url_for('table_selected')}}" method="POST" style="margin: 10px;padding: 0;">
+  <form id="tableselector" action="{{url_for('table_selected')}}" method="POST" style="margin: 10px;padding: 0;">
     <div style="display: flex; flex-direction: row;">
       <select id="db_table" name="db_table" onchange="this.form.submit();">
         <option value="" selected="selected" hidden="hidden">Select table</option>
-        <option>T_Passenger_Arrival_UP</option>
-        <option>T_Passenger_Arrival_DN</option>
-        <option>T_Fare_UP</option>
-        <option>T_Fare_DN</option>
-        <option>T_TraveTimeUP_ANN</option>
-        <option>T_TravelTimeDN_ANN</option>
+        <option value="T_Passenger_Arrival_UP">T_Passenger_Arrival_UP</option>
+        <option value="T_Passenger_Arrival_DN">T_Passenger_Arrival_DN</option>
+        <option value="T_Fare_UP">T_Fare_UP</option>
+        <option value="T_Fare_DN">T_Fare_DN</option>
+        <option value="T_TraveTimeUP_ANN">T_TraveTimeUP_ANN</option>
+        <option value="T_TravelTimeDN_ANN">T_TravelTimeDN_ANN</option>
         {% for n in periods %}
-        <option>OD_UP_{{n}}</option>
-        <option>OD_DN_{{n}}</option>
+        <option value="OD_UP_{{n}}">OD_UP_{{n}}</option>
+        <option value="OD_DN_{{n}}">OD_DN_{{n}}</option>
         {% endfor %}
       </select>
     </div>
   </form>
   {% if selected_table %}
   <form class='tableform' action="{{url_for('table_filled')}}" method="POST" enctype="multipart/form-data">
-    <b>{{selected_table}}</b><br>
+    <b>
+      <i class="fa-solid fa-chevron-left" id="previoustable" style="margin: 0 50px; padding: 5px;"></i>{{selected_table}}<i class="fa-solid fa-chevron-right" id="nexttable" style="margin: 0 50px; padding: 5px;"></i>
+    </b>
+    <br>
     <input id="selected_table" name="selected_table" value="{{selected_table}}" hidden>
     <div class="scroll-table">
       <table>
@@ -83,6 +86,24 @@
 
 {% block foot %}
 <script>
+document.getElementById('previoustable').addEventListener('click', function(){
+  var currtable = document.getElementById('previoustable').nextSibling.textContent
+  var tables = []
+  document.querySelectorAll('#db_table > option').forEach(e => tables.push(e.innerText))
+  var previoustable = tables[tables.indexOf(currtable)-1]
+  document.getElementById('db_table').value = previoustable
+  document.getElementById('tableselector').submit()
+});
+
+document.getElementById('nexttable').addEventListener('click', function(){
+  var currtable = document.getElementById('nexttable').nextSibling.textContent
+  var tables = []
+  document.querySelectorAll('#db_table > option').forEach(e => tables.push(e.innerText))
+  var nexttable = tables[tables.indexOf(currtable)+1]
+  document.getElementById('db_table').value = nexttable
+  document.getElementById('tableselector').submit()
+});
+
 // Get all the buttons in the table
 const buttons = document.querySelectorAll('button');
 
