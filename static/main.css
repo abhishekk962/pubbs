@@ -724,3 +724,18 @@ thead *{
 .tableform.files {
     flex-direction: row;
 }
+
+*::-webkit-scrollbar {
+    display: none;    /* Hide scrollbar for Chrome, Safari and Opera */
+}
+
+* {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+}
+
+*{
+    -webkit-user-select: none; /* Safari */
+    -ms-user-select: none; /* IE 10 and IE 11 */
+    user-select: none; /* Standard syntax */
+}

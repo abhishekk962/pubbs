@@ -1,41 +1,54 @@
 {% extends "dashboard.html" %}
 {% block content %}
-<div class="content"> 
+<div class="content" style="flex-direction: row;"> 
 {% if message %}<div id="messagebox">{{message}}</div>{% endif %}
-  <select id="output_csvs" style="background: white;">
+  <!-- CSV FILE SELECTOR -->
+  <select id="output_csvs" style="background: white; position: absolute; top: 1%;">
     <option value="" selected="selected" hidden="hidden">Select table</option>
     <option value="Chart">Chart</option>
     {% for file in csvfiles %}
     <option value="{{file[0]}}">{{file[0]}}</option>
     {% endfor %}
   </select>
-  <!-- <img id="Chart" style="display: none; max-height: 80%;" class='files' src="data:image/jpeg;base64,{{ img_data }}"> -->
-  <!-- <object data="data:application/pdf;base64,{{ img_data }}" id="Chart" class='files' type="application/pdf" style="display: none; max-height: 80%;"></object> -->
-  <!-- <embed src="data:application/pdf;base64,{{ img_data }}" id="Chart" class='files' type="application/pdf" style="display: none; max-height: 80%;"> -->
-  <iframe src="data:application/pdf;base64,{{ img_data }}" id="Chart" class='files pdf' style="display: none;" height="90%" width="90%"></iframe>
-  {%for file in csvfiles%}
-  <form class='tableform files' style="display: none;" id="{{file[0]}}">
-    <div class="scroll-table" style="width: 120px; font-size: 12px;">
-      <select id="depot">
-        <option value="" selected="selected" hidden="hidden">Select Depot</option>
-        {% for n in depots %}
-        <option value="{{n}}">{{n}}</option>
-        {% endfor %}
-      </select>
-      {% for busname in busnames %}
-        <div style="display: flex; flex-direction: row;">
-          {{busname}}
-          {% for n in range(depots|length) %}
-            <select id="buslist">
-              <option value="" selected="selected" hidden="hidden">Select Buses</option>
-              {% for b in buses[n] %}
-              <option value="{{b}}">{{b}}</option>
+  <!-- PDF -->
+  <!-- <iframe src="data:application/pdf;base64,{{ img_data }}" id="Chart" class='files pdf' style="display: none;" height="90%" width="90%"></iframe> -->
+  <!-- DEPOT SELECTOR -->
+  <form class="scroll-table" style="overflow: scroll; max-height: 80%; flex-grow: 0;" action="{{url_for('assign_buses')}}" method="post">
+    <b>Assign Buses</b>
+    <input type="submit" value="Save">
+    <input id="depot" name="depot" value="{{depot}}" style="display: none;">
+    <!-- LIST OF BUSES TO ASSIGN -->
+      <table style="width: 100%;">
+        <tr>
+          <th>Old</th>
+          <th>New</th>
+          <th>Driver</th>
+          <th>Conductor</th>
+        </tr>
+      {% for i in range(busnames|length) %}
+        <tr>
+          <td><label id="{{busnames[i]}}">{{busnames[i]}}</label></td>
+          <td>
+            <select class="assignbus" name="bus{{i}}" style="font-size: 12px; box-shadow: none;">
+              <option value="{{busnames[i]}}" selected="selected" hidden="hidden" style="font-size: 12px;">{{busnames[i]}}</option>
+              {% for b in busnames %}
+              <option value="{{b}}" style="font-size: 12px;">{{b}}</option>
               {% endfor %}
             </select>
-          {% endfor %}
-        </div>
+          </td>
+          <td><input id="driver{{i}}" name="driver{{i}}" placeholder="Driver" type="email" style="width: 80px; font-size: 12px;"></td>
+          <td><input id="conductor{{i}}" name="conductor{{i}}" placeholder="Conductor" type="email" style="width: 80px; font-size: 12px;"></td>
+        </tr>  
       {% endfor %}
-    </div>
+      </table>
+  </form>
+  <!-- BLANK FORM FOR SPACING -->
+  <form class='tableform files' style="opacity: 0; flex-grow: 8;justify-content: center;">
+  </form>
+
+  {%for file in csvfiles%}
+  <!-- OUTPUT TABLES -->
+  <form class='tableform files' style="display: none; flex-grow: 8;justify-content: center;" id="{{file[0]}}_file">
     <div class="scroll-table" style="font-size: 12px;">
       <table>
         <thead>
@@ -61,10 +74,19 @@
 {% endblock %}
 
 {% block foot %}
-<script>
+<script> 
+  document.querySelectorAll('.assignbus').forEach(e => {
+    e.addEventListener('change', function() {
+      var replacebus = this.parentNode.previousElementSibling.innerText
+      var targetbus = this.value
+      document.getElementById(targetbus).parentNode.nextElementSibling.firstElementChild.value = replacebus
+      console.log(targetbus, replacebus)
+    })
+  })
+
   document.getElementById('output_csvs').addEventListener('change', function(){
     document.querySelectorAll('.files').forEach(e => e.style.display = 'none');
-    var csv = this.value
+    var csv = this.value + '_file'
     document.getElementById(csv).style.display = 'flex'
     // this.style.display = 'none'
     // this.style.position = 'absolute'

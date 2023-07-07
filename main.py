@@ -907,10 +907,12 @@ def buses():
         buslist = list(request.form.values())[1:]
         conn = connpool.get_connection()
         c = conn.cursor()
-        c.execute(f"DROP TABLE IF EXISTS T_BUSES")
+        # c.execute(f"DROP TABLE IF EXISTS T_BUSES")
         c.execute(f"CREATE TABLE IF NOT EXISTS T_BUSES (Operator TEXT, Depot TEXT, Bus TEXT, Driver TEXT, Conductor TEXT);")
         c.execute(f"DELETE FROM T_BUSES WHERE Operator = '{session['email']}' and Depot='{depot}'")
-        for bus in buslist:
+        for i,bus in enumerate(buslist):
+            if bus == "":
+                bus = f"Bus {i+1}"
             c.execute(f"INSERT INTO T_BUSES (Operator, Depot, Bus) VALUES ('{session['email']}','{depot}','{bus}')")
         c.execute(f"UPDATE T_STATUS SET `Bus Details` = '1' WHERE Route = '{session['route']}' and Operator = '{session['email']}';")
         conn.commit()
@@ -919,6 +921,34 @@ def buses():
         busnames = [n[0] for n in busnames]
         return render_template('only_buses.html',buses=buses,message="Saved",busnames=busnames,depot=depot)
     return render_template('only_buses.html',buses=buses)
+
+@app.route('/assign-buses',methods=['GET','POST'])
+def assign_buses():
+    conn = connpool.get_connection()
+    c = conn.cursor()
+    data = request.form.to_dict()
+    depot = request.form['depot']
+    buses = [data[n] for n in data if 'bus' in n]
+    drivers = [data[n] for n in data if 'driver' in n]
+    conductors = [data[n] for n in data if 'conductor' in n]
+    c.execute(f"DELETE FROM T_BUSES WHERE Operator = '{session['email']}' and Depot='{depot}'")
+    conn.commit()
+    for i,bus in enumerate(buses):
+        c.execute(f"INSERT INTO T_BUSES (Operator, Depot, Bus, Driver, Conductor) VALUES ('{session['email']}','{depot}','{bus}','{drivers[i]}','{conductors[i]}')")
+        conn.commit()
+
+    c = conn.cursor()
+    c.execute("CREATE TABLE IF NOT EXISTS T_ONLY_ROUTES (Operator TEXT,Bus_route_name TEXT,Terminal_1_origin TEXT,Terminal_2_destination TEXT,Bus_service_timings_From TEXT,Bus_service_timings_To TEXT,Number_of_service_periods TEXT)")
+    c.execute(f"SELECT DISTINCT Bus_route_name FROM T_ONLY_ROUTES WHERE Operator = '{session['email']}'")
+    data = c.fetchall()
+    routes = [n[0] for n in data]
+
+    c.execute(f"SELECT DISTINCT Depot FROM T_BUSES WHERE Operator = '{session['email']}'")
+    data = c.fetchall()
+    depots = list([n[0] for n in data])
+
+    return render_template('run_scheduling.html',routes=routes,depots=depots, message='Buses were assigned. Please rerun to see changes')
+    return redirect('/scheduling-run/Choose')
 
 @app.route('/frequency', methods=['GET', 'POST'])
 def frequency():
@@ -1054,8 +1084,15 @@ def scheduling_run(method):
         c.execute(f"SELECT DISTINCT Bus_route_name FROM T_ONLY_ROUTES WHERE Operator = '{session['email']}'")
         data = c.fetchall()
         routes = [n[0] for n in data]
-        return render_template('run_scheduling.html',routes=routes)
+
+        c.execute(f"SELECT DISTINCT Depot FROM T_BUSES WHERE Operator = '{session['email']}'")
+        data = c.fetchall()
+        depots = list([n[0] for n in data])
+
+        return render_template('run_scheduling.html',routes=routes,depots=depots)
     else:
+        depot = request.form['depot']
+
         query = f"SELECT * FROM T_PARAMETERS WHERE Operator = '{session['email']}' and Route ='{session['route']}'"
         df = pd.read_sql(query, conn)
         ymlfile = yaml.dump(df.to_dict(orient='records')[0],default_flow_style=None)
@@ -1154,13 +1191,28 @@ def scheduling_run(method):
                         min_ideal = tot_ideal_time
                         min_data = laydf1,departure_DN,departure_UP,fleet, depot_tt, crew, timetable, busreq_at_Terminal1, busreq_at_Terminal2, poolsize_at_Terminal1, poolsize_at_Terminal2, veh_sch1, veh_sch2, veh_schedule, bus_details,  reuse_buses, tot_ideal_time,vehicleschedule
             laydf1,departure_DN,departure_UP,fleet, depot_tt, crew, timetable, busreq_at_Terminal1, busreq_at_Terminal2, poolsize_at_Terminal1, poolsize_at_Terminal2, veh_sch1, veh_sch2, veh_schedule, bus_details,  reuse_buses, tot_ideal_time,vehicleschedule = min_data
-
+        
+        # Ading file names to output files
         veh_schedule.reset_index(inplace=True)
         veh_schedule.title = f'vehicle_schedule_{method}'
         crew.title = f'crew_scheduling_{method}'
         bus_details.title = f'Bus_utility_details_{method}'
         reuse_buses.title = f'Reuse_{method}'
         fleet.title = f'fleet_shift_details_{method}'
+
+        for n in range(len(crew['buses to be dispatched '])):
+            crew['buses to be dispatched '][n] = str(crew['buses to be dispatched '][n])
+
+        print(type(crew['buses to be dispatched '][0]),"svddddddddddddddddddddddddddddddddddddddddddddddd")
+
+        # Renaming buses
+        busnames=bus_details['bus_name'].to_list()
+        c.execute(f"SELECT Bus FROM T_BUSES WHERE Operator = '{session['email']}' and Depot ='{depot}'")
+        data = c.fetchall()
+        buses = [n[0] for n in data]
+        busname_map = {n: buses[i] for i,n in enumerate(busnames)}
+        
+
         files = [veh_schedule,crew,bus_details,reuse_buses,fleet]
 
         sche_out = BytesIO()
@@ -1181,7 +1233,7 @@ def scheduling_run(method):
                     df3.reset_index(drop=True, inplace=True)
                     name = b_lst.iloc[i, 0]
                     sche_zip.writestr(f'vehicleschedule/{name}.csv', df3.to_csv())
-                    df3.title = name
+                    df3.title = busname_map[name]
                     files.append(df3)
             else:
                 timetable.title = f'Time_Table_{method}'
@@ -1190,6 +1242,7 @@ def scheduling_run(method):
                 sche_zip.writestr(f'Time_Table_{method}.csv', timetable.to_csv(index=False))
                 sche_zip.writestr(f'depot_shift_details_{method}.csv', depot_tt.to_csv(index=False))
                 for n in vehicleschedule:
+                    n.title = busname_map[n.title]
                     sche_zip.writestr(f'vehicleschedule/{n.title}.csv', n.to_csv())
                     files.append(n)
             if method != 'Random':
@@ -1228,20 +1281,18 @@ def scheduling_run(method):
             print('fleet size:', busreq_at_r1t1 + busreq_at_r1t2 + busreq_at_r2t1 + busreq_at_r2t2)
             print('\n Total ideal time in hours:', tot_ideal_time.round(0))
         
+        
+        # FOR DOWNLOADING FILE
         # sche_out.seek(0)
         # return send_file(sche_out, download_name=f'{method} Output.zip', as_attachment=True)
 
-        c.execute(f"SELECT Depot, Bus FROM T_BUSES WHERE Operator = '{session['email']}'")
-        data = c.fetchall()
-        depots = list(set([n[0] for n in data]))
-        buses = []
-        for depot in depots:
-            buses.append([n[1] for n in data if n[0] == depot])
-        print(data, buses, depots)
+        for df in files:
+            df.replace(regex=busname_map,inplace=True)
     
         csvfiles = [list([n.title]) + list([tuple(n.columns)]) + list(n.itertuples(index=False, name=None)) for n in files]
         busnames=bus_details['bus_name'].to_list()
-        return render_template('scheduling_output.html', csvfiles=csvfiles, img_data=encoded_img_data.decode('utf-8'), busnames=busnames, buses=buses, depots=depots)
+
+        return render_template('scheduling_output.html', csvfiles=csvfiles, img_data=encoded_img_data.decode('utf-8'), busnames=busnames,depot=depot)
 
 
 @app.route('/livelocation', methods=['GET', 'POST'])

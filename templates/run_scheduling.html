@@ -5,6 +5,13 @@
 <div class="content"> 
 <h4>{{ message }}</h4>
   <form id="myform" method="post">
+    <select id="depot" name="depot">
+      <option value="" selected="selected" hidden="hidden">Select Depot</option>
+      {% for n in depots %}
+      <option value="{{n}}">{{n}}</option>
+      {% endfor %}
+    </select>
+    <b> </b><br>
     <b>Single-line Scheduling</b><br>
     <div style="display: flex;flex-direction: row;justify-content: space-between;">
       <button class="label-button" type="submit" formaction="{{url_for('scheduling_run',method = 'FIFO')}}">FIFO</button>
