@@ -60,7 +60,7 @@
     {% if message %}<div id="messagebox">{{message}}</div>{% endif %}
     <div id="map" class="map2"></div>
     <div id="st-chart-live"><canvas id="myChart" style="width:100%;max-width:100%;height:100%;max-height:100%"></canvas></div>
-    <div id="drivers">
+    <div id="rightpanel">
       <select id="buses">
         <option value="Bus 1">Bus 1</option>
         <option value="Bus 2">Bus 2</option>
@@ -507,11 +507,14 @@
         timeout: 5000,
         maximumAge: 0
       }
-      
+
       navigator.geolocation.getCurrentPosition(function(location) {
         var lat = location.coords.latitude;
         var lng = location.coords.longitude;
         var acc = location.coords.accuracy;
+        var content = document.createElement('p')
+        content.textContent = lat + lng + acc
+        document.getElementById('rightpanel').appendChild(content)
         alert(lat,lng,acc);
       },
       function error(msg) {alert('Please enable your GPS position feature.');},
