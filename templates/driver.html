@@ -69,6 +69,7 @@
     </div>
   </div>
   <p style="position:fixed;opacity:0;" id="username">{{ session['email'] }}</p>
+  <p style="position:fixed;opacity:0;" id="currentbus">{{ bus }}</p>
 </div>
   <script src="https://cdn.jsdelivr.net/npm/leaflet@1.7.1/dist/leaflet.js"></script>
   <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
@@ -502,6 +503,8 @@
 
     // Sending live location
     function sendlocation(){
+      var currentbus = document.getElementById('currentbus').textContent;
+
       var options = {
         enableHighAccuracy: true,
         timeout: 5000,
@@ -515,6 +518,19 @@
         var content = document.createElement('p')
         content.textContent = lat + ' ' + lng + ' ' + acc
         document.getElementById('rightpanel').appendChild(content)
+
+        // Send the image data to the Flask endpoint
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', '/gpslocation', true);
+        xhr.setRequestHeader('Content-Type', 'application/json');
+
+        xhr.onreadystatechange = function() {
+          if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
+            console.log('Location sent successfully');
+          }
+        };
+
+        xhr.send(JSON.stringify({latitude: lat, longitude: lng, bus:currentbus}));
       },
       function error(msg) {alert('Please enable your GPS position feature.');},
       options);

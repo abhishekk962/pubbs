@@ -1340,6 +1340,28 @@ def show_location(data):
     emit('receivedlocation',data,room=room)
     print(str(data))
 
+@app.route('/gpslocation', methods=['POST'])
+def gpslocation():
+    # Connect to the MySQL database
+    conn1 = connpool.get_connection()
+    c = conn1.cursor()
+
+    try:
+        c.execute(f"CREATE TABLE IF NOT EXISTS T_PINGS (Operator TEXT, Route TEXT, Bus TEXT, Latitude FLOAT, Longitude FLOAT, Timestamp TIMESTAMP)")
+        c.execute(f"INSERT INTO T_PINGS (Operator, Route, Bus, Latitude, Longitude) VALUES ('{session['email']}','{session['route']}','{request.json['bus']}','{request.json['latitude']}','{request.json['longitude']}')")
+        conn.commit()
+        return 'Location uploaded successfully'
+
+    except Exception as e:
+        print('Error uploading location:', str(e))
+        conn1.rollback()
+        return 'Location upload failed'
+
+    finally:
+        # Close the database connection
+        c.close()
+        conn1.close()
+
 @app.route('/get-pings', defaults={'route': None})
 @app.route('/get-pings/<route>')
 def get_pings(route):
@@ -1414,7 +1436,7 @@ def driver():
 
     session['route'] = route
 
-    return render_template('driver.html', message=f"Hello {driver} Your are assigned Bus: {bus} and Route: {route}")
+    return render_template('driver.html', bus=bus, message=f"Hello {driver} Your are assigned Bus: {bus} and Route: {route}")
 
 @app.route('/uploadimage', methods=['POST'])
 def uploadimage():
@@ -1459,7 +1481,7 @@ def get_images():
         c.execute(f"SELECT DISTINCT Bus FROM T_PINGS WHERE Operator = '{session['email']}' and Route='{session['route']}' ORDER BY Timestamp > now() - interval 1 hour")
         result= c.fetchall()
         buses = [n[0] for n in result]
-        tuple_buses = str(tuple(buses)).replace(',)','')
+        tuple_buses = str(tuple(buses)).replace(',)',')')
         c.execute(f"SELECT Bus, Image FROM T_BUSES WHERE Bus IN {tuple_buses}")
         # c.execute(f"SELECT Bus, Image FROM T_BUSES WHERE Bus = '{buses[0]}'")
         results = c.fetchall()
