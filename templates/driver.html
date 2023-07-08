@@ -513,9 +513,8 @@
         var lng = location.coords.longitude;
         var acc = location.coords.accuracy;
         var content = document.createElement('p')
-        content.textContent = lat + lng + acc
+        content.textContent = lat + ' ' + lng + ' ' + acc
         document.getElementById('rightpanel').appendChild(content)
-        alert(lat,lng,acc);
       },
       function error(msg) {alert('Please enable your GPS position feature.');},
       options);
