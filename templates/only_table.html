@@ -90,18 +90,22 @@ document.getElementById('previoustable').addEventListener('click', function(){
   var currtable = document.getElementById('previoustable').nextSibling.textContent
   var tables = []
   document.querySelectorAll('#db_table > option').forEach(e => tables.push(e.innerText))
-  var previoustable = tables[tables.indexOf(currtable)-1]
-  document.getElementById('db_table').value = previoustable
-  document.getElementById('tableselector').submit()
+  if (tables.indexOf(currtable) > 1) {
+    var previoustable = tables[tables.indexOf(currtable)-1]
+    document.getElementById('db_table').value = previoustable
+    document.getElementById('tableselector').submit()
+  }
 });
 
 document.getElementById('nexttable').addEventListener('click', function(){
-  var currtable = document.getElementById('nexttable').nextSibling.textContent
+  var currtable = document.getElementById('nexttable').previousSibling.textContent
   var tables = []
   document.querySelectorAll('#db_table > option').forEach(e => tables.push(e.innerText))
-  var nexttable = tables[tables.indexOf(currtable)+1]
-  document.getElementById('db_table').value = nexttable
-  document.getElementById('tableselector').submit()
+  if (tables.indexOf(currtable) < tables.length-1) {
+    var nexttable = tables[tables.indexOf(currtable)+1]
+    document.getElementById('db_table').value = nexttable
+    document.getElementById('tableselector').submit()
+  }
 });
 
 // Get all the buttons in the table

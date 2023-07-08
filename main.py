@@ -36,15 +36,16 @@ connpool = pymysqlpool.ConnectionPool(host="103.21.58.10",
                        password="Matrix__111",
                        database="pubbsm8z_uba",
                        port = 3306,
-                       size=3
+                       size=6
                        )
 conn = connpool.get_connection()
 conn1 = connpool.get_connection()
 conn2 = connpool.get_connection()
+conn_ = connpool.get_connection()
 
 
 def odalight(files):
-    od1 = files[1]
+    od1 = files[0]
 
     boarding = pd.DataFrame(index=np.arange(0), columns=od1.columns)
     alighting = pd.DataFrame(index=np.arange(0), columns=od1.columns)
@@ -593,15 +594,22 @@ def save_route():
 
     c.execute(f"DELETE FROM T_ROUTE_INFO WHERE Route = '{session['route']}' and Operator = '{session['email']}' and uid != '{uid}';")
     conn.commit()
+
+    for n in ["T_Passenger_Arrival_UP", "T_Passenger_Arrival_DN","T_TravelTimeDN_ANN","T_TraveTimeUP_ANN","T_Fare_DN","T_Fare_UP","T_OD"]:
+        c.execute(f"DELETE FROM {n} WHERE Route = '{session['route']}' and Operator = '{session['email']}'")
+    c.execute(f"UPDATE T_STATUS SET `Stop Characteristics` = 0,`Passenger Arrival` = '0',`Fare` = '0',`Travel Time` = '0',`OD Data` = '0' WHERE Route = '{session['route']}' and Operator = '{session['email']}';")
+    conn.commit()
+
     # return render_template('only_table.html', stops_list=session['stops_list'], rows=list(range(session['p_start'],session['p_end'])),periods=list(range(session['p_start'],session['p_end'])))
     return redirect('/build-route')
 
 @app.route('/table-selected', methods=['GET', 'POST'])
 def table_selected():
-    conn = connpool.get_connection()
-    c = conn.cursor()
+    conn_ = connpool.get_connection()
+    c = conn_.cursor()
     c.execute(f"SELECT s.id,s.Stop_Name FROM T_ROUTE_INFO AS r INNER JOIN T_STOPS_INFO AS s ON (s.id = r.Stop_id) WHERE r.Operator = '{session['email']}' and r.Route='{session['route']}' ORDER BY r.Stop_num")
     stops= c.fetchall()
+    conn_.close()
     stop_ids = [n[0] for n in stops]
     stops_list = [n[1] for n in stops]
     table = request.form["db_table"]
@@ -906,8 +914,8 @@ def buses():
         buslist = list(request.form.values())[1:]
         conn = connpool.get_connection()
         c = conn.cursor()
-        # c.execute(f"DROP TABLE IF EXISTS T_BUSES")
-        c.execute(f"CREATE TABLE IF NOT EXISTS T_BUSES (Operator TEXT, Depot TEXT, Bus TEXT, Driver TEXT, Conductor TEXT);")
+        c.execute(f"DROP TABLE IF EXISTS T_BUSES")
+        c.execute(f"CREATE TABLE IF NOT EXISTS T_BUSES (Operator TEXT, Route TEXT, Depot TEXT, Bus TEXT, Driver TEXT, Conductor TEXT, Image MEDIUMBLOB);")
         c.execute(f"DELETE FROM T_BUSES WHERE Operator = '{session['email']}' and Depot='{depot}'")
         for i,bus in enumerate(buslist):
             if bus == "":
@@ -933,7 +941,7 @@ def assign_buses():
     c.execute(f"DELETE FROM T_BUSES WHERE Operator = '{session['email']}' and Depot='{depot}'")
     conn.commit()
     for i,bus in enumerate(buses):
-        c.execute(f"INSERT INTO T_BUSES (Operator, Depot, Bus, Driver, Conductor) VALUES ('{session['email']}','{depot}','{bus}','{drivers[i]}','{conductors[i]}')")
+        c.execute(f"INSERT INTO T_BUSES (Operator, Route, Depot, Bus, Driver, Conductor) VALUES ('{session['email']}','{session['route']}','{depot}','{bus}','{drivers[i]}','{conductors[i]}')")
         conn.commit()
 
     c = conn.cursor()
@@ -1396,7 +1404,85 @@ def get_pings(route):
 
 @app.route('/driver')
 def driver():
-    return render_template('driver.html')
+    driver = session['email']
+    conn = connpool.get_connection()
+    c = conn.cursor()
+    c.execute(f"SELECT Bus, Route FROM T_BUSES WHERE Driver = '{driver}';")
+    data = c.fetchall()
+    bus = data[0][0]
+    route = data[0][1]
+
+    session['route'] = route
+
+    return render_template('driver.html', message=f"Hello {driver} Your are assigned Bus: {bus} and Route: {route}")
+
+@app.route('/uploadimage', methods=['POST'])
+def uploadimage():
+    driver = session['email']
+    # Get the image data from the request
+    image_data = request.json['image']
+
+    # Decode the base64 image data
+    image_bytes = base64.b64decode(image_data.split(',')[1])
+
+    # Connect to the MySQL database
+    conn1 = connpool.get_connection()
+    c = conn1.cursor()
+
+    try:
+        # Insert the image into the database
+        sql = "UPDATE T_BUSES SET Image = %s WHERE Driver = %s"
+        c.execute(sql, (image_bytes,driver))
+
+        # Commit the changes to the database
+        conn1.commit()
+        return 'Image uploaded successfully'
+
+    except Exception as e:
+        print('Error uploading image:', str(e))
+        conn1.rollback()
+        return 'Image upload failed'
+
+    finally:
+        # Close the database connection
+        c.close()
+        conn1.close()
+
+@app.route('/images')
+def get_images():
+    # Connect to the MySQL database
+    conn2 = connpool.get_connection()
+    c = conn2.cursor()
+
+    try:
+        # Retrieve the image data from the database
+        c.execute(f"SELECT DISTINCT Bus FROM T_PINGS WHERE Operator = '{session['email']}' and Route='{session['route']}' ORDER BY Timestamp > now() - interval 1 hour")
+        result= c.fetchall()
+        buses = [n[0] for n in result]
+        tuple_buses = str(tuple(buses)).replace(',)','')
+        c.execute(f"SELECT Bus, Image FROM T_BUSES WHERE Bus IN {tuple_buses}")
+        # c.execute(f"SELECT Bus, Image FROM T_BUSES WHERE Bus = '{buses[0]}'")
+        results = c.fetchall()
+
+        # Create a list to store the base64-encoded image data
+        image_data_dict = {}
+        for result in results:
+            bus = result[0]
+            image_data = result[1]
+            image_data_base64 = base64.b64encode(image_data).decode('utf-8')
+            image_data_dict[bus] = image_data_base64
+
+        # Return the image data as a JSON response
+        return jsonify(image_data_dict)
+
+    except Exception as e:
+        print('Error retrieving images:', str(e))
+        return 'Error retrieving images'
+
+    finally:
+        # Close the database connection
+        c.close()
+        conn2.close()
 
 def open_browser():
     webbrowser.open_new("http://localhost:8080/")

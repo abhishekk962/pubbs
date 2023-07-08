@@ -47,7 +47,7 @@
         <button type="submit" class="nav-button" formaction="{{url_for('scheduling_details')}}">Scheduling Details</button>
         <button type="submit" class="nav-button" formaction="{{url_for('scheduling')}}">Scheduling Files</button>
         <button type="submit" class="nav-button" formaction="{{url_for('buses')}}">Buses</button>
-        <button type="submit" class="nav-button" formaction="{{url_for('livelocation')}}">Live</button>
+        <!-- <button type="submit" class="nav-button" formaction="{{url_for('livelocation')}}">Live</button> -->
         {% endif %}
       </form>
       <div id="account">
@@ -74,6 +74,13 @@
         <div id="statusfreq" class="s_section_cont"></div>
         <div id="showsched" class="s_section">Scheduling<i class="fa-solid fa-caret-down"></i></div>
         <div id="statussched" class="s_section_cont"></div>
+        <div id="showlive" class="s_section">Live Tracking<i class="fa-solid fa-caret-down"></i></div>
+        <div id="statuslive" class="s_section_cont">
+          <form style="display: flex;flex-direction: column;align-items: center;">
+            <button type="submit" class="label-button" formaction="{{url_for('livelocation')}}">Operator</button>
+            <button type="submit" class="label-button" formaction="{{url_for('driver')}}">Driver</button>
+          </form>
+        </div>
         {% if session['route'] %}
         <div id="routemap"></div>
         {% endif %}
@@ -127,6 +134,17 @@
         } else {
           statussched.style.display = "flex";
           showsched.childNodes[1].classList.add('fa-rotate-180')
+        }
+      };
+      const statuslive = document.getElementById("statuslive");
+      const showlive = document.getElementById("showlive");
+      showlive.onclick = function () {
+        if (statuslive.style.display !== "none") {
+          statuslive.style.display = "none";
+          showlive.childNodes[1].classList.remove('fa-rotate-180')
+        } else {
+          statuslive.style.display = "flex";
+          showlive.childNodes[1].classList.add('fa-rotate-180')
         }
       };
     </script>
