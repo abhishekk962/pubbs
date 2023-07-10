@@ -1491,8 +1491,9 @@ def get_images():
         for result in results:
             bus = result[0]
             image_data = result[1]
-            image_data_base64 = base64.b64encode(image_data).decode('utf-8')
-            image_data_dict[bus] = image_data_base64
+            if image_data != None:
+                image_data_base64 = base64.b64encode(image_data).decode('utf-8')
+                image_data_dict[bus] = image_data_base64
 
         # Return the image data as a JSON response
         return jsonify(image_data_dict)

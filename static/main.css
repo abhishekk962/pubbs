@@ -55,7 +55,7 @@ body{
     border-radius: 10px;
 }
 
-#st-chart-live {
+#panel2 {
     height: 75%;
     width: 40%;
     position: fixed;
@@ -64,6 +64,7 @@ body{
     margin: 2%;
     border-radius: 10px;
     background-color: white;
+    color: rgb(52, 52, 52);
 }
 
 #busimages,#rightpanel {
@@ -81,14 +82,23 @@ body{
     color: #4c4c4c;
 }
 
-.popimage {
-    position: absolute !important;
+.maximise {
+    position: fixed !important;
+    margin: auto auto !important;
     top: 0 !important;
-    bottom: 0 !important;
-    right: 0 !important;
     left: 0 !important;
-    width: 80vw !important;
-    height: auto !important;
+    right: 0 !important;
+    width: 100% !important;
+    bottom: 0 !important;
+    height: 100% !important;
+    background: white !important;
+    z-index: 50 !important;
+    overflow: scroll !important;
+}
+
+.maximise img {
+    height: 80% !important;
+    width: auto !important;
 }
 
 .route-segment {
@@ -121,7 +131,7 @@ body{
     scale: 1.8;
 }
 
-.stop-time {
+.speed {
     position: absolute;
     font-size: 70%;
     margin: 25px 0 0 5px;
@@ -133,6 +143,26 @@ body{
     rotate: 45deg;
 }
 
+.stop-time {
+    position: absolute;
+    font-size: 70%;
+    margin: 25px 0 0 5px;
+    background: #659A9D;
+    /* border: 1px solid #385f61; */
+    border-radius: 5px;
+    padding: 1px 6px;
+    color: white;
+    rotate: 45deg;
+    opacity: 0;
+    animation: fade 8s;
+}
+
+@keyframes fade {
+    0%{ opacity: 1;}
+    90%{opacity: 1;}
+    100%{opacity: 0;}
+}
+
 .bus-icon {
     rotate: -45deg;
     color: white;
@@ -141,7 +171,7 @@ body{
 }
 
 .route-bus {
-    background: #7d7d7d;
+    background: #7d7d7d00;
     height: 10px;
     position: absolute;
 }

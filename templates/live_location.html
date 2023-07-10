@@ -7,18 +7,18 @@
   {% endblock %}
 {% block content %}
 <script>var tab = $( "button:contains('Live')" ).attr('disabled','');</script>
+<select id="buses">
+  <option value="Bus 1">Bus 1</option>
+  <option value="Bus 2">Bus 2</option>
+  <option value="Bus 3">Bus 3</option>
+</select>
 <div class="content">
   <div class="mapdata">
     <div id="route-bar"></div>
     {% if message %}<div id="messagebox">{{message}}</div>{% endif %}
     <div id="map" class="map2"></div>
-    <div id="st-chart-live"><canvas id="myChart" style="width:100%;max-width:100%;height:100%;max-height:100%"></canvas></div>
+    <div id="panel2"><canvas id="myChart" style="width:100%;max-width:100%;height:100%;max-height:100%"></canvas></div>
     <div id="busimages">
-      <select id="buses">
-        <option value="Bus 1">Bus 1</option>
-        <option value="Bus 2">Bus 2</option>
-        <option value="Bus 3">Bus 3</option>
-      </select>
     </div>
   </div>
   <p style="position:fixed;opacity:0;" id="username">{{ session['email'] }}</p>
@@ -193,6 +193,20 @@
         // // Based on perpendicular distance from segment, determine previous and next stop
         // closestStop = getClosestStop(distances, markersarray.slice(markersarray.indexOf(closestStop)-1));
 
+        if (markersarray.indexOf(closestStop) != 0 && markersarray.indexOf(closestStop) != markersarray.length-1) {
+          P = pointer
+          A = markersarray[markersarray.indexOf(closestStop) - 1]
+          B = closestStop
+          C = markersarray[markersarray.indexOf(closestStop) + 1]
+
+          if (calculateAngle(P,B,A) > calculateAngle(P,B,C)){
+            prevstop = A
+          } else {
+            prevstop = C
+          }
+        }
+        
+
         if (markersarray.indexOf(closestStop)+1 != markersarray.length){
           // Three sides of trianble joining nearest stop, prev stop and next stop
           var side1 = distBet(pointer,closestStop)
@@ -267,21 +281,7 @@
           document.getElementById('route-bar').appendChild(segElem)
         }
 
-        document.querySelectorAll('.bus-marker').forEach(e => {
-          e.addEventListener('click', function(){
-            var key = this.parentNode.id.replace('busElem','')
-            console.log('ascasc',key)
-            var route_segments = document.querySelectorAll('#route-bar .route-segment')
-            document.querySelectorAll('.route-segment .stop-time').forEach(e => e.remove());
-
-            for (let i = 0; i < route_segments.length ; i++) {
-              var timeElem = document.createElement('div')
-              timeElem.classList.add('stop-time')
-              timeElem.innerText = arrival_times[key][i]
-              route_segments[i].appendChild(timeElem)
-            }
-          });
-        });
+        //time elements code
 
         var covDist = 0;
         for (let i = 0; i <= markersarray.indexOf(prevstop)-1 ; i++) {
@@ -304,13 +304,29 @@
         busLocElem.innerHTML = '<span class="material-symbols-outlined bus-icon">directions_bus</span>'
         busElem.appendChild(busLocElem)
         var speedElem = document.createElement('div')
-        speedElem.classList.add('stop-time')
+        speedElem.classList.add('speed')
         speedElem.innerText = speed + ' km/h'
         speedElem.style.margin = '-35px 5px 0px 0px'
         speedElem.style.right = '0'
         speedElem.style.background = 'black'
         busElem.appendChild(speedElem)
         document.getElementById('route-bar').appendChild(busElem)
+
+        document.querySelectorAll('.bus-marker').forEach(e => {
+          e.addEventListener('click', function(){
+            const key = this.parentNode.id.replace('busElem','')
+            console.log('clicked',key)
+            var route_segments = document.querySelectorAll('#route-bar .route-segment')
+            document.querySelectorAll('.route-segment .stop-time').forEach(e => e.remove());
+
+            for (let i = 0; i < route_segments.length ; i++) {
+              var timeElem = document.createElement('div')
+              timeElem.classList.add('stop-time')
+              timeElem.innerText = arrival_times[key][i]
+              route_segments[i].appendChild(timeElem)
+            }
+          });
+        });
 
         var d = new Date();
         time_decimal = d.getHours() + d.getMinutes()/60 + d.getSeconds()/3600
@@ -346,6 +362,20 @@
         const closestStop = stops[minIndex];
 
         return closestStop;
+      }
+
+      function calculateAngle(A, B, C) {
+        const angle1 = Math.atan2(A.lng - B.lng, A.lat - B.lat);
+        const angle2 = Math.atan2(C.lng - B.lng, C.lat - B.lat);
+
+        let angle = angle2 - angle1;
+        angle = angle * (180 / Math.PI);
+
+        if (angle < 0) {
+          angle += 360;
+        }
+
+        return angle;
       }
 
       function calculateProjection(A, B, X) {
@@ -406,6 +436,10 @@
       });
   </script>
   <script>
+    const imageContainer = document.getElementById('busimages');
+    imageContainer.addEventListener('click', function(){
+      imageContainer.classList.toggle('maximise')
+    })
     // For bus images
     // Function to fetch and display multiple images
     function displayImages() {
