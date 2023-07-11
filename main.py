@@ -1214,8 +1214,10 @@ def scheduling_run(method):
         print(type(crew['buses to be dispatched '][0]),"svddddddddddddddddddddddddddddddddddddddddddddddd")
 
         # Renaming buses
-        busnames=b_lst['bus_name'].to_list()
-        print(busnames,b_lst)
+        try:
+            busnames=b_lst['bus_name'].to_list()
+        except:
+            busnames=bus_details['bus_name'].to_list()
         c.execute(f"SELECT Bus FROM T_BUSES WHERE Operator = '{session['email']}' and Depot ='{depot}'")
         data = c.fetchall()
         buses = [n[0] for n in data]
@@ -1351,7 +1353,7 @@ def gpslocation():
     try:
         c.execute(f"CREATE TABLE IF NOT EXISTS T_PINGS (Operator TEXT, Route TEXT, Bus TEXT, Latitude FLOAT, Longitude FLOAT, Timestamp TIMESTAMP)")
         c.execute(f"INSERT INTO T_PINGS (Operator, Route, Bus, Latitude, Longitude) VALUES ('{session['email']}','{session['route']}','{request.json['bus']}','{request.json['latitude']}','{request.json['longitude']}')")
-        conn.commit()
+        conn3.commit()
         return 'Location uploaded successfully'
 
     except Exception as e:
