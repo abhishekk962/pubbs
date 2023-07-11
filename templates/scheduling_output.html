@@ -11,7 +11,7 @@
     {% endfor %}
   </select>
   <!-- PDF -->
-  <!-- <iframe src="data:application/pdf;base64,{{ img_data }}" id="Chart" class='files pdf' style="display: none;" height="90%" width="90%"></iframe> -->
+  <iframe src="data:application/pdf;base64,{{ img_data }}" id="Chart_file" class='files pdf' style="display: none;" height="90%" width="90%"></iframe>
   <!-- DEPOT SELECTOR -->
   <form class="scroll-table" style="overflow: scroll; max-height: 80%; flex-grow: 0;" action="{{url_for('assign_buses')}}" method="post">
     <b>Assign Buses</b>

@@ -2,7 +2,7 @@
 {% block head %}
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" />
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js" integrity="sha512-q/dWJ3kcmjBLU4Qc47E4A9kTB4m3wuTY7vkFJDTZKjTs8jhyGQnaUrxa0Ytd0ssMZhbNua9hE+E7Qv1j+DyZwA==" crossorigin="anonymous"></script>
+  <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js" integrity="sha512-q/dWJ3kcmjBLU4Qc47E4A9kTB4m3wuTY7vkFJDTZKjTs8jhyGQnaUrxa0Ytd0ssMZhbNua9hE+E7Qv1j+DyZwA==" crossorigin="anonymous"></script> -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js"></script>
   {% endblock %}
 {% block content %}
@@ -79,15 +79,26 @@
     // livelocation
     var email = document.getElementById('username').textContent;
 
-    var socket = io();
-    socket.on('connect', function() {
-        socket.emit('join',{room: email});
-        socket.emit('my event', {data: 'I\'m connected!'});
-    });
+    // var socket = io();
+    // socket.on('connect', function() {
+    //     socket.emit('join',{room: email});
+    //     socket.emit('my event', {data: 'I\'m connected!'});
+    // });
 
     map.on('click', function(e) {
       var selectedbus = document.getElementById('buses').value
-      socket.emit('location', {latitude: e.latlng.lat, longitude: e.latlng.lng, bus:selectedbus})
+
+      // socket.emit('location', {latitude: e.latlng.lat, longitude: e.latlng.lng, bus:selectedbus})
+
+      const xhr = new XMLHttpRequest();
+      xhr.open('POST', '/gpslocation', true);
+      xhr.setRequestHeader('Content-Type', 'application/json');
+      xhr.onreadystatechange = function() {
+        if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
+          console.log('Location sent successfully');
+        }
+      };
+      xhr.send(JSON.stringify({latitude: e.latlng.lat, longitude:  e.latlng.lng, bus:selectedbus}));
     });
 
     var linesLayer = L.layerGroup().addTo(map);

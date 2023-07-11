@@ -36,11 +36,12 @@ connpool = pymysqlpool.ConnectionPool(host="103.21.58.10",
                        password="Matrix__111",
                        database="pubbsm8z_uba",
                        port = 3306,
-                       size=6
+                       size=10
                        )
 conn = connpool.get_connection()
 conn1 = connpool.get_connection()
 conn2 = connpool.get_connection()
+conn3 = connpool.get_connection()
 conn_ = connpool.get_connection()
 
 
@@ -116,16 +117,16 @@ def get_route_data(route):
 @app.route('/status-display')
 def get_status():
     conn2 = connpool.get_connection()
-    query = f"SELECT `Route Details`,`Build Route`,`Stop Characteristics`,`Passenger Arrival`,`Fare`,`Travel Time`,`OD Data`,`OLS Details`,`Constraints`,`Service Details`,`GA Parameters`,`Scheduling Details`,`Scheduling Files`,`Bus Details`,`Depot Details` FROM T_STATUS WHERE Route = '{session['route']}' and Operator = '{session['email']}';"
+    query = f"SELECT `Route Details`,`Build Route`,`Stop Characteristics`,`Passenger Arrival`,`Fare`,`Travel Time`,`OD Data`,`OLS Details`,`Constraints`,`Service Details`,`GA Parameters`,`Scheduling Details`,`Scheduling Files`,`Bus Details` FROM T_STATUS WHERE Route = '{session['route']}' and Operator = '{session['email']}';"
     df = pd.read_sql(query, conn2)
     df = df.fillna(0)
     freq_value = df.iloc[:,:11].sum(axis=1)
     sched_value = df.iloc[:,11:].sum(axis=1)
     df.insert(11,'Frequency',freq_value)
-    df.insert(16,'Scheduling',sched_value)
+    df.insert(15,'Scheduling',sched_value)
     df = df.fillna(0)
     if df.empty:
-        data = {"Route Details":0,"Build Route":0,"Stop Characteristics":0,"Passenger Arrival":0,"Fare":0,"Travel Time":0,"OD Data":0,"OLS Details":0,"Constraints":0,"Service Details":0,"GA Parameters":0,"Frequency":0,"Scheduling Details":0,"Scheduling Files":0,"Bus Details":0,"Depot Details":0}
+        data = {"Route Details":0,"Build Route":0,"Stop Characteristics":0,"Passenger Arrival":0,"Fare":0,"Travel Time":0,"OD Data":0,"OLS Details":0,"Constraints":0,"Service Details":0,"GA Parameters":0,"Frequency":0,"Scheduling Details":0,"Scheduling Files":0,"Bus Details":0}
         return jsonify(data)
     data = df.to_dict(orient='records')[0]
     return jsonify(data)
@@ -914,7 +915,7 @@ def buses():
         buslist = list(request.form.values())[1:]
         conn = connpool.get_connection()
         c = conn.cursor()
-        c.execute(f"DROP TABLE IF EXISTS T_BUSES")
+        # c.execute(f"DROP TABLE IF EXISTS T_BUSES")
         c.execute(f"CREATE TABLE IF NOT EXISTS T_BUSES (Operator TEXT, Route TEXT, Depot TEXT, Bus TEXT, Driver TEXT, Conductor TEXT, Image MEDIUMBLOB);")
         c.execute(f"DELETE FROM T_BUSES WHERE Operator = '{session['email']}' and Depot='{depot}'")
         for i,bus in enumerate(buslist):
@@ -1213,7 +1214,8 @@ def scheduling_run(method):
         print(type(crew['buses to be dispatched '][0]),"svddddddddddddddddddddddddddddddddddddddddddddddd")
 
         # Renaming buses
-        busnames=bus_details['bus_name'].to_list()
+        busnames=b_lst['bus_name'].to_list()
+        print(busnames,b_lst)
         c.execute(f"SELECT Bus FROM T_BUSES WHERE Operator = '{session['email']}' and Depot ='{depot}'")
         data = c.fetchall()
         buses = [n[0] for n in data]
@@ -1343,8 +1345,8 @@ def show_location(data):
 @app.route('/gpslocation', methods=['POST'])
 def gpslocation():
     # Connect to the MySQL database
-    conn1 = connpool.get_connection()
-    c = conn1.cursor()
+    conn3 = connpool.get_connection(pre_ping=True)
+    c = conn3.cursor()
 
     try:
         c.execute(f"CREATE TABLE IF NOT EXISTS T_PINGS (Operator TEXT, Route TEXT, Bus TEXT, Latitude FLOAT, Longitude FLOAT, Timestamp TIMESTAMP)")
@@ -1354,13 +1356,13 @@ def gpslocation():
 
     except Exception as e:
         print('Error uploading location:', str(e))
-        conn1.rollback()
+        conn3.rollback()
         return 'Location upload failed'
 
     finally:
         # Close the database connection
         c.close()
-        conn1.close()
+        conn3.close()
 
 @app.route('/get-pings', defaults={'route': None})
 @app.route('/get-pings/<route>')
@@ -1369,23 +1371,26 @@ def get_pings(route):
         route = session['route']
     conn1 = connpool.get_connection()
     c = conn1.cursor()
-    c.execute(f"SELECT DISTINCT Bus FROM T_PINGS WHERE Operator = '{session['email']}' and Route='{route}' ORDER BY Timestamp > now() - interval 1 hour")
+    c.execute(f"SELECT DISTINCT Bus FROM T_PINGS WHERE Operator = '{session['email']}' and Route='{route}' and Timestamp > now() - interval 1 hour")
     result= c.fetchall()
     buses = [n[0] for n in result]
     busdata = {}
     for i_bus,bus in enumerate(buses):
         c.execute(f"SELECT Latitude, Longitude, Timestamp FROM T_PINGS WHERE Operator = '{session['email']}' and Route='{route}' and Bus = '{bus}' ORDER BY Timestamp Desc LIMIT 3")
         result= c.fetchall()
-        timediff = result[0][2]-result[1][2]
-        latest_coord = [result[2][0],result[2][1]]
-        previous_coord = [result[1][0],result[1][1]]
-        init_pos = utm.from_latlon(previous_coord[0],previous_coord[1])
-        fin_pos = utm.from_latlon(latest_coord[0],latest_coord[1])
-        distance = geopy.distance.distance(latest_coord, previous_coord).m
-        speed = round((distance/timediff.total_seconds())*18/5)
+        try:
+            timediff = result[0][2]-result[1][2]
+            latest_coord = [result[2][0],result[2][1]]
+            previous_coord = [result[1][0],result[1][1]]
+            distance = geopy.distance.distance(latest_coord, previous_coord).m
+            speed = round((distance/timediff.total_seconds())*18/5)
+            timediff = timediff.total_seconds()
+        except:
+            timediff = 0
+            speed = 0
         data = []
         for res in result:
-            data.append({"latitude": res[0],"longitude": res[1],"Speed" :speed,"Timediff": timediff.total_seconds()})
+            data.append({"latitude": res[0],"longitude": res[1],"Speed" :speed,"Timediff": timediff})
 
         c.execute(f"SELECT s.id,s.Stop_Name,s.Stop_Lat,s.Stop_Long,s.Stop_rad FROM T_ROUTE_INFO AS r INNER JOIN T_STOPS_INFO AS s ON (s.id = r.Stop_id) WHERE r.Operator = '{session['email']}' and r.Route='{session['route']}' ORDER BY r.Stop_num")
         stops= c.fetchall()
@@ -1430,11 +1435,14 @@ def driver():
     conn = connpool.get_connection()
     c = conn.cursor()
     c.execute(f"SELECT Bus, Route FROM T_BUSES WHERE Driver = '{driver}';")
-    data = c.fetchall()
-    bus = data[0][0]
-    route = data[0][1]
+    try:
+        data = c.fetchall()
+        bus = data[0][0]
+        route = data[0][1]
 
-    session['route'] = route
+        session['route'] = route
+    except:
+        return render_template('driver.html', message=f"Hello {driver} Your are not assigned any bus.")
 
     return render_template('driver.html', bus=bus, message=f"Hello {driver} Your are assigned Bus: {bus} and Route: {route}")
 
@@ -1478,11 +1486,11 @@ def get_images():
 
     try:
         # Retrieve the image data from the database
-        c.execute(f"SELECT DISTINCT Bus FROM T_PINGS WHERE Operator = '{session['email']}' and Route='{session['route']}' ORDER BY Timestamp > now() - interval 1 hour")
+        c.execute(f"SELECT DISTINCT Bus FROM T_PINGS WHERE Operator = '{session['email']}' and Route='{session['route']}' and Timestamp > now() - interval 1 hour")
         result= c.fetchall()
         buses = [n[0] for n in result]
         tuple_buses = str(tuple(buses)).replace(',)',')')
-        c.execute(f"SELECT Bus, Image FROM T_BUSES WHERE Bus IN {tuple_buses}")
+        c.execute(f"SELECT Bus, Image FROM T_BUSES WHERE Bus IN {tuple_buses} and Operator = '{session['email']}' and Route='{session['route']}'")
         # c.execute(f"SELECT Bus, Image FROM T_BUSES WHERE Bus = '{buses[0]}'")
         results = c.fetchall()
 

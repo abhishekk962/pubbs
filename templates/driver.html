@@ -66,10 +66,14 @@
     <div id="map" class="map2"></div>
     <div id="panel2"></div>
     <div id="rightpanel">
+      <div>BUS</div>
+      <div id="currentbus">{{ bus }}</div>
+      <div>ROUTE</div>
+      <div>{{ session['route'] }}</div>
+      <div id="panic">SOS</div>
     </div>
   </div>
   <p style="position:fixed;opacity:0;" id="username">{{ session['email'] }}</p>
-  <p style="position:fixed;opacity:0;" id="currentbus">{{ bus }}</p>
 </div>
   <script src="https://cdn.jsdelivr.net/npm/leaflet@1.7.1/dist/leaflet.js"></script>
   <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
@@ -133,7 +137,18 @@
 
     map.on('click', function(e) {
       var selectedbus = document.getElementById('buses').value
+
       socket.emit('location', {latitude: e.latlng.lat, longitude: e.latlng.lng, bus:selectedbus})
+
+      const xhr = new XMLHttpRequest();
+      xhr.open('POST', '/gpslocation', true);
+      xhr.setRequestHeader('Content-Type', 'application/json');
+      xhr.onreadystatechange = function() {
+        if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
+          console.log('Location sent successfully');
+        }
+      };
+      xhr.send(JSON.stringify({latitude: e.latlng.lat, longitude:  e.latlng.lng, bus:selectedbus}));
     });
 
     var linesLayer = L.layerGroup().addTo(map);
@@ -524,8 +539,8 @@
         var acc = location.coords.accuracy;
         var content = document.createElement('p')
         content.textContent = lat + ' ' + lng + ' ' + acc
-        document.getElementById('rightpanel').replaceChildren()
-        document.getElementById('rightpanel').appendChild(content)
+        // document.getElementById('rightpanel').replaceChildren()
+        // document.getElementById('rightpanel').appendChild(content)
 
         // Send the image data to the Flask endpoint
         const xhr = new XMLHttpRequest();
