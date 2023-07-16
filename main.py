@@ -2265,7 +2265,10 @@ def get_pings(route):
 
         c.execute(f"SELECT Schedule from T_SCHEDULING_OUTPUT Where Operator='{session['email']}' and Route='{session['route']}'")
         schedule=b2df(c.fetchone()[0])
-        trip_no = schedule.loc[(schedule['bus_name1'] == bus) & (schedule['Dep/Arrival T1'] == 'Departure'),'Dep T1'].values[0]
+        try:
+            trip_no = schedule.loc[(schedule['bus_name1'] == bus) & (schedule['Dep/Arrival T1'] == 'Departure'),'Dep T1'].values[0]
+        except:
+            continue
         trip_no = int(trip_no)
         
         arrival_times = stoparrivalUP.iloc[trip_no-1,:].to_list()
@@ -2339,7 +2342,10 @@ def holding_data():
 
         c.execute(f"SELECT Schedule from T_SCHEDULING_OUTPUT Where Operator='{session['email']}' and Route='{session['route']}'")
         schedule=b2df(c.fetchone()[0])
-        trip_no = schedule.loc[(schedule['bus_name1'] == bus) & (schedule['Dep/Arrival T1'] == 'Departure'),'Dep T1'].values[0]
+        try:
+            trip_no = schedule.loc[(schedule['bus_name1'] == bus) & (schedule['Dep/Arrival T1'] == 'Departure'),'Dep T1'].values[0]
+        except:
+            continue
         trip_no = int(trip_no)
         
         arrival_times = stoparrivalUP.iloc[trip_no-1,:].to_list()
@@ -3043,30 +3049,30 @@ def holding_process_run(delay,trip_no,stop_no,drctn):
             #Export files
             if direc == 'DN':
                 c = conn4.cursor(pymysql.cursors.DictCursor)
-                c.execute(f"SELECT * FROM T_INPUT_FILES_HOLDING_2 WHERE WHERE Operator='{session['email']}' AND Route='{session['route']}' AND Direction='DN';")
+                c.execute(f"SELECT * FROM T_INPUT_FILES_HOLDING_2 WHERE Operator='{session['email']}' AND Route='{session['route']}' AND Direction='DN';")
                 row = c.fetchone()
 
                 for i,n in enumerate(columns):
                     row[columns[i]] = df2b(files[i])
                 
-                c.execute(f"DELETE FROM T_INPUT_FILES_HOLDING_2 WHERE WHERE Operator='{session['email']}' AND Route='{session['route']}' AND Direction='DN';")
-                sql = f"INSERT INTO T_INPUT_FILES_HOLDING_2 ({','.join([f'`{n}`' for n in row])}) VALUES ({','.join(['%s' for n in row])})"
+                # c.execute(f"DELETE FROM T_INPUT_FILES_HOLDING_2 WHERE Operator='{session['email']}' AND Route='{session['route']}' AND Direction='DN';")
+                # sql = f"INSERT INTO T_INPUT_FILES_HOLDING_2 ({','.join([f'`{n}`' for n in row])}) VALUES ({','.join(['%s' for n in row])})"
 
-                c.execute(sql,tuple([row[n] for n in row]))
+                # c.execute(sql,tuple([row[n] for n in row]))
                 conn4.commit()
 
             else:
                 c = conn4.cursor(pymysql.cursors.DictCursor)
-                c.execute(f"SELECT * FROM T_INPUT_FILES_HOLDING_2 WHERE WHERE Operator='{session['email']}' AND Route='{session['route']}' AND Direction='UP';")
+                c.execute(f"SELECT * FROM T_INPUT_FILES_HOLDING_2 WHERE Operator='{session['email']}' AND Route='{session['route']}' AND Direction='UP';")
                 row = c.fetchone()
 
                 for i,n in enumerate(columns):
                     row[columns[i]] = df2b(files[i])
                 
-                c.execute(f"DELETE FROM T_INPUT_FILES_HOLDING_2 WHERE WHERE Operator='{session['email']}' AND Route='{session['route']}' AND Direction='UP';")
-                sql = f"INSERT INTO T_INPUT_FILES_HOLDING_2 ({','.join([f'`{n}`' for n in row])}) VALUES ({','.join(['%s' for n in row])})"
+                # c.execute(f"DELETE FROM T_INPUT_FILES_HOLDING_2 WHERE Operator='{session['email']}' AND Route='{session['route']}' AND Direction='UP';")
+                # sql = f"INSERT INTO T_INPUT_FILES_HOLDING_2 ({','.join([f'`{n}`' for n in row])}) VALUES ({','.join(['%s' for n in row])})"
 
-                c.execute(sql,tuple([row[n] for n in row]))
+                # c.execute(sql,tuple([row[n] for n in row]))
                 conn4.commit()
 
             return(despatch,stoparrival,t_cost)
