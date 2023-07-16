@@ -11,6 +11,9 @@
   <option value="Bus 1">Bus 1</option>
   <option value="Bus 2">Bus 2</option>
   <option value="Bus 3">Bus 3</option>
+  <option value="Bus 1">Bus 4</option>
+  <option value="Bus 2">Bus 5</option>
+  <option value="Bus 3">Bus 6</option>
 </select>
 <div class="content">
   <div class="mapdata">
@@ -170,6 +173,31 @@
             },
             error: function() {
               console.log('Error!');
+            }
+          });
+        };
+
+      holdingInterval = setInterval(function() { // run function every 4000 ms
+          holdingcheck();
+      }, 20000);
+
+      holdingcheck();
+
+      function holdingcheck() {
+          $.ajax({
+            url: '/holding-data',
+            dataType: 'json',
+            type: 'get',
+            success: function(data) {
+              if ( data ) {
+                console.log(data);
+                for (var key in data){
+                  console.log(data[key],key);
+                }
+              }
+            },
+            error: function(e) {
+              console.log('Error!',e);
             }
           });
         };

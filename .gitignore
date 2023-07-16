@@ -37,3 +37,6 @@ old pages.zip
 *.pyc
 templates/test.html
 testingpubbs.ipynb
+/Function files
+frequency.ipynb
+holding.ipynb

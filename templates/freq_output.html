@@ -1,0 +1,91 @@
+{% extends "dashboard.html" %}
+
+{% block content %}
+<div class="content" style="flex-direction: row;"> 
+{% if message %}<div id="messagebox">{{message}}</div>{% endif %}
+  <p style="position: absolute; top: 0;">
+    {{heading}}
+  </p>
+  <!-- CSV FILE SELECTOR -->
+  <select id="output_csvs" style="background: white; position: absolute; bottom: 1%;">
+    <option value="" selected="selected" hidden="hidden">Select table</option>
+    {% for file in outputs %}
+    <option value="{{file[0]}}">{{file[0]}}</option>
+    {% endfor %}
+  </select>
+  <form class='scroll-table' action="{{url_for('initial_frequency')}}" method="POST" style="display: flex;flex-direction: column;align-items: center;flex-grow: 0;">
+    <div style="display: flex; flex-direction: row;">
+    {%for file in csvfiles%}
+    <div class="scroll-table" style="font-size: 12px;">
+      <b>{{file[0]}}</b>
+      <table>
+        <thead>
+          <tr>
+            {%for header in file[1]%}
+            <th>{{header}}</th>
+            {%endfor%}
+          </tr>
+        </thead>
+          {% for row in file[2:] %}
+          <tr>
+            <td>{{row[0]}}</td>
+            {%for cell in row[1:] %}
+              <td><input type="number" name="{{file[0]}}_{{row[0]}}_freq" value="{{cell}}"></td>
+              <!-- <td>{{cell}}</td> -->
+            {% endfor %}
+          </tr>
+          {% endfor %}
+      </table>
+    </div>
+    {% endfor %}
+    </div>
+    <input type="submit" value="Save">
+  </form>
+  {%for file in outputs%}
+  <form class='tableform files' style="display: none; flex-grow: 8;justify-content: center;" id="{{file[0]}}_file">
+
+    <div class="scroll-table" style="font-size: 12px;">
+      <b>{{file[0]}}</b>
+      <table>
+        <thead>
+          <tr>
+            {%for header in file[1]%}
+            <th>{{header}}</th>
+            {%endfor%}
+          </tr>
+        </thead>
+          {% for row in file[2:] %}
+          <tr>
+            <td>{{row[0]}}</td>
+            {%for cell in row[1:] %}
+              <!-- <td><input type="number" name="{{file[0]}}_{{row[0]}}_freq" value="{{cell}}"></td> -->
+              <td>{{cell}}</td>
+            {% endfor %}
+          </tr>
+          {% endfor %}
+      </table>
+    </div>
+  </form>
+  {% endfor %}
+  
+</div>
+{% endblock %}
+
+{% block foot %}
+<script> 
+document.getElementById('output_csvs').addEventListener('change', function(){
+    document.querySelectorAll('.files').forEach(e => e.style.display = 'none');
+    var csv = this.value + '_file'
+    document.getElementById(csv).style.display = 'flex'
+    // this.style.display = 'none'
+    // this.style.position = 'absolute'
+    // this.style.margin = 'auto auto'
+    // this.style.top = '0'
+    // this.style.left = '0'
+    // this.style.right = '0'
+    // this.style.bottom = '0'
+  })
+
+</script>
+{% endblock %}
+

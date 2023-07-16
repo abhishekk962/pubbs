@@ -13,7 +13,7 @@
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,0,0" />
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js" integrity="sha512-q/dWJ3kcmjBLU4Qc47E4A9kTB4m3wuTY7vkFJDTZKjTs8jhyGQnaUrxa0Ytd0ssMZhbNua9hE+E7Qv1j+DyZwA==" crossorigin="anonymous"></script>
+  <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js" integrity="sha512-q/dWJ3kcmjBLU4Qc47E4A9kTB4m3wuTY7vkFJDTZKjTs8jhyGQnaUrxa0Ytd0ssMZhbNua9hE+E7Qv1j+DyZwA==" crossorigin="anonymous"></script> -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js"></script>
 </head>
 <body>
@@ -32,7 +32,7 @@
     </div>
   </div>
 </header>
-<nav style="display: none;">
+<nav style="background: none;box-shadow: none;">
   <div id="account">
     <div id="profile">
       <span class="material-symbols-outlined" style="padding: 5px;font-size: 40px;">person</span>
@@ -65,19 +65,42 @@
     {% if message %}<div id="messagebox">{{message}}</div>{% endif %}
     <div id="map" class="map2"></div>
     <div id="panel2"></div>
-    <div id="rightpanel">
-      <div>BUS</div>
-      <div id="currentbus">{{ bus }}</div>
-      <div>ROUTE</div>
-      <div>{{ session['route'] }}</div>
-      <div id="panic">SOS</div>
+    <div id="rightpanel" style="background: none;">
+      <div id="currentbus" style="width: 100%;text-align: center;font-size: 40px;color: white;">{{ bus }}</div>
+      <hr style="width: 80%;">
+      <div style="width: 100%;text-align: center;font-size: 30px;color: white;">{{ session['route'] }}</div>
+      <button id="panic">SOS</button>
     </div>
   </div>
   <p style="position:fixed;opacity:0;" id="username">{{ session['email'] }}</p>
 </div>
   <script src="https://cdn.jsdelivr.net/npm/leaflet@1.7.1/dist/leaflet.js"></script>
   <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
+  {% if message %}
+    <script>
+      var msgbox = document.getElementById('messagebox')
+
+      msgbox.innerHTML = '<div style="padding: 4px;">' + msgbox.innerHTML + '</div><div style=" background: #76C551; padding: 4px 6px; "><i class="fa fa-check" style="color: #ffffff;"></i></div>'
+
+      msgbox.addEventListener('click',function(){
+        msgbox.style.display = 'none'
+      })
+
+    </script>
+  {% endif %}
   <script>
+    var accountshow = document.getElementById('account-show');
+    var account = document.getElementById('account');
+    accountshow.addEventListener('click',function(){
+      if (account.style.display == 'flex'){
+        account.style.display = 'none'
+      } else {
+        account.style.display = 'flex'
+      }
+    })
+
+
+
     var busMarker = {
         radius : 6,
         color  : '#8C025D',
@@ -129,16 +152,16 @@
     // livelocation
     var email = document.getElementById('username').textContent;
 
-    var socket = io();
-    socket.on('connect', function() {
-        socket.emit('join',{room: email});
-        socket.emit('my event', {data: 'I\'m connected!'});
-    });
+    // var socket = io();
+    // socket.on('connect', function() {
+    //     socket.emit('join',{room: email});
+    //     socket.emit('my event', {data: 'I\'m connected!'});
+    // });
 
     map.on('click', function(e) {
       var selectedbus = document.getElementById('buses').value
 
-      socket.emit('location', {latitude: e.latlng.lat, longitude: e.latlng.lng, bus:selectedbus})
+      // socket.emit('location', {latitude: e.latlng.lat, longitude: e.latlng.lng, bus:selectedbus})
 
       const xhr = new XMLHttpRequest();
       xhr.open('POST', '/gpslocation', true);
@@ -257,6 +280,20 @@
         // // Based on perpendicular distance from segment, determine previous and next stop
         // closestStop = getClosestStop(distances, markersarray.slice(markersarray.indexOf(closestStop)-1));
 
+        if (markersarray.indexOf(closestStop) != 0 && markersarray.indexOf(closestStop) != markersarray.length-1) {
+          P = pointer
+          A = markersarray[markersarray.indexOf(closestStop) - 1]
+          B = closestStop
+          C = markersarray[markersarray.indexOf(closestStop) + 1]
+
+          if (calculateAngle(P,B,A) > calculateAngle(P,B,C)){
+            prevstop = A
+          } else {
+            prevstop = C
+          }
+        }
+
+
         if (markersarray.indexOf(closestStop)+1 != markersarray.length){
           // Three sides of trianble joining nearest stop, prev stop and next stop
           var side1 = distBet(pointer,closestStop)
@@ -331,6 +368,8 @@
           document.getElementById('route-bar').appendChild(segElem)
         }
 
+        //time elements code
+
         var covDist = 0;
         for (let i = 0; i <= markersarray.indexOf(prevstop)-1 ; i++) {
           covDist = covDist + distBet(markersarray[i],markersarray[i+1])
@@ -350,7 +389,7 @@
         busLocElem.classList.add('stop-marker')
         busLocElem.classList.add('bus-marker')
         var currentbus = document.getElementById('currentbus').textContent;
-        if (currentbus = key) {
+        if (currentbus === key) {
           busLocElem.style.border ='ridge'
         }
         busLocElem.innerHTML = '<span class="material-symbols-outlined bus-icon">directions_bus</span>'
@@ -384,7 +423,7 @@
         times.replaceChildren()
         for (let i = 0; i < stop_names.length ; i++) {
           var time_elem = document.createElement('div')
-          time_elem.textContent = stop_names[i] + '-' + arrival_times[currentbus][i]
+          time_elem.innerHTML = '<div style="margin: 0 50px;">' + stop_names[i] + '</div><div style="margin: 0 50px;">' + arrival_times[currentbus][i] +'</div>'
           times.appendChild(time_elem)
         }
       };
@@ -414,6 +453,20 @@
         const closestStop = stops[minIndex];
 
         return closestStop;
+      }
+
+      function calculateAngle(A, B, C) {
+        const angle1 = Math.atan2(A.lng - B.lng, A.lat - B.lat);
+        const angle2 = Math.atan2(C.lng - B.lng, C.lat - B.lat);
+
+        let angle = angle2 - angle1;
+        angle = angle * (180 / Math.PI);
+
+        if (angle < 0) {
+          angle += 360;
+        }
+
+        return angle;
       }
 
       function calculateProjection(A, B, X) {
@@ -521,7 +574,7 @@
       xhr.send(JSON.stringify({ image: imageData }));
     };
 
-    setInterval(uploadimage,5000)
+    // setInterval(uploadimage,5000)
 
     // Sending live location
     function sendlocation(){
