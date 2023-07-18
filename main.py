@@ -2370,12 +2370,14 @@ def holding_data():
                           f"{int(scheduled_arrival)}".zfill(2) + ":" + f"{round((scheduled_arrival-int(scheduled_arrival))*60)}".zfill(2))
 
                     holding_table = holding_process_run(delay,trip_no,stop_no,'UP')
-                    if holding_table:
+                    try:
                         busdata = []
                         holding_table.set_index()
                         holding_table.set_index('bus_name',inplace=True)
                         busdata['holding'] = holding_table.to_json(orient='index')
                         return jsonify(busdata)
+                    except:
+                        return "None"
     return "checked"
 
 @app.route('/driver')
@@ -3250,7 +3252,7 @@ def holding_process_run(delay,trip_no,stop_no,drctn):
     # #INPUT FILES
 
     #INPUT FILES
-    holding= pd.DataFrame(data={})
+    holding= pd.DataFrame(data={0:[0,0,0,0],0.1:[0,0,0,0],0.2:[0,0,0,0],0:[0,0,0,0]})
     # holding=pd.read_csv(r'Function files\Input_files_holding\holding_process.csv ')
     if drctn== 'DN':
         veh_sch = b2df(dn_data['veh_schedule'])
@@ -5752,9 +5754,9 @@ def open_browser():
 
 if __name__ == '__main__':
     Timer(1, open_browser).start()
-    socketio.run(app, host="0.0.0.0", port=8080)
+    # socketio.run(app, host="0.0.0.0", port=8080)
     # app.run(debug=True)
-    # from waitress import serve
-    # serve(app, host="0.0.0.0", port=8080) # http://localhost:8080/
+    from waitress import serve
+    serve(app, host="0.0.0.0", port=8080) # http://localhost:8080/
 
 
