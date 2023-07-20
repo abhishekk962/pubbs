@@ -34,21 +34,21 @@
     </header>
     <nav>
       <form>
-        <button type="submit" class="nav-button" formaction="{{url_for('busroute')}}">Bus Route</button>
-        {% if 'route' in session %}
-        <button type="submit" class="nav-button" formaction="{{url_for('stop_details')}}">Stop Details</button>
-        <button type="submit" class="nav-button" formaction="{{url_for('route_details')}}">Build Route</button>
-        <button type="submit" class="nav-button" formaction="{{url_for('stop_char')}}">Stop Characteristics</button>
-        <button type="submit" class="nav-button" formaction="{{url_for('table_details')}}">Table Details</button>
-        <button type="submit" class="nav-button" formaction="{{url_for('ols_details')}}">OLS Details</button>
-        <button type="submit" class="nav-button" formaction="{{url_for('constraints_details')}}">Constraints</button>
-        <button type="submit" class="nav-button" formaction="{{url_for('service_details')}}">Service Details</button>
-        <button type="submit" class="nav-button" formaction="{{url_for('ga_params')}}">GA Params</button>
-        <button type="submit" class="nav-button" formaction="{{url_for('scheduling_details')}}">Scheduling Details</button>
-        <button type="submit" class="nav-button" formaction="{{url_for('scheduling')}}">Scheduling Files</button>
+        <button type="submit" class="nav-button" formaction="{{url_for('buses')}}">Depot</button>
         <button type="submit" class="nav-button" formaction="{{url_for('buses')}}">Buses</button>
+        <button type="submit" class="nav-button" formaction="{{url_for('busroute')}}">Bus Route</button>
+        <button type="submit" class="nav-button" formaction="{{url_for('stop_details')}}">Insert Stop</button>
+        <button type="submit" class="nav-button" formaction="{{url_for('stop_char')}}">Stop Details</button>
+        <button type="submit" class="nav-button" formaction="{{url_for('route_details')}}">Travel Demand</button>
+        <button type="submit" class="nav-button" formaction="{{url_for('route_details')}}">Travel Time</button>
+        <button type="submit" class="nav-button" formaction="{{url_for('ols_details')}}">OLS Details</button>
+        <button type="submit" class="nav-button" formaction="{{url_for('constraints_details')}}">Default Constraints</button>
+        <button type="submit" class="nav-button" formaction="{{url_for('service_details')}}">Default Service Details</button>
+        <button type="submit" class="nav-button" formaction="{{url_for('ga_params')}}">Frequency Setting</button>
+        <button type="submit" class="nav-button" formaction="{{url_for('scheduling_details')}}">Scheduling</button>
+        <button type="submit" class="nav-button" formaction="{{url_for('ga_params')}}">Frequency Time</button>
+        <button type="submit" class="nav-button" formaction="{{url_for('ga_params')}}">Crew Detail</button>
         <!-- <button type="submit" class="nav-button" formaction="{{url_for('livelocation')}}">Live</button> -->
-        {% endif %}
       </form>
       <div id="account">
         <div id="profile">
@@ -63,6 +63,7 @@
     </nav>
     <div class="page-body">
       <div class="sidebar">
+        <p style="position:fixed;opacity:0;" id="sidebarstate">{{ session['sidebar'] }}</p>
         <div class="route">Route: {{ session['route'] }}</div>
         <form method="get" action="{{url_for('frequency')}}" style="display: flex;flex-direction: column;align-items: center;">
           <button id="freq" formaction="{{url_for('initial_frequency')}}" class="label-button" type="submit" disabled hidden>Period Wise Frequency Setting</button>
@@ -119,9 +120,11 @@
       const showfreq = document.getElementById("showfreq");
       showfreq.onclick = function () {
         if (statusfreq.style.display !== "none") {
+          fetch('/sidebar/close')
           statusfreq.style.display = "none";
           showfreq.childNodes[1].classList.remove('fa-rotate-180')
         } else {
+          fetch('/sidebar/freq')
           statusfreq.style.display = "flex";
           showfreq.childNodes[1].classList.add('fa-rotate-180')
         }
@@ -130,9 +133,11 @@
       const showsched = document.getElementById("showsched");
       showsched.onclick = function () {
         if (statussched.style.display !== "none") {
+          fetch('/sidebar/close')
           statussched.style.display = "none";
           showsched.childNodes[1].classList.remove('fa-rotate-180')
         } else {
+          fetch('/sidebar/sched')
           statussched.style.display = "flex";
           showsched.childNodes[1].classList.add('fa-rotate-180')
         }
@@ -141,13 +146,20 @@
       const showlive = document.getElementById("showlive");
       showlive.onclick = function () {
         if (statuslive.style.display !== "none") {
+          fetch('/sidebar/close')
           statuslive.style.display = "none";
           showlive.childNodes[1].classList.remove('fa-rotate-180')
         } else {
+          fetch('/sidebar/live')
           statuslive.style.display = "flex";
           showlive.childNodes[1].classList.add('fa-rotate-180')
         }
       };
+      const sidebarstate = document.getElementById("sidebarstate").textContent
+      if (sidebarstate != 'close'){
+        document.getElementById("status"+sidebarstate).style.display = "flex";
+        document.getElementById("show"+sidebarstate).childNodes[1].classList.add('fa-rotate-180')
+      }
     </script>
     {% block foot %}
     {% endblock %}

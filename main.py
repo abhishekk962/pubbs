@@ -1055,6 +1055,11 @@ def registered():
         return render_template('login1.html', message = message)
         # return render_template('register1.html', message = message)
 
+@app.route('/sidebar/<section>', methods=['GET', 'POST'])
+def sidebar(section):
+    session['sidebar'] = section
+    return section
+
 # DATA ENTRY================================================================================================================
 
 @app.route('/bus-route', methods=['GET', 'POST'])
@@ -1671,6 +1676,8 @@ def upload_csv_data():
 
     csvdata = request.files['csvfile'].read()
     csvdata = pd.read_csv(BytesIO(csvdata))
+    print(csvdata)
+    csvdata = csvdata.iloc[:,1:]
     csvdata = csvdata.transpose()
     csvdata = list(csvdata.itertuples(index=False, name=None))
     # if len(csvdata) != session['periods']:
@@ -1707,13 +1714,13 @@ def download_csv_data():
 
     # Write csv
     csv = ""
-    csv += ','.join(stops_list) + '\n'
-    for r in rows:
+    csv += ',' + ','.join(stops_list) + '\n'
+    for i,r in enumerate(rows):
         row = []
         for s in stop_ids:
             row.append(float(data[f"{s}_{r}"]))
         row = ','.join([str(n) for n in row])
-        csv += row + '\n'
+        csv += str(stops_list[i])+ ',' + row + '\n'
 
     return Response(
         csv,
@@ -1952,27 +1959,43 @@ def scheduling_run(method):
 
         conn = connpool.get_connection()
         c = conn.cursor()
-        c.execute(f"SELECT * FROM T_SCHEDULING_FILES WHERE Route = '{session['route']}' and Operator = '{session['email']}';")
-        files = c.fetchone()
+        c.execute(f"SELECT departuretime,travel_time_tot,stoparrival FROM T_INPUT_FILES_HOLDING WHERE Route = '{session['route']}' and Operator = '{session['email']}' and Direction = 'DN';")
+        dn_files = c.fetchone()
 
-        departuretimeDN = pd.read_csv(StringIO(files[2]))
-        departuretimeUP = pd.read_csv(StringIO(files[3]))
-        terminalarrivalDN = pd.read_csv(StringIO(files[4]))
+        departuretimeDN = b2df(dn_files[0])
+        terminalarrivalDN = b2df(dn_files[2])
         terminalarrivalDN = terminalarrivalDN.iloc[:, 0]
-        terminalarrivalUP = pd.read_csv(StringIO(files[5]))
+        travel_time_totDN = b2df(dn_files[1])
+
+        c.execute(f"SELECT departuretime,travel_time_tot,stoparrival FROM T_INPUT_FILES_HOLDING WHERE Route = '{session['route']}' and Operator = '{session['email']}' and Direction = 'UP';")
+        up_files = c.fetchone()
+
+        departuretimeUP = b2df(up_files[0])
+        terminalarrivalUP = b2df(up_files[2])
         terminalarrivalUP = terminalarrivalUP.iloc[:, 0]
-        travel_time_totDN = pd.read_csv(StringIO(files[6]))
-        travel_time_totUP = pd.read_csv(StringIO(files[7]))
+        travel_time_totUP = b2df(up_files[1])
+
+        # c.execute(f"SELECT * FROM T_SCHEDULING_FILES WHERE Route = '{session['route']}' and Operator = '{session['email']}';")
+        # files = c.fetchone()
+
+        # departuretimeDN = pd.read_csv(StringIO(files[2]))
+        # departuretimeUP = pd.read_csv(StringIO(files[3]))
+        # terminalarrivalDN = pd.read_csv(StringIO(files[4]))
+        # terminalarrivalDN = terminalarrivalDN.iloc[:, 0]
+        # terminalarrivalUP = pd.read_csv(StringIO(files[5]))
+        # terminalarrivalUP = terminalarrivalUP.iloc[:, 0]
+        # travel_time_totDN = pd.read_csv(StringIO(files[6]))
+        # travel_time_totUP = pd.read_csv(StringIO(files[7]))
 
         if method == 'Multiline':
-            r1_dtimeDN = pd.read_csv(StringIO(files[2]))
-            r1_dtimeUP = pd.read_csv(StringIO(files[3]))
-            r1_tarrivalDN = pd.read_csv(StringIO(files[4]))
+            r1_dtimeDN = b2df(dn_files[0])
+            r1_dtimeUP = b2df(up_files[0])
+            r1_tarrivalDN = b2df(dn_files[2])
             r1_tarrivalDN = r1_tarrivalDN.iloc[:, 0]
-            r1_tarrivalUP = pd.read_csv(StringIO(files[5]))
+            r1_tarrivalUP = b2df(up_files[2])
             r1_tarrivalUP = r1_tarrivalUP.iloc[:, 0]
-            r1_ttDN = pd.read_csv(StringIO(files[6]))
-            r1_ttUP = pd.read_csv(StringIO(files[7]))
+            r1_ttDN = b2df(dn_files[1])
+            r1_ttUP = b2df(up_files[1])
 
             query = f"SELECT A,B,dead_todepot_t1,dead_todepot_t2 FROM T_PARAMETERS WHERE Operator = '{session['email']}' and Route = '{session['route']}'"
             c.execute(query)
@@ -1984,17 +2007,23 @@ def scheduling_run(method):
             d2 = c.fetchone()
             data.update(A2=d2[0],B2=d2[1],dead_todepot_r2t1=d2[2],dead_todepot_r2t2=d2[3])
 
-            c.execute(f"SELECT * FROM T_SCHEDULING_FILES WHERE Route = '{request.form['second_route']}' and Operator = '{session['email']}';")
-            files = c.fetchone()
+            c.execute(f"SELECT departuretime,travel_time_tot,stoparrival FROM T_INPUT_FILES_HOLDING WHERE Route = '{request.form['second_route']}' and Operator = '{session['email']}' and Direction = 'DN';")
+            dn_files = c.fetchone()
 
-            r2_dtimeDN = pd.read_csv(StringIO(files[2]))
-            r2_dtimeUP = pd.read_csv(StringIO(files[3]))
-            r2_tarrivalDN = pd.read_csv(StringIO(files[4]))
+            c.execute(f"SELECT departuretime,travel_time_tot,stoparrival FROM T_INPUT_FILES_HOLDING WHERE Route = '{request.form['second_route']}' and Operator = '{session['email']}' and Direction = 'UP';")
+            up_files = c.fetchone()
+
+            # c.execute(f"SELECT * FROM T_SCHEDULING_FILES WHERE Route = '{request.form['second_route']}' and Operator = '{session['email']}';")
+            # files = c.fetchone()
+
+            r2_dtimeDN = b2df(dn_files[0])
+            r2_dtimeUP = b2df(up_files[0])
+            r2_tarrivalDN = b2df(dn_files[2])
             r2_tarrivalDN = r2_tarrivalDN.iloc[:, 0]
-            r2_tarrivalUP = pd.read_csv(StringIO(files[5]))
+            r2_tarrivalUP = b2df(up_files[2])
             r2_tarrivalUP = r2_tarrivalUP.iloc[:, 0]
-            r2_ttDN = pd.read_csv(StringIO(files[6]))
-            r2_ttUP = pd.read_csv(StringIO(files[7]))
+            r2_ttDN = b2df(dn_files[1])
+            r2_ttUP = b2df(up_files[1])
 
             from multiline_scheduling_model2 import main_schedule
 
@@ -2257,11 +2286,19 @@ def get_pings(route):
         stops_coord = [[n[2],n[3]] for n in stops]
         stops_rad = [n[4] for n in stops]
 
-        c.execute(f"SELECT * FROM T_SCHEDULING_FILES WHERE Route = '{session['route']}' and Operator = '{session['email']}';")
+        c.execute(f"SELECT stoparrival FROM T_INPUT_FILES_HOLDING WHERE Route = '{session['route']}' and Operator = '{session['email']}' and Direction = 'DN';")
         files = c.fetchone()
+        stoparrivalDN = b2df(files[1])
 
-        stoparrivalDN = pd.read_csv(StringIO(files[4]))
-        stoparrivalUP = pd.read_csv(StringIO(files[5]))
+        c.execute(f"SELECT stoparrival FROM T_INPUT_FILES_HOLDING WHERE Route = '{session['route']}' and Operator = '{session['email']}' and Direction = 'UP';")
+        files = c.fetchone()
+        stoparrivalUP = b2df(files[1])
+
+        # c.execute(f"SELECT * FROM T_SCHEDULING_FILES WHERE Route = '{session['route']}' and Operator = '{session['email']}';")
+        # files = c.fetchone()
+
+        # stoparrivalDN = pd.read_csv(StringIO(files[4]))
+        # stoparrivalUP = pd.read_csv(StringIO(files[5]))
 
         c.execute(f"SELECT Schedule from T_SCHEDULING_OUTPUT Where Operator='{session['email']}' and Route='{session['route']}'")
         schedule=b2df(c.fetchone()[0])
@@ -2334,11 +2371,19 @@ def holding_data():
         stops_coord = [[n[2],n[3]] for n in stops]
         stops_rad = [n[4] for n in stops]
 
-        c.execute(f"SELECT * FROM T_SCHEDULING_FILES WHERE Route = '{session['route']}' and Operator = '{session['email']}';")
+        c.execute(f"SELECT stoparrival FROM T_INPUT_FILES_HOLDING WHERE Route = '{session['route']}' and Operator = '{session['email']}' and Direction = 'DN';")
         files = c.fetchone()
+        stoparrivalDN = b2df(files[1])
 
-        stoparrivalDN = pd.read_csv(StringIO(files[4]))
-        stoparrivalUP = pd.read_csv(StringIO(files[5]))
+        c.execute(f"SELECT stoparrival FROM T_INPUT_FILES_HOLDING WHERE Route = '{session['route']}' and Operator = '{session['email']}' and Direction = 'UP';")
+        files = c.fetchone()
+        stoparrivalUP = b2df(files[1])
+
+        # c.execute(f"SELECT * FROM T_SCHEDULING_FILES WHERE Route = '{session['route']}' and Operator = '{session['email']}';")
+        # files = c.fetchone()
+
+        # stoparrivalDN = pd.read_csv(StringIO(files[4]))
+        # stoparrivalUP = pd.read_csv(StringIO(files[5]))
 
         c.execute(f"SELECT Schedule from T_SCHEDULING_OUTPUT Where Operator='{session['email']}' and Route='{session['route']}'")
         schedule=b2df(c.fetchone()[0])
@@ -5754,9 +5799,9 @@ def open_browser():
 
 if __name__ == '__main__':
     Timer(1, open_browser).start()
-    # socketio.run(app, host="0.0.0.0", port=8080)
+    socketio.run(app, host="0.0.0.0", port=8080)
     # app.run(debug=True)
-    from waitress import serve
-    serve(app, host="0.0.0.0", port=8080) # http://localhost:8080/
+    # from waitress import serve
+    # serve(app, host="0.0.0.0", port=8080) # http://localhost:8080/
 
 
