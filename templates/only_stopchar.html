@@ -4,7 +4,7 @@
 <div class="content"> 
   {% if message %}<div id="messagebox">{{message}}</div>{% endif %}
   {% if stop_ids %}
-  <form style="max-width: 70%;"action="{{url_for('stop_char')}}" method="POST">
+  <form style="max-width: 70%; max-height: 80%; overflow: scroll;"action="{{url_for('stop_char')}}" method="POST">
       <b>Stop Characteristics</b><br>  
       <table  class="char" style="table-layout: fixed;text-align: center;height: auto;">
           <thead>
