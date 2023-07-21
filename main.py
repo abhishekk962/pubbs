@@ -4662,6 +4662,8 @@ def initial_frequency():
 
         outputs = [list([n.title]) + list([tuple(n.columns)]) + list(n.itertuples(index=False, name=None)) for n in all_files]
 
+        c.execute(f"UPDATE T_STATUS SET `Scheduling Files` = '1' WHERE Route = '{session['route']}' and Operator = '{session['email']}';")
+        conn.commit()
         return render_template('freq_output.html', csvfiles=csvfiles, outputs=outputs,heading=heading)
 
 @app.route('/optimisation')
@@ -5804,6 +5806,8 @@ def optimisation():
 
     outputs = [list([n.title]) + list([tuple(n.columns)]) + list(n.itertuples(index=False, name=None)) for n in all_files]
 
+    c.execute(f"UPDATE T_STATUS SET `Scheduling Files` = '1' WHERE Route = '{session['route']}' and Operator = '{session['email']}';")
+    conn.commit()
     return render_template('freq_output.html', csvfiles=csvfiles, outputs=outputs,heading=heading)
 
 def open_browser():
@@ -5811,9 +5815,9 @@ def open_browser():
 
 if __name__ == '__main__':
     Timer(1, open_browser).start()
-    socketio.run(app, host="0.0.0.0", port=8080)
+    # socketio.run(app, host="0.0.0.0", port=8080)
     # app.run(debug=True)
-    # from waitress import serve
-    # serve(app, host="0.0.0.0", port=8080) # http://localhost:8080/
+    from waitress import serve
+    serve(app, host="0.0.0.0", port=8080) # http://localhost:8080/
 
 

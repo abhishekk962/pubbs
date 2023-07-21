@@ -66,8 +66,9 @@
         <p style="position:fixed;opacity:0;" id="sidebarstate">{{ session['sidebar'] }}</p>
         <div class="route">Route: {{ session['route'] }}</div>
         <form method="get" action="{{url_for('frequency')}}" style="display: flex;flex-direction: column;align-items: center;">
-          <button id="freq" formaction="{{url_for('initial_frequency')}}" class="label-button" type="submit" disabled hidden>Period Wise Frequency Setting</button>
-          <button id="freq1" formaction="{{url_for('optimisation')}}" class="label-button" type="submit" disabled hidden>Full Day Frequency Optimisation</button>
+          <button id="freq" formaction="{{url_for('initial_frequency')}}" class="label-button" type="submit" disabled hidden>Frequency: Ride Check Method</button>
+          <button id="freq1" formaction="{{url_for('initial_frequency')}}" class="label-button" type="submit" disabled hidden>Period Wise Frequency Setting</button>
+          <button id="freq2" formaction="{{url_for('optimisation')}}" class="label-button" type="submit" disabled hidden>Full Day Frequency Optimisation</button>
         </form>
         <form method="post" style="display: flex;flex-direction: column;align-items: center;">
           <button id="sched" formaction="{{url_for('scheduling_run',method='Choose',type_='single')}}" class ="label-button" type="submit" disabled hidden>Single-Line Scheduling</button>
@@ -207,14 +208,17 @@
             } else if (key == 'Frequency'){
               var freqbtn = document.getElementById('freq');
               var freqbtn1 = document.getElementById('freq1');
+              var freqbtn2 = document.getElementById('freq2');
               var freqbtnparent = freqbtn.parentElement;
 
               freqbtn.removeAttribute('hidden');
               freqbtn1.removeAttribute('hidden');
+              freqbtn2.removeAttribute('hidden');
               document.getElementById('statusfreq').appendChild(freqbtnparent);
               if (data[key] == 11){
                 freqbtn.removeAttribute('disabled');
                 freqbtn1.removeAttribute('disabled');
+                freqbtn2.removeAttribute('disabled');
               }
             } else if ((key != 'Scheduling') && (12 < index)){
               // Create a new <span> element for each key
