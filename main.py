@@ -1941,8 +1941,8 @@ def frequency():
     memory_file.seek(0)
     return send_file(memory_file, download_name='Freq_Input.zip', as_attachment=True)    
 
-@app.route('/scheduling-run/<method>', methods=['GET', 'POST'])
-def scheduling_run(method):
+@app.route('/scheduling-run/<method>/<type_>', methods=['GET', 'POST'])
+def scheduling_run(method,type_=None):
     conn = connpool.get_connection()
     if method == "Choose":
         c = conn.cursor()
@@ -1955,7 +1955,7 @@ def scheduling_run(method):
         data = c.fetchall()
         depots = list([n[0] for n in data])
 
-        return render_template('run_scheduling.html',routes=routes,depots=depots)
+        return render_template('run_scheduling.html',routes=routes,depots=depots,type_=type_)
     else:
         depot = request.form['depot']
 

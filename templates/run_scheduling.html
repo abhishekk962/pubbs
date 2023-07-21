@@ -12,23 +12,29 @@
       {% endfor %}
     </select>
     <b> </b><br>
-    <b>Single-line Scheduling</b><br>
-    <div style="display: flex;flex-direction: row;justify-content: space-between;">
-      <button class="label-button" type="submit" formaction="{{url_for('scheduling_run',method = 'FIFO')}}">FIFO</button>
-      <button class="label-button" type="submit" formaction="{{url_for('scheduling_run',method = 'LIFO')}}">LIFO</button>
-      <button class="label-button" type="submit" formaction="{{url_for('scheduling_run',method = 'Random')}}">Random</button>
-    </div>  
-    {% if routes %}
-    <br><hr><br><b>Multi-line Scheduling</b><br>
-    <div style="display: flex;flex-direction: row;justify-content: space-between;">
-        <select id="second_route" name="second_route">
-          <option value="" selected="selected" hidden="hidden">Select Second Route</option>
-          {% for route in routes %}
-          <option>{{route}}</option>
-          {% endfor %}
-        </select>
-        <button class="label-button" type="submit" value="Submit" formaction="{{url_for('scheduling_run',method = 'Multiline')}}">Multiline</button>
-    </div>
+    {% if type_ == 'single'%}
+      <b>Single-line Scheduling</b><br>
+      <div style="display: flex;flex-direction: row;justify-content: space-between;">
+        <button class="label-button" type="submit" formaction="{{url_for('scheduling_run',method = 'FIFO',type_='None')}}">FIFO</button>
+        <button class="label-button" type="submit" formaction="{{url_for('scheduling_run',method = 'LIFO',type_='None')}}">LIFO</button>
+        <button class="label-button" type="submit" formaction="{{url_for('scheduling_run',method = 'Random',type_='None')}}">Random</button>
+      </div>
+    {% endif %}
+    {% if type_ == 'multi'%}
+      {% if routes %}
+      <br><hr><br><b>Multi-line Scheduling</b><br>
+      <div style="display: flex;flex-direction: row;justify-content: space-between;">
+          <select id="second_route" name="second_route">
+            <option value="" selected="selected" hidden="hidden">Select Second Route</option>
+            {% for route in routes %}
+            <option>{{route}}</option>
+            {% endfor %}
+          </select>
+          <button class="label-button" type="submit" value="Submit" formaction="{{url_for('scheduling_run',method = 'Multiline',type_='None')}}">Multiline</button>
+      </div>
+      {% else %}
+      <b>Add multiple routes to use this feature</b>
+      {% endif %}
     {% endif %}
   </form>
 </div>
