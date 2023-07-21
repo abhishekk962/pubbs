@@ -27,6 +27,7 @@ from threading import Timer
 from yaml.loader import SafeLoader
 import gc
 import matplotlib.pyplot as plt
+from werkzeug.exceptions import InternalServerError
 
 
 
@@ -1059,6 +1060,17 @@ def registered():
 def sidebar(section):
     session['sidebar'] = section
     return section
+
+@app.errorhandler(InternalServerError)
+def handle_500(e):
+    original = getattr(e, "original_exception", None)
+
+    if original is None:
+        # direct 500 error, such as abort(500)
+        return "dirext 500"
+
+    # wrapped unhandled error
+    return original
 
 # DATA ENTRY================================================================================================================
 
