@@ -8,7 +8,6 @@ dwn.csv
 freq_range.py
 freqOptimisation_GA.py
 ga_freq.py
-Initial_frequency.py
 overallcost.py
 parameters.yml
 Passenger_arrival_DN.csv
