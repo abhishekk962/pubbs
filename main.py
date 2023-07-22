@@ -539,18 +539,18 @@ def cost_oned (passengerarrival,distance,frequency,timeperiod,link_traveltime,al
         if direcn == 'DN':
 
             categories = [
-                'Total waiting time cost (₹)',
-                'Total cost of in vehicle time (₹)',
+                'Total waiting time cost (Rs)',
+                'Total cost of in vehicle time (Rs)',
                 'Total passenger lost',
-                'User Cost (₹)',
-                'Operator Penalty Cost for passenger lost (₹)',
+                'User Cost (Rs)',
+                'Operator Penalty Cost for passenger lost (Rs)',
                 'Vehcile Kilometre-run (Km)',
-                'Cost of fuel (₹)',
-                'Cost of vehicle maintenance (₹)',
-                'Vehicle depreciation cost (₹)',
-                'Crew cost (₹)',
-                'Operator Cost for bus operation (₹)',
-                'Total cost in down direction (₹)',
+                'Cost of fuel (Rs)',
+                'Cost of vehicle maintenance (Rs)',
+                'Vehicle depreciation cost (Rs)',
+                'Crew cost (Rs)',
+                'Operator Cost for bus operation (Rs)',
+                'Total cost in down direction (Rs)',
             ]
 
             values = [
@@ -589,18 +589,18 @@ def cost_oned (passengerarrival,distance,frequency,timeperiod,link_traveltime,al
         else:
 
             categories = [
-                'Total waiting time cost (₹)',
-                'Total cost of in vehicle time (₹)',
+                'Total waiting time cost (Rs)',
+                'Total cost of in vehicle time (Rs)',
                 'Total passenger lost',
-                'User Cost (₹)',
-                'Operator Penalty Cost for passenger lost (₹)',
+                'User Cost (Rs)',
+                'Operator Penalty Cost for passenger lost (Rs)',
                 'Vehcile Kilometre-run (Km)',
-                'Cost of fuel (₹)',
-                'Cost of vehicle maintenance (₹)',
-                'Vehicle depreciation cost (₹)',
-                'Crew cost (₹)',
-                'Operator Cost for bus operation (₹)',
-                'Total cost in down direction (₹)',
+                'Cost of fuel (Rs)',
+                'Cost of vehicle maintenance (Rs)',
+                'Vehicle depreciation cost (Rs)',
+                'Crew cost (Rs)',
+                'Operator Cost for bus operation (Rs)',
+                'Total cost in down direction (Rs)',
             ]
 
             values = [
@@ -4178,18 +4178,18 @@ def initial_frequency():
             if direcn == 'DN':
 
                 categories = [
-                    'Total waiting time cost (₹)',
-                    'Total cost of in vehicle time (₹)',
+                    'Total waiting time cost (Rs)',
+                    'Total cost of in vehicle time (Rs)',
                     'Total passenger lost',
-                    'User Cost (₹)',
-                    'Operator Penalty Cost for passenger lost (₹)',
+                    'User Cost (Rs)',
+                    'Operator Penalty Cost for passenger lost (Rs)',
                     'Vehcile Kilometre-run (Km)',
-                    'Cost of fuel (₹)',
-                    'Cost of vehicle maintenance (₹)',
-                    'Vehicle depreciation cost (₹)',
-                    'Crew cost (₹)',
-                    'Operator Cost for bus operation (₹)',
-                    'Total cost in down direction (₹)',
+                    'Cost of fuel (Rs)',
+                    'Cost of vehicle maintenance (Rs)',
+                    'Vehicle depreciation cost (Rs)',
+                    'Crew cost (Rs)',
+                    'Operator Cost for bus operation (Rs)',
+                    'Total cost in down direction (Rs)',
                 ]
 
                 values = [
@@ -4228,18 +4228,18 @@ def initial_frequency():
             else:
 
                 categories = [
-                    'Total waiting time cost (₹)',
-                    'Total cost of in vehicle time (₹)',
+                    'Total waiting time cost (Rs)',
+                    'Total cost of in vehicle time (Rs)',
                     'Total passenger lost',
-                    'User Cost (₹)',
-                    'Operator Penalty Cost for passenger lost (₹)',
+                    'User Cost (Rs)',
+                    'Operator Penalty Cost for passenger lost (Rs)',
                     'Vehcile Kilometre-run (Km)',
-                    'Cost of fuel (₹)',
-                    'Cost of vehicle maintenance (₹)',
-                    'Vehicle depreciation cost (₹)',
-                    'Crew cost (₹)',
-                    'Operator Cost for bus operation (₹)',
-                    'Total cost in down direction (₹)',
+                    'Cost of fuel (Rs)',
+                    'Cost of vehicle maintenance (Rs)',
+                    'Vehicle depreciation cost (Rs)',
+                    'Crew cost (Rs)',
+                    'Operator Cost for bus operation (Rs)',
+                    'Total cost in down direction (Rs)',
                 ]
 
                 values = [
@@ -4567,7 +4567,7 @@ def initial_frequency():
         ppse='optmised frequency'
         overall_custom = overallcost(frequencyDN['Frequency'],frequencyUP['Frequency'],ppse,input_dict_UP,input_dict_DN)
 
-        heading = f"Total Cost Using Custom Frequency ₹{overall_custom}\n"
+        heading = f"Total Cost Using Custom Frequency Rs{overall_custom}\n"
         
         conn = connpool.get_connection()
         c = conn.cursor()
@@ -4637,13 +4637,13 @@ def initial_frequency():
         ppse='optmised frequency'
         overall_initial = overallcost(frequencyDN['Frequency'],frequencyUP['Frequency'],ppse,input_dict_UP,input_dict_DN)
 
-        heading = f"Total Cost Using Initial Frequency ₹{overall_initial}\n"
+        heading = f"Total Cost Using Initial Frequency Rs{overall_initial}\n"
         
         conn = connpool.get_connection()
         c = conn.cursor()
         c.execute(f"SELECT Direction,final_costs FROM T_INPUT_FILES_HOLDING WHERE Operator = '{session['email']}' and Route = '{session['route']}' ORDER BY Direction")
         data = c.fetchall()
-        print(data)
+        # print(data)
         final_cost_up = b2df(data[1][1])
         final_cost_up.title = data[1][0]
         final_cost_dn = b2df(data[0][1])
@@ -5266,18 +5266,18 @@ def optimisation():
             if direcn == 'DN':
 
                 categories = [
-                    'Total waiting time cost (₹)',
-                    'Total cost of in vehicle time (₹)',
+                    'Total waiting time cost (Rs)',
+                    'Total cost of in vehicle time (Rs)',
                     'Total passenger lost',
-                    'User Cost (₹)',
-                    'Operator Penalty Cost for passenger lost (₹)',
+                    'User Cost (Rs)',
+                    'Operator Penalty Cost for passenger lost (Rs)',
                     'Vehcile Kilometre-run (Km)',
-                    'Cost of fuel (₹)',
-                    'Cost of vehicle maintenance (₹)',
-                    'Vehicle depreciation cost (₹)',
-                    'Crew cost (₹)',
-                    'Operator Cost for bus operation (₹)',
-                    'Total cost in down direction (₹)',
+                    'Cost of fuel (Rs)',
+                    'Cost of vehicle maintenance (Rs)',
+                    'Vehicle depreciation cost (Rs)',
+                    'Crew cost (Rs)',
+                    'Operator Cost for bus operation (Rs)',
+                    'Total cost in down direction (Rs)',
                 ]
 
                 values = [
@@ -5316,18 +5316,18 @@ def optimisation():
             else:
 
                 categories = [
-                    'Total waiting time cost (₹)',
-                    'Total cost of in vehicle time (₹)',
+                    'Total waiting time cost (Rs)',
+                    'Total cost of in vehicle time (Rs)',
                     'Total passenger lost',
-                    'User Cost (₹)',
-                    'Operator Penalty Cost for passenger lost (₹)',
+                    'User Cost (Rs)',
+                    'Operator Penalty Cost for passenger lost (Rs)',
                     'Vehcile Kilometre-run (Km)',
-                    'Cost of fuel (₹)',
-                    'Cost of vehicle maintenance (₹)',
-                    'Vehicle depreciation cost (₹)',
-                    'Crew cost (₹)',
-                    'Operator Cost for bus operation (₹)',
-                    'Total cost in down direction (₹)',
+                    'Cost of fuel (Rs)',
+                    'Cost of vehicle maintenance (Rs)',
+                    'Vehicle depreciation cost (Rs)',
+                    'Crew cost (Rs)',
+                    'Operator Cost for bus operation (Rs)',
+                    'Total cost in down direction (Rs)',
                 ]
 
                 values = [
@@ -5693,7 +5693,7 @@ def optimisation():
 
     num_parents_mating =int(sol_per_pop/2)       #sol_per_pop/2
 
-    print("\n---------------------------------------------------------------------------\nInitiating Genetic Algorithm for", A ,"to", B ,"to Optimise Overall Cost(₹)\n---------------------------------------------------------------------------")
+    print("\n---------------------------------------------------------------------------\nInitiating Genetic Algorithm for", A ,"to", B ,"to Optimise Overall Cost(Rs)\n---------------------------------------------------------------------------")
 
     # Defining the population size.
     pop_size = (sol_per_pop,num_weights) # The population will have sol_per_pop (chromosome) where each chromosome has num_weights (genes).
@@ -5774,13 +5774,13 @@ def optimisation():
     frequencyUP=FrequencyUPO.to_numpy()
     ppse='optmised frequency'
     overall_opt= overallcost(frequencyDN,frequencyUP,ppse,input_dict_UP,input_dict_DN)
-    print('\n overall cost for the operations using optimised frequency              :₹',overall_opt)
-    print('\n overall cost for the operations using initial frequency              :₹',overall_initial)
+    print('\n overall cost for the operations using optimised frequency              :Rs',overall_opt)
+    print('\n overall cost for the operations using initial frequency              :Rs',overall_initial)
     cost_reduction= 100-(overall_opt/overall_initial*100)
     print('\n cost of reduction using optimisation:  ', cost_reduction,'%')
 
-    heading = f"Total Cost Using Optimised Frequency ₹{overall_opt} | "
-    heading += f"Total Cost Using Initial Frequency ₹{overall_initial} | "
+    heading = f"Total Cost Using Optimised Frequency Rs{overall_opt} | "
+    heading += f"Total Cost Using Initial Frequency Rs{overall_initial} | "
     heading += f"Reduction Using Optimisation {cost_reduction}%"
     
     conn = connpool.get_connection()
