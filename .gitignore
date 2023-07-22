@@ -5,7 +5,6 @@ app.py
 distanceDN.csv
 distanceUP.csv
 dwn.csv
-freq_range.py
 freqOptimisation_GA.py
 ga_freq.py
 overallcost.py
