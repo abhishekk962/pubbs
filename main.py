@@ -1516,7 +1516,7 @@ def table_filled():
         c.execute(query)
         c.execute(f"DELETE FROM T_OD WHERE Route = '{session['route']}' and Operator = '{session['email']}' and Direction = '{db_table[3:5]}' and Period = '{db_table[6:8]}';")
         for s in stop_ids:
-            row = [data[f"{s}_{r}"] for r in stop_ids]
+            row = [data[f"{r}_{s}"] for r in stop_ids]
             query = f"INSERT INTO T_OD (Operator,Route,Stop_num,Stop_id,Direction,Period,{','.join([f'`Stop_{n+1}`' for n in range(len(stop_ids))])}) VALUES ('{session['email']}','{session['route']}','{stop_ids.index(s)+1}','{s}','{db_table[3:5]}','{db_table[6:8]}',{','.join(['%s' for n in range(len(rows))])});"
             c.execute(query, tuple(row))
             # c.execute(f"INSERT INTO {db_table} (Operator,Route,Stop_num,Stop_id,{','.join([f'`Stop_{n+1}`' for n in range(len(stop_ids))])}) VALUES ('{session['email']}','{session['route']}','{stop_ids.index(s)+1}','{s}','{','.join(row)}');")
@@ -2300,11 +2300,11 @@ def get_pings(route):
 
         c.execute(f"SELECT stoparrival FROM T_INPUT_FILES_HOLDING WHERE Route = '{session['route']}' and Operator = '{session['email']}' and Direction = 'DN';")
         files = c.fetchone()
-        stoparrivalDN = b2df(files[1])
+        stoparrivalDN = b2df(files[0])
 
         c.execute(f"SELECT stoparrival FROM T_INPUT_FILES_HOLDING WHERE Route = '{session['route']}' and Operator = '{session['email']}' and Direction = 'UP';")
         files = c.fetchone()
-        stoparrivalUP = b2df(files[1])
+        stoparrivalUP = b2df(files[0])
 
         # c.execute(f"SELECT * FROM T_SCHEDULING_FILES WHERE Route = '{session['route']}' and Operator = '{session['email']}';")
         # files = c.fetchone()
@@ -3627,8 +3627,8 @@ def holding_process_run(delay,trip_no,stop_no,drctn):
     print('End of the holding process')
 
 
-@app.route('/initial-frequency', methods=['GET','POST'])
-def initial_frequency():
+@app.route('/initial-frequency/<objective>', methods=['GET','POST'])
+def initial_frequency(objective):
     conn = connpool.get_connection()
     c = conn.cursor()
 
@@ -4591,7 +4591,7 @@ def initial_frequency():
 
         outputs = [list([n.title]) + list([tuple(n.columns)]) + list(n.itertuples(index=False, name=None)) for n in all_files]
 
-        return render_template('freq_output.html', csvfiles=csvfiles, outputs=outputs, heading=heading)
+        return render_template('freq_output.html', csvfiles=csvfiles, outputs=outputs, heading=heading,objective=objective)
 
     if request.method == 'GET':
 
@@ -4637,7 +4637,10 @@ def initial_frequency():
         ppse='optmised frequency'
         overall_initial = overallcost(frequencyDN['Frequency'],frequencyUP['Frequency'],ppse,input_dict_UP,input_dict_DN)
 
-        heading = f"Total Cost Using Initial Frequency Rs{overall_initial}\n"
+        if objective == 'initial':
+            heading = f"Total Cost Using Initial Frequency Rs{overall_initial}\n"
+        elif objective == 'custom':
+            heading = f"Total Cost Using Initial Frequency Rs{overall_initial}. Set custom frequency and 'Save' to see changes.\n"
         
         conn = connpool.get_connection()
         c = conn.cursor()
@@ -4664,10 +4667,10 @@ def initial_frequency():
 
         c.execute(f"UPDATE T_STATUS SET `Scheduling Files` = '1' WHERE Route = '{session['route']}' and Operator = '{session['email']}';")
         conn.commit()
-        return render_template('freq_output.html', csvfiles=csvfiles, outputs=outputs,heading=heading)
+        return render_template('freq_output.html', csvfiles=csvfiles, outputs=outputs,heading=heading,objective=objective)
 
-@app.route('/optimisation')
-def optimisation():
+@app.route('/optimisation/<objective>')
+def optimisation(objective):
         
     def cal_pop_fitness(pop,sol_per_pop):
         # Calculating the fitness value of each solution in the current population.
@@ -5808,7 +5811,7 @@ def optimisation():
 
     c.execute(f"UPDATE T_STATUS SET `Scheduling Files` = '1' WHERE Route = '{session['route']}' and Operator = '{session['email']}';")
     conn.commit()
-    return render_template('freq_output.html', csvfiles=csvfiles, outputs=outputs,heading=heading)
+    return render_template('freq_output.html', csvfiles=csvfiles, outputs=outputs,heading=heading,objective=objective)
 
 def open_browser():
     webbrowser.open_new("http://localhost:8080/")

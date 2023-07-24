@@ -187,7 +187,7 @@
       var distUPname = markerName + markerCount + '_UP';
       distUPInputBox.id = distUPname;
       distUPInputBox.name = distUPname;
-      distUPInputBox.value = 0;
+      distUPInputBox.setAttribute('required', 'required');
       distUPCell.appendChild(distUPInputBox);
       markerRow.appendChild(distUPCell);
       
@@ -198,7 +198,7 @@
       var distDNname = markerName + markerCount + '_DN';
       distDNInputBox.id = distDNname;
       distDNInputBox.name = distDNname;
-      distDNInputBox.value = 0;
+      distDNInputBox.setAttribute('required', 'required');
       distDNCell.appendChild(distDNInputBox);
       markerRow.appendChild(distDNCell);
 

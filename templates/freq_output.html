@@ -13,7 +13,7 @@
     <option value="{{file[0]}}">{{file[0]}}</option>
     {% endfor %}
   </select>
-  <form class='scroll-table' action="{{url_for('initial_frequency')}}" method="POST" style="display: flex;flex-direction: column;align-items: center;flex-grow: 0;max-height: 80%;">
+  <form class='scroll-table' action="{{url_for('initial_frequency',objective='custom')}}" method="POST" style="display: flex;flex-direction: column;align-items: center;flex-grow: 0;max-height: 80%;">
     <div style="display: flex; flex-direction: row;overflow: scroll;">
     {%for file in csvfiles%}
     <div class="scroll-table" style="font-size: 12px;">
@@ -30,8 +30,12 @@
           <tr>
             <td>{{row[0]}}</td>
             {%for cell in row[1:] %}
+              {% if objective == 'custom' %}
               <td><input type="number" name="{{file[0]}}_{{row[0]}}_freq" value="{{cell}}"></td>
-              <!-- <td>{{cell}}</td> -->
+              {% endif %}
+              {% if objective == 'initial' %}
+              <td>{{cell}}</td>
+              {% endif %}
             {% endfor %}
           </tr>
           {% endfor %}
@@ -39,7 +43,9 @@
     </div>
     {% endfor %}
     </div>
+    {% if objective == 'custom' %}
     <input type="submit" value="Save">
+    {% endif %}
   </form>
   {%for file in outputs%}
   <form class='tableform files' style="display: none; flex-grow: 8;justify-content: center;" id="{{file[0]}}_file">
