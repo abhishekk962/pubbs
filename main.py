@@ -2385,11 +2385,11 @@ def holding_data():
 
         c.execute(f"SELECT stoparrival FROM T_INPUT_FILES_HOLDING WHERE Route = '{session['route']}' and Operator = '{session['email']}' and Direction = 'DN';")
         files = c.fetchone()
-        stoparrivalDN = b2df(files[1])
+        stoparrivalDN = b2df(files[0])
 
         c.execute(f"SELECT stoparrival FROM T_INPUT_FILES_HOLDING WHERE Route = '{session['route']}' and Operator = '{session['email']}' and Direction = 'UP';")
         files = c.fetchone()
-        stoparrivalUP = b2df(files[1])
+        stoparrivalUP = b2df(files[0])
 
         # c.execute(f"SELECT * FROM T_SCHEDULING_FILES WHERE Route = '{session['route']}' and Operator = '{session['email']}';")
         # files = c.fetchone()
@@ -5818,9 +5818,9 @@ def open_browser():
 
 if __name__ == '__main__':
     Timer(1, open_browser).start()
-    # socketio.run(app, host="0.0.0.0", port=8080)
+    socketio.run(app, host="0.0.0.0", port=8080)
     # app.run(debug=True)
-    from waitress import serve
-    serve(app, host="0.0.0.0", port=8080) # http://localhost:8080/
+    # from waitress import serve
+    # serve(app, host="0.0.0.0", port=8080) # http://localhost:8080/
 
 
