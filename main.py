@@ -1070,7 +1070,16 @@ def handle_500(e):
         return "dirext 500"
 
     # wrapped unhandled error
-    return original
+    if 'lack' in str(original):
+        conn.close()
+        conn1.close()
+        conn2.close()
+        conn3.close()
+        conn_.close()
+        conn4.close()
+        return redirect('/bus-route')
+
+    return str(original)
 
 # DATA ENTRY================================================================================================================
 
@@ -2427,6 +2436,20 @@ def holding_data():
                           f"{int(scheduled_arrival)}".zfill(2) + ":" + f"{round((scheduled_arrival-int(scheduled_arrival))*60)}".zfill(2))
 
                     holding_table = holding_process_run(delay,trip_no,stop_no,'UP')
+                    c.execute(f"SELECT veh_sch1, veh_sch2 FROM T_INPUT_FILES_HOLDING WHERE Operator = '{session['email']}' and Route='{session['route']}'")
+                    df1 = b2df(c.fetchone()[0])
+                    df2 = b2df(c.fetchone()[1])
+                    oldnames = df1['bus_name'].to_list()
+                    oldnames += df2['bus_name'].to_list()
+
+                    c.execute(f"SELECT Schedule FROM T_SCHEDULING_OUTPUT WHERE Operator = '{session['email']}' and Route='{session['route']}'")
+                    df = b2df(c.fetchone()[0])
+                    newnames = df[df['Dep T1'] != '------']['bus_name1'].to_list()
+                    newnames += df[df['Dep T2'] != '------']['bus_name2'].to_list()
+
+                    sched_bus_map = {oldnames[i]:newnames[i] for i,n in enumerate(oldnames)}
+                    
+                    holding_table.replace(regex=sched_bus_map,inplace=True)
                     try:
                         busdata = []
                         holding_table.set_index()
