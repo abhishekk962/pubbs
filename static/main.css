@@ -73,7 +73,7 @@ body{
 div#panel2 > div {
     background: #6e6e6e;
     flex-grow: 5;
-    margin: 10px;
+    /* margin: 10px; */
     /* width: 50%; */
     text-align: center;
     border-radius: 5px;

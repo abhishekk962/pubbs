@@ -42,7 +42,7 @@ connpool = pymysqlpool.ConnectionPool(host="103.21.58.10",
                        password="Matrix__111",
                        database="pubbsm8z_uba",
                        port = 3306,
-                       size=10
+                       size=8
                        )
 conn = connpool.get_connection()
 conn1 = connpool.get_connection()
@@ -982,15 +982,28 @@ def login():
     c.execute('CREATE TABLE IF NOT EXISTS T_USER (name TEXT,email VARCHAR(50), password VARCHAR(50))')
     message = ''
     if 'email' in session:
-        return redirect(url_for('busroute'))
+        c.execute(f"SELECT Operator FROM T_BUSES WHERE Driver = '{session['email']}'")
+        data = c.fetchone()
+        if data:
+            session['email'] = data[0]
+            return redirect(url_for('driver'))
+        else:
+            return redirect(url_for('busroute'))
         return render_template('only_busroute.html')
     else:
         return render_template('login1.html', message = message)
     
 @app.route('/home', methods=['GET', 'POST'])
 def home():
+    conn = connpool.get_connection()
+    c = conn.cursor()
     if 'email' in session:
-        return redirect(url_for('busroute'))
+        c.execute(f"SELECT Operator FROM T_BUSES WHERE Driver = '{session['email']}'")
+        data = c.fetchone()
+        if data:
+            return redirect(url_for('driver'))
+        else:
+            return redirect(url_for('busroute'))
         return render_template('only_busroute.html')
     else:
         return redirect('/login')
@@ -2462,9 +2475,17 @@ def holding_data():
 
 @app.route('/driver')
 def driver():
-    driver = session['email']
     conn = connpool.get_connection()
     c = conn.cursor()
+    driver = session['email']
+
+    c.execute(f"SELECT Operator FROM T_BUSES WHERE Driver = '{driver}'")
+    data = c.fetchone()
+    if data:
+        session['email'] = data[0]
+    else:
+        return redirect(url_for('busroute'))
+
     c.execute(f"SELECT Bus, Route FROM T_BUSES WHERE Driver = '{driver}';")
     try:
         data = c.fetchall()
