@@ -33,13 +33,13 @@ from werkzeug.exceptions import InternalServerError
 
 app = Flask(__name__)
 app.json.sort_keys = False
-app.secret_key = os.urandom(24)
+app.secret_key = b'VT\x03k\xe8Y\xafl\xd7\xdf\xb8\x86\xb10\xee\xea\x87\x1b\xb2\x16+\x10\x06\x88' #os.urandom(24)
 socketio = SocketIO(app,logger=True, engineio_logger=True)
 
 # Connect to phpMyAdmin Database
 connpool = pymysqlpool.ConnectionPool(host="103.21.58.10",
                        user="pubbsm8z",
-                       password="Matrix__111",
+                       password="Matrix__11",
                        database="pubbsm8z_uba",
                        port = 3306,
                        size=8
